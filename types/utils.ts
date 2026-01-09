@@ -1,0 +1,1 @@
+export type ProgressMapType = Record<string, number>;
