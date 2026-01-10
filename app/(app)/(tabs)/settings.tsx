@@ -1,9 +1,10 @@
-import React from 'react';
-import { ScrollView, YStack, XStack, Text, H1, H2, Card, Separator, Avatar, Switch, useTheme } from 'tamagui';
-import { User, Bell, Moon, ChevronRight, HelpCircle, Shield } from '@tamagui/lucide-icons';
-import { useUser } from '@clerk/clerk-expo';
 import { SignOutButton } from '@/components/SignOutButton'; // Assure-toi du chemin
+import { APP_NAME } from '@/constants/constants';
+import { useUser } from '@clerk/clerk-expo';
+import { Bell, ChevronRight, Moon } from '@tamagui/lucide-icons';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar, Card, H1, H2, ScrollView, Separator, Switch, Text, useTheme, XStack, YStack } from 'tamagui';
 
 export default function SettingsScreen() {
   const { user } = useUser();
@@ -80,7 +81,7 @@ export default function SettingsScreen() {
             <YStack mt="$4">
               <SignOutButton />
               <Text textAlign="center" mt="$4" fontSize={12} color="$color" opacity={0.4}>
-                Version 1.0.0 • Journal.ai
+                Version 1.0.0 • {APP_NAME}
               </Text>
             </YStack>
 

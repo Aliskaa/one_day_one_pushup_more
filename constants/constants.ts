@@ -1,7 +1,7 @@
 // Constantes globales de l'application
 
 export const START_YEAR = 2026;
-export const STORAGE_KEY = `@pushup_data_${START_YEAR}`;
+export const APP_NAME = 'One Day One Pushup More';
 
 // Calcul du total dynamique (gère année bissextile)
 const getDaysInYear = (year: number): number => {

@@ -28,7 +28,7 @@ import { useProgressData } from '@/hooks/useProgressData';
 import { TOTAL_TARGET_YEAR } from '@/constants/constants';
 
 export default function DashboardScreen() {
-  const { days, todayIndex, updateDay, stats, isLoading, error } = useProgressData();
+  const { todayIndex, updateDay, stats, isLoading, error } = useProgressData();
   const [localInputValue, setLocalInputValue] = useState('');
   const theme = useTheme(); // Pour accéder aux couleurs hexadécimales si besoin
 
@@ -48,8 +48,8 @@ export default function DashboardScreen() {
     if (todayIndex !== -1) updateDay(todayIndex, text);
   };
 
-  const totalDone = days.reduce((sum, d) => sum + (d.done || 0), 0);
-  const progressPercent = Math.min(100, Math.max(0, (totalDone / TOTAL_TARGET_YEAR) * 100));
+  // Utiliser stats.totalDone au lieu de recalculer
+  const progressPercent = Math.min(100, Math.max(0, (stats.totalDone / TOTAL_TARGET_YEAR) * 100));
   const isAhead = stats.ecart >= 0;
   const dayProgress = stats.todayTarget > 0 
     ? Math.min(100, ((stats.todayDone || 0) / stats.todayTarget) * 100) 
@@ -214,7 +214,7 @@ export default function DashboardScreen() {
                 Total 2026
               </Text>
               <H2 fontFamily="$heading" size="$5">
-                {totalDone}
+                {stats.totalDone}
               </H2>
             </YStack>
           </Card>
@@ -275,10 +275,10 @@ export default function DashboardScreen() {
             
             <XStack justifyContent="space-between">
               <Text fontSize={12} color="$color" opacity={0.6}>
-                {totalDone.toLocaleString()} faites
+                {stats.totalDone.toLocaleString()} faites
               </Text>
               <Text fontSize={12} color="$color" opacity={0.6}>
-                {(TOTAL_TARGET_YEAR - totalDone).toLocaleString()} restantes
+                {(TOTAL_TARGET_YEAR - stats.totalDone).toLocaleString()} restantes
               </Text>
             </XStack>
           </YStack>

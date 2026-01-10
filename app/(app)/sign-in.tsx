@@ -1,5 +1,6 @@
 import Logo from "@/components/Logo";
 import SignInWithGoogle from "@/components/SignInWithGoogle";
+import { APP_NAME } from "@/constants/constants";
 import { Link } from "expo-router";
 import React from "react";
 // On utilise le composant SafeAreaView de react-native-safe-area-context
@@ -47,7 +48,7 @@ export default function Page() {
                   textAlign="center"
                   fontSize={16}
                 >
-                  Connecte-toi à Journal.ai pour continuer
+                  Connecte-toi à {APP_NAME} pour continuer
                 </Paragraph>
               </YStack>
             </YStack>

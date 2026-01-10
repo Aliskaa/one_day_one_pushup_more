@@ -43,7 +43,7 @@ export const useProgressData = (): UseProgressDataReturn => {
   const [error, setError] = useState<string | null>(null);
   
   // Référence pour le debounce de sauvegarde
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingUpdatesRef = useRef<ProgressMapType>({});
 
   // Calcul de l'index d'aujourd'hui
