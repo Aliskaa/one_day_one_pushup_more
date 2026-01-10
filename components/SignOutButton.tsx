@@ -1,31 +1,48 @@
 import { useClerk } from "@clerk/clerk-expo";
-import { Alert, Text } from "react-native";
-import { Button } from "tamagui";
+import { Alert } from "react-native";
+import { Button, Text, Spinner, XStack } from "tamagui";
+import { LogOut } from "@tamagui/lucide-icons";
+import { useState } from "react";
 
 export const SignOutButton = () => {
-  // Use `useClerk()` to access the `signOut()` function
   const { signOut } = useClerk();
+  const [loading, setLoading] = useState(false);
+
   const handleSignOut = async () => {
-    // Are you sure you want to sign out?
     Alert.alert(
-      "Are you sure you want to sign out?",
-      "This will sign you out of your account and you will need to sign in again.",
+      "Déconnexion",
+      "Es-tu sûr de vouloir te déconnecter ?",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "Annuler", style: "cancel" },
         {
-          text: "Sign out",
+          text: "Se déconnecter",
           style: "destructive",
           onPress: async () => {
+            setLoading(true);
             await signOut();
-            // Redirect to the sign-in page happens automatically with the Protected Route
+            // La redirection est gérée par le contexte d'auth
+            setLoading(false);
           },
         },
       ]
     );
   };
+
   return (
-    <Button theme="red" borderColor="$borderColor" onPress={handleSignOut}>
-      <Text>Sign out</Text>
+    <Button 
+      bg="$danger" 
+      color="white"
+      size="$4" 
+      borderRadius={12}
+      onPress={handleSignOut}
+      animation="bouncy"
+      pressStyle={{ scale: 0.95, opacity: 0.8 }}
+      icon={loading ? <Spinner color="white" /> : <LogOut size={18} />}
+      disabled={loading}
+    >
+      <Text fontFamily="$heading" fontWeight="700" color="white">
+        {loading ? "Au revoir..." : "Se déconnecter"}
+      </Text>
     </Button>
   );
 };

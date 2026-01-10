@@ -1,8 +1,8 @@
 import React from 'react';
 import { TextInput } from 'react-native';
-import { XStack, YStack, Text, Card } from 'tamagui';
-import { Check, Clock, Circle } from '@tamagui/lucide-icons';
-import { DayDataType } from '@/types/Day';
+import { XStack, YStack, Text, Card, useTheme } from 'tamagui';
+import { Check, Clock, Circle, Lock } from '@tamagui/lucide-icons';
+import { DayDataType } from '@/types/day';
 
 interface DayRowProps {
   item: DayDataType;
@@ -11,7 +11,6 @@ interface DayRowProps {
   isToday?: boolean;
 }
 
-// Fonction helper pour afficher la date joliment
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   const day = date.getDate().toString().padStart(2, '0');
@@ -21,18 +20,26 @@ const formatDate = (dateStr: string) => {
 };
 
 export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate, isToday = false }) => {
+  const theme = useTheme();
+  
   const isValidated = item.done !== null && item.done >= item.target;
   const isStarted = item.done !== null && item.done > 0;
   
-  // Couleur et icône dynamiques
-  let statusColor = '$purple8';
+  // Détermination des couleurs dynamiques basées sur le thème
+  let statusColor = '$borderColor';
   let StatusIcon = Circle;
-  
-  if (isValidated) {
-    statusColor = '$green9';
+  let cardBorderColor = '$borderColor';
+
+  if (isToday) {
+    statusColor = '$primary';
+    cardBorderColor = '$primary';
+  } else if (isValidated) {
+    statusColor = '$success';
+    cardBorderColor = '$success';
     StatusIcon = Check;
   } else if (isStarted) {
-    statusColor = '$orange9';
+    statusColor = '$warning';
+    cardBorderColor = '$warning';
     StatusIcon = Clock;
   }
 
@@ -44,76 +51,66 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
       mb="$3"
       mx="$4"
       p="$3"
-      borderRadius={16}
-      bg={isToday ? '$blue2' : '$background'}
+      borderRadius={20}
+      bg={isToday ? '$background' : '$background'} // On garde un fond neutre pour la lisibilité
       borderLeftWidth={5}
-      borderStartColor={isToday ? '$blue9' : isValidated ? '$green9' : isStarted ? '$orange9' : '$purple6'}
-      borderWidth={isToday ? 1 : 0}
-      borderColor="$blue9"
+      borderLeftColor={cardBorderColor}
+      // Petit hack visuel pour mettre en avant "Aujourd'hui"
+      borderWidth={isToday ? 2 : 1}
+      borderColor={isToday ? '$primary' : '$borderColor'}
       scale={isToday ? 1.02 : 1}
-      animation="quick"
-      pressStyle={{ scale: 0.98, opacity: 0.9 }}
+      animation="lazy"
+      pressStyle={{ scale: 0.98 }}
     >
-      <XStack verticalAlign="center" gap="$3">
-        {/* 1. Bloc Date à gauche */}
-        <YStack verticalAlign="center" justify="center" minW={45}>
-          <Text fontSize={22} fontWeight="900" color="$purple12">
+      <XStack alignItems="center" gap="$3">
+        {/* 1. Date */}
+        <YStack alignItems="center" justifyContent="center" minWidth={50}>
+          <Text fontFamily="$heading" fontSize={24} color="$color">
             {day}
           </Text>
-          <Text fontSize={10} fontWeight="700" color="$purple10" textTransform="uppercase">
+          <Text fontFamily="$body" fontSize={11} fontWeight="700" color="$color" opacity={0.6}>
             {month}
           </Text>
-          {isToday && (
-            <YStack mt="$1" bg="$blue9" px="$2" py="$0.5" rounded={4}>
-              <Text fontSize={8} fontWeight="800" color="#fff">
-                AUJOURD'HUI
-              </Text>
-            </YStack>
-          )}
         </YStack>
 
         {/* 2. Infos Centrales */}
-        <YStack flex={1} gap="$1">
-          <XStack verticalAlign="baseline" gap="$1">
-            <Text fontSize={12} color="$purple10" fontWeight="600">
-              Objectif
-            </Text>
-            <Text fontSize={20} fontWeight="800" color="$purple11">
-              {item.target}
-            </Text>
+        <YStack flex={1} gap="$1" justifyContent="center">
+          <XStack alignItems="baseline" gap="$2">
+             <Text fontSize={12} color="$color" opacity={0.6}>Objectif</Text>
+             <Text fontFamily="$heading" fontSize={16} color="$color">{item.target}</Text>
           </XStack>
           
-          {/* Barre de progression mini */}
-          {item.done !== null && (
-            <YStack height={4} background="$purple4" rounded={2} overflow="hidden">
+          {/* Barre de progression */}
+          <YStack height={6} bg="$backgroundHover" borderRadius={10} overflow="hidden">
+            {item.done !== null && (
               <YStack 
                 height="100%" 
                 width={`${Math.min(100, (item.done / item.target) * 100)}%`}
-                background={isValidated ? '$green9' : '$orange9'}
-                rounded={2}
+                bg={isValidated ? '$success' : '$warning'}
+                borderRadius={10}
               />
-            </YStack>
-          )}
+            )}
+          </YStack>
         </YStack>
         
-        {/* 3. Input et Statut à droite */}
-        <XStack verticalAlign="center" gap="$2">
+        {/* 3. Input Zone */}
+        <XStack alignItems="center" gap="$2">
           <TextInput 
             style={{
               width: 70,
               height: 45,
-              borderWidth: isValidated ? 2 : 1,
-              borderColor: isValidated ? '#4CAF50' : isToday ? '#2196F3' : '#E0E0E0',
-              backgroundColor: isValidated ? '#F1F8E9' : '#fff',
-              borderRadius: 12,
+              borderWidth: 1.5,
+              borderColor: isValidated ? theme.success.val : (isToday ? theme.primary.val : theme.borderColor.val),
+              backgroundColor: theme.backgroundHover.val,
+              borderRadius: 14,
               textAlign: 'center',
               fontSize: 18,
-              fontWeight: 'bold',
-              color: isValidated ? '#2E7D32' : '#333',
+              fontFamily: 'InterBold', // Utilise ta police custom
+              color: theme.color.val,
             }}
             keyboardType="numeric"
             placeholder="-"
-            placeholderTextColor="#ccc"
+            placeholderTextColor={theme.color.val + '40'} // Opacité sur le placeholder
             value={item.done?.toString() || ''}
             onChangeText={(text) => onUpdate(index, text)}
             maxLength={4}
@@ -121,14 +118,11 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
           />
           
           <YStack 
-            width={32} 
-            height={32} 
-            rounded={16} 
-            background={isValidated ? '$green9' : isStarted ? '$orange9' : '$purple4'}
-            verticalAlign="center" 
-            justify="center"
+            width={32} height={32} borderRadius={16} 
+            bg={isValidated ? '$success' : (isStarted ? '$warning' : '$backgroundHover')}
+            alignItems="center" justifyContent="center"
           >
-            <StatusIcon size={18} color={isValidated || isStarted ? '#fff' : '$purple8'} />
+            <StatusIcon size={16} color={isValidated || isStarted ? 'white' : '$color'} />
           </YStack>
         </XStack>
       </XStack>

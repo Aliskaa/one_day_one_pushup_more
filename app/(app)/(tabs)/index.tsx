@@ -5,10 +5,13 @@ import {
   XStack, 
   Text, 
   H1, 
+  H2,
   Card, 
   ScrollView, 
   Button, 
-  Spinner 
+  Spinner,
+  useTheme,
+  Progress
 } from 'tamagui';
 import { LinearGradient } from 'expo-linear-gradient';
 import { 
@@ -27,8 +30,8 @@ import { TOTAL_TARGET_YEAR } from '@/constants/constants';
 export default function DashboardScreen() {
   const { days, todayIndex, updateDay, stats, isLoading, error } = useProgressData();
   const [localInputValue, setLocalInputValue] = useState('');
+  const theme = useTheme(); // Pour accéder aux couleurs hexadécimales si besoin
 
-  // Synchroniser l'input local avec les stats
   useEffect(() => {
     setLocalInputValue(stats.todayDone?.toString() || '');
   }, [stats.todayDone]);
@@ -37,19 +40,14 @@ export default function DashboardScreen() {
     const current = parseInt(localInputValue || '0', 10);
     const newVal = Math.max(0, current + amount);
     setLocalInputValue(newVal.toString());
-    if (todayIndex !== -1) {
-      updateDay(todayIndex, newVal.toString());
-    }
+    if (todayIndex !== -1) updateDay(todayIndex, newVal.toString());
   };
 
   const handleChangeText = (text: string) => {
     setLocalInputValue(text);
-    if (todayIndex !== -1) {
-      updateDay(todayIndex, text);
-    }
+    if (todayIndex !== -1) updateDay(todayIndex, text);
   };
 
-  // Calculs
   const totalDone = days.reduce((sum, d) => sum + (d.done || 0), 0);
   const progressPercent = Math.min(100, Math.max(0, (totalDone / TOTAL_TARGET_YEAR) * 100));
   const isAhead = stats.ecart >= 0;
@@ -59,78 +57,79 @@ export default function DashboardScreen() {
 
   if (isLoading) {
     return (
-      <YStack flex={1} items="center" justify="center" background="$purple2">
-        <Spinner size="large" color="$blue9" />
-        <Text mt="$4" color="$purple11" fontWeight="600">
-          Chargement de tes données...
-        </Text>
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="$background">
+        <Spinner size="large" color="$primary" />
       </YStack>
     );
   }
 
   if (error) {
     return (
-      <YStack flex={1} items="center" justify="center" background="$purple2" p="$4">
-        <Text color="$red10" fontSize={18} fontWeight="700" verticalAlign="center">
-          ❌ {error}
-        </Text>
-        <Text color="$purple11" mt="$2" verticalAlign="center">
-          Vérifie ta connexion internet
-        </Text>
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="$background" p="$4">
+        <Text color="$danger" fontSize={18} fontWeight="700">❌ {error}</Text>
       </YStack>
     );
   }
 
   return (
-    <ScrollView background="$purple2" showsVerticalScrollIndicator={false}>
+    <ScrollView bg="$backgroundHover" showsVerticalScrollIndicator={false}>
       <YStack p="$4" gap="$4" pb="$8">
         
         {/* 1. HEADER */}
-        <YStack gap="$1">
-          <Text fontSize={16} color="$purple10" fontWeight="600" textTransform="capitalize">
+        <YStack gap="$1" mb="$2">
+          <Text fontSize={14} color="$color" opacity={0.6} fontWeight="600" textTransform="uppercase" letterSpacing={1}>
             {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </Text>
-          <H1 fontSize={28} fontWeight="900" color="$purple12">
+          <H1 fontFamily="$heading" size="$6" color="$color">
             Défi PushUp 2026 💪
           </H1>
         </YStack>
 
-        {/* 2. HERO CARD - OBJECTIF DU JOUR */}
-        <Card elevate size="$4" p="$0" overflow="hidden" borderRadius={25}>
+        {/* 2. HERO CARD */}
+        <Card 
+          elevate 
+          size="$4" 
+          p="$0" 
+          overflow="hidden" 
+          borderRadius={24}
+          animation="bouncy"
+          hoverStyle={{ scale: 0.98 }}
+          pressStyle={{ scale: 0.97 }}
+        >
+          {/* Utilisation des couleurs de ton thème défini dans config */}
           <LinearGradient
-            colors={['#1e3c72', '#2a5298']}
+            colors={['#4f46e5', '#6366f1']} // Correspond à brandDark -> brandLight
             style={{ padding: 24 }}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
             <YStack gap="$3">
-              <XStack justify="space-between" items="center">
-                <Text color="rgba(255,255,255,0.7)" fontSize={12} fontWeight="700" letterSpacing={1}>
+              <XStack justifyContent="space-between" alignItems="center">
+                <Text color="rgba(255,255,255,0.8)" fontSize={12} fontWeight="700" letterSpacing={1.5}>
                   OBJECTIF DU JOUR
                 </Text>
                 <Activity size={24} color="#fff" />
               </XStack>
               
-              <YStack items="center" py="$2">
-                <Text fontSize={72} fontWeight="900" color="#fff">
+              <YStack alignItems="center" py="$2">
+                <H1 fontFamily="$heading" fontSize={72} lineHeight={72} color="#fff">
                   {stats.todayTarget}
-                </Text>
-                <Text color="rgba(255,255,255,0.8)" fontSize={16} fontWeight="700" letterSpacing={2}>
+                </H1>
+                <Text color="rgba(255,255,255,0.8)" fontSize={16} fontWeight="600" letterSpacing={2}>
                   POMPES
                 </Text>
               </YStack>
 
-              {/* Barre de progression du jour */}
               <YStack gap="$2">
                 <Text color="rgba(255,255,255,0.9)" fontSize={13} fontWeight="700">
                   Fait : {stats.todayDone || 0} / {stats.todayTarget}
                 </Text>
-                <YStack height={10} background="rgba(0,0,0,0.3)" rounded={5} overflow="hidden">
+                <YStack height={8} bg="rgba(0,0,0,0.2)" borderRadius={10} overflow="hidden">
                   <YStack
                     height="100%"
                     width={`${dayProgress}%`}
-                    background={dayProgress >= 100 ? '#4CAF50' : '#FFC107'}
-                    rounded={5}
+                    bg={dayProgress >= 100 ? '$success' : '#fff'}
+                    borderRadius={10}
                   />
                 </YStack>
               </YStack>
@@ -138,30 +137,30 @@ export default function DashboardScreen() {
           </LinearGradient>
         </Card>
 
-        {/* 3. INPUT ZONE - SAISIE RAPIDE */}
-        <Card elevate p="$4" borderRadius={20}>
+        {/* 3. INPUT ZONE */}
+        <Card elevate p="$4" borderRadius={24} bg="$background" animation="lazy">
           <YStack gap="$4">
-            <Text fontSize={16} fontWeight="800" color="$purple12">
+            <H2 fontFamily="$heading" size="$4" color="$color">
               ✍️ Saisir ma performance
-            </Text>
+            </H2>
             
-            <XStack gap="$3" items="center">
+            <XStack gap="$3" alignItems="center">
               <TextInput
                 style={{
                   flex: 1,
                   height: 60,
-                  backgroundColor: '#fff',
-                  borderRadius: 15,
+                  backgroundColor: theme.backgroundHover.val, // Utilise la couleur du thème
+                  borderRadius: 16,
                   fontSize: 28,
-                  fontWeight: 'bold',
+                  fontFamily: 'InterBold', // Utilise la police configurée
                   textAlign: 'center',
-                  color: '#333',
-                  borderWidth: 2,
-                  borderColor: '#2196F3',
+                  color: theme.color.val,
+                  borderWidth: 1,
+                  borderColor: theme.borderColor.val,
                 }}
                 keyboardType="numeric"
                 placeholder="0"
-                placeholderTextColor="#ccc"
+                placeholderTextColor={theme.color.val + '50'}
                 value={localInputValue}
                 onChangeText={handleChangeText}
               />
@@ -171,14 +170,14 @@ export default function DashboardScreen() {
                   <Button
                     key={amount}
                     size="$4"
-                    background="$purple3"
-                    borderWidth={1}
-                    borderColor="$purple6"
-                    rounded={12}
+                    bg="$brandSoft"
+                    color="$brandDark"
+                    borderRadius={14}
                     onPress={() => handleQuickAdd(amount)}
-                    pressStyle={{ scale: 0.95, background: '$purple4' }}
+                    animation="quick"
+                    pressStyle={{ scale: 0.9, bg: '$brandLight'}}
                   >
-                    <Text fontWeight="800" color="$purple11">+{amount}</Text>
+                    <Text fontFamily="$heading" fontWeight="700">+{amount}</Text>
                   </Button>
                 ))}
               </XStack>
@@ -186,158 +185,99 @@ export default function DashboardScreen() {
           </YStack>
         </Card>
 
-        {/* 4. STATS CARDS GRID */}
+        {/* 4. STATS GRID */}
         <XStack gap="$3">
-          {/* CARTE DETTE / BANQUE */}
           <Card 
-            elevate 
-            flex={1} 
-            p="$4" 
-            borderRadius={20}
-            borderLeftWidth={4}
-            borderLeftColor={isAhead ? '$green9' : '$red9'}
+            elevate flex={1} p="$4" borderRadius={20} bg="$background"
+            borderTopWidth={4} borderTopColor={isAhead ? '$success' : '$danger'}
+            animation="bouncy"
           >
-            <YStack gap="$2">
-              <XStack items="center" gap="$2">
-                {isAhead ? (
-                  <TrendingUp size={22} color="#4CAF50" />
-                ) : (
-                  <TrendingDown size={22} color="#FF5252" />
-                )}
-                <Text fontSize={11} fontWeight="800" color={isAhead ? '$green10' : '$red10'}>
-                  {isAhead ? 'EN BANQUE' : 'DETTE'}
-                </Text>
-              </XStack>
-              <Text fontSize={28} fontWeight="900" color="$purple12">
+            <YStack gap="$2" alignItems="center">
+               {isAhead ? <TrendingUp size={24} color="$success" /> : <TrendingDown size={24} color="$danger" />}
+              <Text fontSize={11} fontWeight="800" color={isAhead ? '$success' : '$danger'} textTransform="uppercase">
+                {isAhead ? 'En Banque' : 'Dette'}
+              </Text>
+              <H2 fontFamily="$heading" size="$5">
                 {stats.ecart > 0 ? '+' : ''}{stats.ecart}
-              </Text>
-              <Text fontSize={11} color="$purple10">
-                pompes {isAhead ? "d'avance" : "de retard"}
-              </Text>
+              </H2>
             </YStack>
           </Card>
 
-          {/* CARTE TOTAL */}
           <Card 
-            elevate 
-            flex={1} 
-            p="$4" 
-            borderRadius={20}
-            borderLeftWidth={4}
-            borderLeftColor="$blue9"
+            elevate flex={1} p="$4" borderRadius={20} bg="$background"
+            borderTopWidth={4} borderTopColor="$primary"
+            animation="bouncy"
           >
-            <YStack gap="$2">
-              <XStack items="center" gap="$2">
-                <BarChart3 size={22} color="#2196F3" />
-                <Text fontSize={11} fontWeight="800" color="$blue10">
-                  TOTAL 2026
-                </Text>
-              </XStack>
-              <Text fontSize={28} fontWeight="900" color="$purple12">
+            <YStack gap="$2" alignItems="center">
+              <BarChart3 size={24} color="$primary" />
+              <Text fontSize={11} fontWeight="800" color="$primary" textTransform="uppercase">
+                Total 2026
+              </Text>
+              <H2 fontFamily="$heading" size="$5">
                 {totalDone}
-              </Text>
-              <Text fontSize={11} color="$purple10">
-                sur {TOTAL_TARGET_YEAR.toLocaleString()} prévues
-              </Text>
+              </H2>
             </YStack>
           </Card>
         </XStack>
 
-        {/* STATS SEMAINE ET SÉRIE */}
         <XStack gap="$3">
-          {/* STATS SEMAINE */}
-          <Card 
-            elevate 
-            flex={1} 
-            p="$4" 
-            borderRadius={20}
-            borderLeftWidth={4}
-            borderStartColor="$orange9"
-          >
+          <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" animation="bouncy" animationDelay={100}>
             <YStack gap="$2">
-              <XStack items="center" gap="$2">
-                <Calendar size={18} color="#FF9800" />
-                <Text fontSize={11} fontWeight="700" color="$purple11">
-                  Cette Semaine
-                </Text>
+              <XStack alignItems="center" gap="$2">
+                <Calendar size={16} color="$warning" />
+                <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Semaine</Text>
               </XStack>
-              <Text fontSize={18} fontWeight="900" color="$purple12">
-                {stats.daysCompleted} jours
+              <Text fontFamily="$heading" fontSize={20}>
+                {stats.daysCompleted} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>jours</Text>
               </Text>
-              <YStack height={6} background="$purple4" rounded={3} overflow="hidden">
-                <YStack 
-                  height="100%" 
-                  width={`${Math.min(100, (stats.daysCompleted / 7) * 100)}%`}
-                  background="$orange9"
-                  rounded={3}
-                />
-              </YStack>
+              <Progress value={(stats.daysCompleted / 7) * 100} size="$1" bg="$backgroundHover">
+                <Progress.Indicator animation="bouncy" bg="$warning" />
+              </Progress>
             </YStack>
           </Card>
 
-          {/* SÉRIE EN COURS */}
-          <Card 
-            elevate 
-            flex={1} 
-            p="$4" 
-            rounded={20}
-            borderStartWidth={4}
-            borderStartColor="$pink9"
-          >
-            <YStack gap="$2">
-              <XStack items="center" gap="$2">
-                <Flame size={18} color="#E91E63" />
-                <Text fontSize={11} fontWeight="700" color="$purple11">
-                  Jours validés
-                </Text>
+          <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" animation="bouncy" animationDelay={200}>
+             <YStack gap="$2">
+              <XStack alignItems="center" gap="$2">
+                <Flame size={16} color="$danger" />
+                <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Série</Text>
               </XStack>
-              <Text fontSize={18} fontWeight="900" color="$purple12">
-                {stats.daysCompleted} / {todayIndex + 1}
+              <Text fontFamily="$heading" fontSize={20}>
+                 {stats.daysCompleted} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>/ {todayIndex + 1}</Text>
               </Text>
-              <YStack height={6} background="$purple4" rounded={3} overflow="hidden">
-                <YStack 
-                  height="100%" 
-                  width={`${Math.min(100, (stats.daysCompleted / (todayIndex + 1)) * 100)}%`}
-                  background="$pink9"
-                  rounded={3}
-                />
-              </YStack>
+              <Progress value={(stats.daysCompleted / (todayIndex + 1)) * 100} size="$1" bg="$backgroundHover">
+                <Progress.Indicator animation="bouncy" bg="$danger" />
+              </Progress>
             </YStack>
           </Card>
         </XStack>
 
         {/* 5. JAUGE ANNUELLE */}
-        <Card elevate p="$5" borderRadius={20}>
+        <Card elevate p="$5" borderRadius={24} bg="$background" animation="lazy">
           <YStack gap="$3">
-            <XStack justify="space-between" items="center">
-              <Text fontSize={16} fontWeight="800" color="$purple12">
-                📊 Progression Annuelle
-              </Text>
-              <Target size={22} color="#2196F3" />
+            <XStack justifyContent="space-between" alignItems="center">
+              <H2 fontFamily="$heading" size="$4">Progression Annuelle</H2>
+              <Target size={22} color="$primary" />
             </XStack>
             
-            <Text fontSize={36} fontWeight="900" color="$purple12">
+            <H1 fontFamily="$heading" size="$7" color="$primary">
               {stats.percent}%
-            </Text>
+            </H1>
             
-            <YStack height={14} background="$purple4" rounded={7} overflow="hidden">
-              <LinearGradient
-                colors={['#4facfe', '#00f2fe']}
-                style={{ 
-                  height: '100%', 
-                  width: `${progressPercent}%`,
-                  borderRadius: 7,
-                }}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+            <YStack height={14} bg="$brandSoft" borderRadius={100} overflow="hidden">
+              <YStack 
+                height="100%" 
+                width={`${progressPercent}%`}
+                bg="$primary"
+                borderRadius={100}
               />
             </YStack>
             
-            <XStack justify="space-between">
-              <Text fontSize={12} color="$purple10" fontWeight="600">
+            <XStack justifyContent="space-between">
+              <Text fontSize={12} color="$color" opacity={0.6}>
                 {totalDone.toLocaleString()} faites
               </Text>
-              <Text fontSize={12} color="$purple10" fontWeight="600">
+              <Text fontSize={12} color="$color" opacity={0.6}>
                 {(TOTAL_TARGET_YEAR - totalDone).toLocaleString()} restantes
               </Text>
             </XStack>

@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
-import { YStack, Text, H2, Spinner } from 'tamagui';
+import { YStack, Text, H2, Spinner, useTheme } from 'tamagui';
 import { Calendar } from '@tamagui/lucide-icons';
 
 import { UI_CONSTANTS } from '@/constants/constants';
-import { DayDataType } from '@/types/Day';
+import { DayDataType } from '@/types/day';
 import { DayRow } from '@/components/DayRow';
 import { TodayButton } from '@/components/TodayButton';
 import { useProgressData } from '@/hooks/useProgressData';
@@ -12,12 +12,11 @@ import { useProgressData } from '@/hooks/useProgressData';
 export default function DaysListScreen() {
   const { days, todayIndex, updateDay, isLoading, error } = useProgressData();
   const flatListRef = useRef<FlatList>(null);
+  const theme = useTheme();
 
   useEffect(() => {
     if (todayIndex !== -1 && days.length > 0) {
-      const timer = setTimeout(() => {
-        scrollToToday();
-      }, 500);
+      const timer = setTimeout(() => scrollToToday(), 500);
       return () => clearTimeout(timer);
     }
   }, [todayIndex, days.length]);
@@ -32,17 +31,18 @@ export default function DaysListScreen() {
     }
   }, [todayIndex]);
 
-  // Header Component Tamagui
   const ListHeader = () => (
-    <YStack px="$4" pt="$4" pb="$2" gap="$1">
-      <YStack flexDirection="row" items="center" gap="$2">
-        <Calendar size={24} color="$blue10" />
-        <H2 fontSize={24} fontWeight="900" color="$purple12">
+    <YStack px="$4" pt="$6" pb="$4" gap="$2">
+      <YStack flexDirection="row" alignItems="center" gap="$3">
+        <YStack bg="$brandSoft" p="$2" borderRadius="$4">
+             <Calendar size={24} color="$primary" />
+        </YStack>
+        <H2 fontFamily="$heading" size="$6" color="$color">
           Mon Calendrier
         </H2>
       </YStack>
-      <Text fontSize={14} color="$purple10" fontWeight="600">
-        365 jours de discipline 💪
+      <Text fontSize={15} color="$color" opacity={0.6} ml="$1">
+        365 jours de discipline, une pompe à la fois.
       </Text>
     </YStack>
   );
@@ -59,39 +59,24 @@ export default function DaysListScreen() {
     [updateDay, todayIndex]
   );
 
-  const getItemLayout = (data: any, index: number) => ({
-    length: UI_CONSTANTS.DAY_ROW_HEIGHT,
-    offset: UI_CONSTANTS.DAY_ROW_HEIGHT * index,
-    index,
-  });
-
-  // États de chargement et erreur
   if (isLoading) {
     return (
-      <YStack flex={1} items="center" justify="center" background="$purple2">
-        <Spinner size="large" color="$blue9" />
-        <Text mt="$4" color="$purple11" fontWeight="600">
-          Chargement du calendrier...
-        </Text>
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="$backgroundHover">
+        <Spinner size="large" color="$primary" />
       </YStack>
     );
   }
 
   if (error) {
     return (
-      <YStack flex={1} items="center" justify="center" background="$purple2" p="$4">
-        <Text color="$red10" fontSize={18} fontWeight="700" verticalAlign="center">
-          ❌ {error}
-        </Text>
-        <Text color="$purple11" mt="$2" verticalAlign="center">
-          Vérifie ta connexion internet
-        </Text>
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="$backgroundHover" p="$4">
+        <Text color="$danger" fontSize={18} fontWeight="700">❌ {error}</Text>
       </YStack>
     );
   }
 
   return (
-    <YStack flex={1} background="$purple2">
+    <YStack flex={1} bg="$backgroundHover">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
@@ -101,20 +86,24 @@ export default function DaysListScreen() {
           data={days}
           renderItem={renderItem}
           keyExtractor={(item) => item.dateStr}
-          getItemLayout={getItemLayout}
-          initialNumToRender={20}
+          getItemLayout={(data, index) => ({
+            length: UI_CONSTANTS.DAY_ROW_HEIGHT,
+            offset: UI_CONSTANTS.DAY_ROW_HEIGHT * index,
+            index,
+          })}
+          initialNumToRender={15}
           maxToRenderPerBatch={10}
           windowSize={10}
           removeClippedSubviews={true}
           ListHeaderComponent={ListHeader}
           contentContainerStyle={{ 
             paddingBottom: UI_CONSTANTS.LIST_BOTTOM_PADDING,
-            paddingTop: 10,
           }}
           showsVerticalScrollIndicator={false}
         />
       </KeyboardAvoidingView>
 
+      {/* Assure-toi que TodayButton utilise les props Tamagui ou passe lui des styles */}
       <TodayButton onPress={scrollToToday} />
     </YStack>
   );

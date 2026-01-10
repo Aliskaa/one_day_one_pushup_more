@@ -4,7 +4,7 @@
  */
 
 import { START_YEAR } from '@/constants/constants';
-import { DayDataType } from '@/types/Day';
+import { DayDataType } from '@/types/day';
 import { ProgressMapType } from '@/types/utils';
 import {
     doc,
