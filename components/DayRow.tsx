@@ -138,7 +138,7 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
             onChangeText={(text) => onUpdate(index, text)}
             maxLength={4}
             selectTextOnFocus
-            editable={!isLockedOrMissed}
+            editable={isToday}
           />
           
           <YStack 
