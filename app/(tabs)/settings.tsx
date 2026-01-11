@@ -10,6 +10,13 @@ export default function SettingsScreen() {
   const { user } = useUser();
   const theme = useTheme();
 
+  const handleSwitchTheme = () => {
+    // Logique pour changer le thème (clair/sombre)
+    console.log('Changement de thème déclenché');
+    console.log(theme)
+
+  }
+
   // Composant helper pour une ligne de menu
   const MenuItem = ({ icon: Icon, title, subtitle, hasSwitch = false }: any) => (
     <XStack 
@@ -27,7 +34,7 @@ export default function SettingsScreen() {
         {subtitle && <Text fontSize={12} color="$color" opacity={0.6}>{subtitle}</Text>}
       </YStack>
       {hasSwitch ? (
-        <Switch size="$2" bg="$backgroundHover">
+        <Switch size="$2" bg="$backgroundHover" onCheckedChange={handleSwitchTheme}>
           <Switch.Thumb animation="bouncy" bg="$primary" />
         </Switch>
       ) : (
@@ -73,7 +80,7 @@ export default function SettingsScreen() {
               <Card elevate bordered overflow="hidden" borderRadius={20} bg="$background">
                 <MenuItem icon={Bell} title="Notifications" subtitle="Rappels quotidiens" hasSwitch />
                 <Separator borderColor="$borderColor" />
-                <MenuItem icon={Moon} title="Mode Sombre" subtitle="Apparence de l'application" hasSwitch />
+                <MenuItem icon={Moon} title="Mode Sombre" subtitle="Apparence de l'application" hasSwitch onClick={() => handleSwitchTheme()} />
               </Card>
             </YStack>
 

@@ -25,7 +25,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!isSignedIn && !isOnSignIn) {
       router.replace('/sign-in');
     } else if (isSignedIn && isOnSignIn) {
-      router.replace('/(tabs)');
+      // Utilise un délai pour laisser les routes se monter
+      setTimeout(() => {
+        router.replace('/(tabs)');
+      }, 100);
     }
   }, [isSignedIn, isLoaded, segments, router]);
 

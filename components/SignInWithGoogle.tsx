@@ -1,49 +1,77 @@
-import { useClerk, useSSO } from "@clerk/clerk-expo";
-import * as AuthSession from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
-import React, { useCallback, useEffect } from "react";
-import { Platform } from "react-native";
-import { Button, Text, useTheme } from "tamagui";
-// Tu peux importer une icône Google si tu en as une, sinon on reste texte ou icône générique
-import { Chrome } from '@tamagui/lucide-icons'; 
+import { useSSO } from '@clerk/clerk-expo'
+import { Chrome } from '@tamagui/lucide-icons'
+import * as AuthSession from 'expo-auth-session'
+import { router } from 'expo-router'
+import * as WebBrowser from 'expo-web-browser'
+import React, { useCallback, useEffect } from 'react'
+import { Platform } from 'react-native'
+import { Button, Text } from "tamagui"
+import * as Linking from "expo-linking";
 
+// Preloads the browser for Android devices to reduce authentication load time
+// See: https://docs.expo.dev/guides/authentication/#improving-user-experience
 export const useWarmUpBrowser = () => {
   useEffect(() => {
-    if (Platform.OS !== "android") return;
-    void WebBrowser.warmUpAsync();
+    if (Platform.OS !== 'android') return
+    void WebBrowser.warmUpAsync()
     return () => {
-      void WebBrowser.coolDownAsync();
-    };
-  }, []);
-};
+      // Cleanup: closes browser when component unmounts
+      void WebBrowser.coolDownAsync()
+    }
+  }, [])
+}
 
-WebBrowser.maybeCompleteAuthSession();
+// Handle any pending authentication sessions
+WebBrowser.maybeCompleteAuthSession()
 
-export default function SignInWithGoogle() {
-  useWarmUpBrowser();
-  const { startSSOFlow } = useSSO();
-  const { setActive } = useClerk();
-  const theme = useTheme();
+export default function Page() {
+  useWarmUpBrowser()
+
+  // Use the `useSSO()` hook to access the `startSSOFlow()` method
+  const { startSSOFlow } = useSSO()
 
   const onPress = useCallback(async () => {
     try {
-      const redirectUrl = AuthSession.makeRedirectUri({
-        scheme: 'https',
-        path: 'welcomed-spaniel-61.clerk.accounts.dev/v1/oauth_callback',
-      });
+      const linkedUrl = Linking.createURL("/oauth-native-callback", { scheme: "onedayonepushupmore" }); 
       
-      const { createdSessionId } = await startSSOFlow({
-        strategy: "oauth_google",
-        redirectUrl,
-      });
+      console.log("Redirect URL générée :", linkedUrl);
 
+      // Start the authentication process by calling `startSSOFlow()`
+      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
+        strategy: 'oauth_google',
+        // For web, defaults to current path
+        // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
+        // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
+        redirectUrl: linkedUrl,
+      })
+
+      // If sign in was successful, set the active session
       if (createdSessionId) {
-        await setActive({ session: createdSessionId });
+        setActive!({
+          session: createdSessionId,
+          // Check for session tasks and navigate to custom UI to help users resolve them
+          // See https://clerk.com/docs/guides/development/custom-flows/overview#session-tasks
+          navigate: async ({ session }) => {
+            if (session?.currentTask) {
+              console.log(session?.currentTask)
+              router.push('/sign-in')
+              return
+            }
+
+            router.push('/')
+          },
+        })
+      } else {
+        // If there is no `createdSessionId`,
+        // there are missing requirements, such as MFA
+        // See https://clerk.com/docs/guides/development/custom-flows/authentication/oauth-connections#handle-missing-requirements
       }
     } catch (err) {
-      console.error("Erreur de connexion Google:", err);
+      // See https://clerk.com/docs/guides/development/custom-flows/error-handling
+      // for more info on error handling
+      console.error(JSON.stringify(err, null, 2))
     }
-  }, [startSSOFlow, setActive]);
+  }, [])
 
   return (
     <Button
