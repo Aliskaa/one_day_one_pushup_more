@@ -1,7 +1,8 @@
+import { APP_NAME } from '@/constants/constants';
 import { Dumbbell } from '@tamagui/lucide-icons';
 import React from 'react';
 
-import { Text, XStack, YStack } from 'tamagui';
+import { Avatar, Image, Text, XStack, YStack } from 'tamagui';
 
 export default function Logo({ hasText = false }: { hasText?: boolean }) {
     return (
@@ -15,11 +16,15 @@ export default function Logo({ hasText = false }: { hasText?: boolean }) {
                     borderRadius: 16,
                 }}
             >
-                <Dumbbell size={32} color="white" />
+                <Image
+                    source={require('../assets/images/logo_one_day_one_pushup_more.png')}
+                    width={200}
+                    height={300}
+                />
             </XStack>
             {hasText && (
-                <Text fontSize="$7" fontWeight="700" color="$color">
-                    1 Day 1 Pushup+
+                <Text fontSize="$7" fontWeight="700" color="$color" textAlign='center'>
+                    {APP_NAME}
                 </Text>
             )}
         </YStack>

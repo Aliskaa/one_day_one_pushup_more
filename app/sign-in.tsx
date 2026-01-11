@@ -29,7 +29,7 @@ export default function Page() {
           >
             {/* 1. HEADER & LOGO */}
             <YStack alignItems="center" gap="$2" mt="$4">
-              <Logo />
+              <Logo hasText={true} />
 
               <YStack alignItems="center" mt="$4">
                 <H1 fontFamily="$heading" size="$8" color="$primary" textAlign="center">
@@ -41,7 +41,7 @@ export default function Page() {
                   textAlign="center"
                   fontSize={16}
                 >
-                  Connecte-toi à {APP_NAME} pour continuer
+                  Connecte-toi pour continuer
                 </Paragraph>
               </YStack>
             </YStack>

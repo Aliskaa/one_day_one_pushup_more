@@ -76,7 +76,6 @@ export default function Page() {
   return (
     <Button
       size="$4"
-      bg="white"
       borderColor="$borderColor"
       borderWidth={1}
       borderRadius={14}

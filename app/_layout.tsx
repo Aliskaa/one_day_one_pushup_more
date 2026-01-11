@@ -8,7 +8,6 @@ import { useFonts } from 'expo-font';
 import { Slot, SplashScreen } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
 import { tamaguiConfig } from '../tamagui.config';
@@ -23,13 +22,10 @@ function AppContent() {
   }
 
   return (
-    // On force le thème Tamagui ici avec animation fluide
-    <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
-      <YStack flex={1} animation="medium">
-        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        <Slot />
-      </YStack>
-    </TamaguiProvider>
+    <YStack flex={1} animation="medium" theme={theme}>
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      <Slot />
+    </YStack>
   );
 }
 
@@ -38,7 +34,6 @@ export default function RootLayout() {
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   });
-  const colorScheme = useColorScheme();
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
   useEffect(() => {
@@ -56,18 +51,20 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        <ClerkLoaded>
-          <ModalProvider>
-            <ThemeProvider>
-              <AuthGuard>
-                <AppContent />
-              </AuthGuard>
-            </ThemeProvider>
-          </ModalProvider>
-        </ClerkLoaded>
-      </ClerkProvider>
-    </SafeAreaProvider>
+    <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
+      <SafeAreaProvider>
+        <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+          <ClerkLoaded>
+            <ModalProvider>
+              <ThemeProvider>
+                <AuthGuard>
+                  <AppContent />
+                </AuthGuard>
+              </ThemeProvider>
+            </ModalProvider>
+          </ClerkLoaded>
+        </ClerkProvider>
+      </SafeAreaProvider>
+    </TamaguiProvider>
   );
 }
