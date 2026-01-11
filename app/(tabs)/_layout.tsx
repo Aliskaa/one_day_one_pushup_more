@@ -1,20 +1,24 @@
-import { HapticTab } from '@/components/haptic-tab';
 import { Home, Calendar, Settings, Award } from '@tamagui/lucide-icons';
 import { Colors } from '@/constants/theme';
 import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAppTheme } from '@/contexts/ThemeContext';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+  const isDark = theme === 'dark';
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#111827' : '#ffffff' }}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          tabBarActiveTintColor: Colors[theme].tint,
+          tabBarStyle: {
+            backgroundColor: isDark ? '#1f2937' : '#ffffff',
+            borderTopColor: isDark ? '#374151' : '#e5e7eb',
+          },
+          tabBarInactiveTintColor: isDark ? '#9BA1A6' : '#687076',
           headerShown: false,
-          tabBarButton: HapticTab,
         }}>
         <Tabs.Screen
           name="index"

@@ -4888,6 +4888,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-async-storage/async-storage@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@react-native-async-storage/async-storage@npm:2.2.0"
+  dependencies:
+    merge-options: "npm:^3.0.4"
+  peerDependencies:
+    react-native: ^0.0.0-0 || >=0.65 <1.0
+  checksum: 10/625e42134f0c487acfd4ba9b3ba182e6f6f29581485004cc658850ef024372cdb7381b7399393f4416fda39df2d822e3008427d7671d635a7363f9a65430a2dd
+  languageName: node
+  linkType: hard
+
 "@react-native-async-storage/async-storage@npm:^1.17.7":
   version: 1.24.0
   resolution: "@react-native-async-storage/async-storage@npm:1.24.0"
@@ -10475,15 +10486,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-status-bar@npm:~3.0.8":
-  version: 3.0.8
-  resolution: "expo-status-bar@npm:3.0.8"
+"expo-status-bar@npm:~3.0.9":
+  version: 3.0.9
+  resolution: "expo-status-bar@npm:3.0.9"
   dependencies:
     react-native-is-edge-to-edge: "npm:^1.2.1"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/7a88e8e48a28d5f1d339a44ed6235fd937967fc297b911deac59b7e14e54a6c3d260a087176126b6571a50c437f00a368396f562aaa37b5bdd91892c51afad79
+  checksum: 10/c598dc8089b962c97e50cfd2dde876391cfd675d756700c5439b0522678bced99d70f04a2128f80d6b84ba7676929afdc3165dfaf14ea771ac1e82104f30768d
   languageName: node
   linkType: hard
 
@@ -13873,6 +13884,7 @@ __metadata:
     "@clerk/clerk-expo": "npm:^2.19.16"
     "@expo/metro-config": "npm:~54.0.2"
     "@expo/metro-runtime": "npm:~6.1.2"
+    "@react-native-async-storage/async-storage": "npm:2.2.0"
     "@react-navigation/bottom-tabs": "npm:^7.9.0"
     "@react-navigation/elements": "npm:^2.9.3"
     "@react-navigation/native": "npm:^7.1.6"
@@ -13897,7 +13909,7 @@ __metadata:
     expo-router: "npm:~6.0.14"
     expo-secure-store: "npm:~15.0.8"
     expo-splash-screen: "npm:~31.0.10"
-    expo-status-bar: "npm:~3.0.8"
+    expo-status-bar: "npm:~3.0.9"
     expo-symbols: "npm:~1.0.8"
     expo-system-ui: "npm:~6.0.8"
     expo-web-browser: "npm:~15.0.9"

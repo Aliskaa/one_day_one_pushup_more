@@ -1,46 +1,36 @@
 import '../tamagui-web.css';
 
+import { AuthGuard } from '@/components/AuthGuard';
 import { ModalProvider } from '@/contexts/ModalContext';
-import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/clerk-expo';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider, useAppTheme } from '@/contexts/ThemeContext';
+import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
 import { useFonts } from 'expo-font';
-import { Slot, SplashScreen, useRouter, useSegments } from 'expo-router';
+import { Slot, SplashScreen } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Spinner, TamaguiProvider, YStack } from 'tamagui';
+import { TamaguiProvider, YStack } from 'tamagui';
 import { tamaguiConfig } from '../tamagui.config';
 import { tokenCache } from '../utils/cache';
 
-function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isSignedIn, isLoaded } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
+function AppContent() {
+  const { theme, isLoading } = useAppTheme();
 
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    const isOnSignIn = segments[0] === 'sign-in';
-
-    if (!isSignedIn && !isOnSignIn) {
-      router.replace('/sign-in');
-    } else if (isSignedIn && isOnSignIn) {
-      // Utilise un délai pour laisser les routes se monter
-      setTimeout(() => {
-        router.replace('/(tabs)');
-      }, 100);
-    }
-  }, [isSignedIn, isLoaded, segments, router]);
-
-  if (!isLoaded) {
-    return (
-      <YStack flex={1} alignItems="center" justifyContent="center" bg="$background">
-        <Spinner size="large" />
-      </YStack>
-    );
+  // Attendre le chargement du thème sauvegardé avant d'afficher l'app
+  if (isLoading) {
+    return null;
   }
 
-  return <>{children}</>;
+  return (
+    // On force le thème Tamagui ici avec animation fluide
+    <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
+      <YStack flex={1} animation="medium">
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        <Slot />
+      </YStack>
+    </TamaguiProvider>
+  );
 }
 
 export default function RootLayout() {
@@ -69,15 +59,13 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <ClerkLoaded>
-          <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme!}>
-            <ModalProvider>
-              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <AuthGuard>
-                  <Slot />
-                </AuthGuard>
-              </ThemeProvider>
-            </ModalProvider>
-          </TamaguiProvider>
+          <ModalProvider>
+            <ThemeProvider>
+              <AuthGuard>
+                <AppContent />
+              </AuthGuard>
+            </ThemeProvider>
+          </ModalProvider>
         </ClerkLoaded>
       </ClerkProvider>
     </SafeAreaProvider>

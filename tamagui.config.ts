@@ -24,6 +24,12 @@ const animations = createAnimations({
     mass: 1.2,
     stiffness: 250,
   },
+  medium: {
+    type: 'spring',
+    damping: 15,
+    mass: 1,
+    stiffness: 120,
+  },
 })
 
 // --- 2. FONTS ---

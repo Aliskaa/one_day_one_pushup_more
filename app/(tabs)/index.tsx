@@ -23,7 +23,6 @@ import {
   Target,
   Flame
 } from '@tamagui/lucide-icons';
-
 import { useProgressData } from '@/hooks/useProgressData';
 import { TOTAL_TARGET_YEAR } from '@/constants/constants';
 
