@@ -9,6 +9,7 @@ interface DayRowProps {
   index: number;
   onUpdate: (index: number, value: string) => void;
   isToday?: boolean;
+  isLocked?: boolean;
 }
 
 const formatDate = (dateStr: string) => {
@@ -19,8 +20,18 @@ const formatDate = (dateStr: string) => {
   return { day, month };
 };
 
-export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate, isToday = false }) => {
+export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate, isToday = false, isLocked = false }) => {
   const theme = useTheme();
+  
+  // Vérifier si c'est un jour passé non rempli
+  const itemDate = new Date(item.dateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  itemDate.setHours(0, 0, 0, 0);
+  
+  const isPast = itemDate < today;
+  const isMissed = isPast && item.done === null;
+  const isLockedOrMissed = isLocked || isMissed;
   
   const isValidated = item.done !== null && item.done >= item.target;
   const isStarted = item.done !== null && item.done > 0;
@@ -30,7 +41,15 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
   let StatusIcon = Circle;
   let cardBorderColor = '$borderColor';
 
-  if (isToday) {
+  if (isMissed) {
+    statusColor = '$danger';
+    cardBorderColor = '$danger';
+    StatusIcon = Lock;
+  } else if (isLocked) {
+    statusColor = '$borderColor';
+    cardBorderColor = '$borderColor';
+    StatusIcon = Lock;
+  } else if (isToday) {
     statusColor = '$primary';
     cardBorderColor = '$primary';
   } else if (isValidated) {
@@ -100,29 +119,34 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
               width: 70,
               height: 45,
               borderWidth: 1.5,
-              borderColor: isValidated ? theme.success.val : (isToday ? theme.primary.val : theme.borderColor.val),
-              backgroundColor: theme.backgroundHover.val,
+              borderColor: isMissed ? theme.danger.val : (isValidated ? theme.success.val : (isToday ? theme.primary.val : theme.borderColor.val)),
+              backgroundColor: isMissed ? theme.danger.val + '20' : theme.backgroundHover.val,
               borderRadius: 14,
               textAlign: 'center',
+              textAlignVertical: 'center',
+              padding: 0,
+              includeFontPadding: false,
               fontSize: 18,
               fontFamily: 'InterBold', // Utilise ta police custom
-              color: theme.color.val,
+              color: isMissed ? theme.danger.val : theme.color.val,
+              opacity: isMissed ? 0.7 : 1,
             }}
             keyboardType="numeric"
             placeholder="-"
-            placeholderTextColor={theme.color.val + '40'} // Opacité sur le placeholder
+            placeholderTextColor={isMissed ? theme.danger.val + '60' : theme.color.val + '40'} // Opacité sur le placeholder
             value={item.done?.toString() || ''}
             onChangeText={(text) => onUpdate(index, text)}
             maxLength={4}
             selectTextOnFocus
+            editable={!isLockedOrMissed}
           />
           
           <YStack 
             width={32} height={32} borderRadius={16} 
-            bg={isValidated ? '$success' : (isStarted ? '$warning' : '$backgroundHover')}
+            bg={isMissed ? '$danger' : (isValidated ? '$success' : (isStarted ? '$warning' : '$backgroundHover'))}
             alignItems="center" justifyContent="center"
           >
-            <StatusIcon size={16} color={isValidated || isStarted ? 'white' : '$color'} />
+            <StatusIcon size={16} color={isMissed || isValidated || isStarted ? 'white' : '$color'} />
           </YStack>
         </XStack>
       </XStack>

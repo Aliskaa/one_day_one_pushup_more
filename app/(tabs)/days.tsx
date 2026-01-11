@@ -1,18 +1,17 @@
+import { Calendar } from '@tamagui/lucide-icons';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
-import { YStack, Text, H2, Spinner, useTheme } from 'tamagui';
-import { Calendar } from '@tamagui/lucide-icons';
+import { H2, Spinner, Text, YStack } from 'tamagui';
 
-import { UI_CONSTANTS } from '@/constants/constants';
-import { DayDataType } from '@/types/day';
 import { DayRow } from '@/components/DayRow';
 import { TodayButton } from '@/components/TodayButton';
+import { UI_CONSTANTS } from '@/constants/constants';
 import { useProgressData } from '@/hooks/useProgressData';
+import { DayDataType } from '@/types/day';
 
 export default function DaysListScreen() {
   const { days, todayIndex, updateDay, isLoading, error } = useProgressData();
   const flatListRef = useRef<FlatList>(null);
-  const theme = useTheme();
 
   useEffect(() => {
     if (todayIndex !== -1 && days.length > 0) {
@@ -54,6 +53,7 @@ export default function DaysListScreen() {
         index={index}
         onUpdate={updateDay}
         isToday={index === todayIndex}
+        isLocked={index < todayIndex && index !== todayIndex}
       />
     ),
     [updateDay, todayIndex]
