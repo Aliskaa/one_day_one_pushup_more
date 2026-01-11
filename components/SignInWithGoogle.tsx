@@ -1,6 +1,5 @@
-import { useSSO } from "@clerk/clerk-expo";
+import { useClerk, useSSO } from "@clerk/clerk-expo";
 import * as AuthSession from "expo-auth-session";
-import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useEffect } from "react";
 import { Platform } from "react-native";
@@ -22,32 +21,29 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function SignInWithGoogle() {
   useWarmUpBrowser();
-  const router = useRouter();
   const { startSSOFlow } = useSSO();
+  const { setActive } = useClerk();
   const theme = useTheme();
 
   const onPress = useCallback(async () => {
     try {
-      const { createdSessionId, setActive } = await startSSOFlow({
+      const redirectUrl = AuthSession.makeRedirectUri({
+        scheme: 'https',
+        path: 'welcomed-spaniel-61.clerk.accounts.dev/v1/oauth_callback',
+      });
+      
+      const { createdSessionId } = await startSSOFlow({
         strategy: "oauth_google",
-        redirectUrl: AuthSession.makeRedirectUri({}),
+        redirectUrl,
       });
 
       if (createdSessionId) {
-        setActive!({
-          session: createdSessionId,
-          navigate: async ({ session }) => {
-            if (session?.currentTask) {
-              // Géré par protected route
-              return;
-            }
-          },
-        });
+        await setActive({ session: createdSessionId });
       }
     } catch (err) {
-      console.error(JSON.stringify(err, null, 2));
+      console.error("Erreur de connexion Google:", err);
     }
-  }, [router, startSSOFlow]);
+  }, [startSSOFlow, setActive]);
 
   return (
     <Button

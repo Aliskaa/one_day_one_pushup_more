@@ -1,25 +1,18 @@
 import Logo from "@/components/Logo";
 import SignInWithGoogle from "@/components/SignInWithGoogle";
 import { APP_NAME } from "@/constants/constants";
-import { Link } from "expo-router";
 import React from "react";
-// On utilise le composant SafeAreaView de react-native-safe-area-context
-// Mais on peut aussi wrapper avec YStack safeAreaTop si on préfère.
-// Ici on garde SafeAreaView pour wrapper tout l'écran proprement.
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Card,
   H1,
   Paragraph,
   ScrollView,
-  Text,
-  XStack,
   YStack
 } from "tamagui";
 
 export default function Page() {
   return (
-    // Utilisation de la couleur de fond du thème
     <YStack flex={1} bg="$backgroundHover">
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
@@ -36,7 +29,7 @@ export default function Page() {
           >
             {/* 1. HEADER & LOGO */}
             <YStack alignItems="center" gap="$2" mt="$4">
-              <Logo /> {/* Assure-toi que ton Logo s'adapte ou a une taille fixe */}
+              <Logo />
 
               <YStack alignItems="center" mt="$4">
                 <H1 fontFamily="$heading" size="$8" color="$primary" textAlign="center">
@@ -63,15 +56,12 @@ export default function Page() {
               bg="$background"
               p="$5"
               gap="$4"
-              animation="lazy" // Animation d'entrée douce
+              animation="lazy"
               enterStyle={{ opacity: 0, scale: 0.95, y: 10 }}
             >
-              {/* Google Button */}
-              {/* On encapsule ton composant pour s'assurer qu'il s'aligne bien */}
               <YStack>
                 <SignInWithGoogle />
               </YStack>
-
             </Card>
           </YStack>
         </ScrollView>

@@ -1,38 +1,65 @@
 import '../tamagui-web.css';
 
 import { ModalProvider } from '@/contexts/ModalContext';
-import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
+import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Slot, SplashScreen } from 'expo-router';
+import { Slot, SplashScreen, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { TamaguiProvider } from 'tamagui';
-import { tamaguiConfig } from '../tamagui.config'; // Vérifie le chemin selon ton template
-import { tokenCache } from '../utils/cache'; // Ton fichier cache
+import { Spinner, TamaguiProvider, YStack } from 'tamagui';
+import { tamaguiConfig } from '../tamagui.config';
+import { tokenCache } from '../utils/cache';
+
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { isSignedIn, isLoaded } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const isOnSignIn = segments[0] === 'sign-in';
+
+    if (!isSignedIn && !isOnSignIn) {
+      router.replace('/sign-in');
+    } else if (isSignedIn && isOnSignIn) {
+      router.replace('/(tabs)');
+    }
+  }, [isSignedIn, isLoaded, segments, router]);
+
+  if (!isLoaded) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="$background">
+        <Spinner size="large" />
+      </YStack>
+    );
+  }
+
+  return <>{children}</>;
+}
 
 export default function RootLayout() {
   const [interLoaded, interError] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
-  })
-  const colorScheme = useColorScheme()
+  });
+  const colorScheme = useColorScheme();
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
   useEffect(() => {
     if (interLoaded || interError) {
-      // Hide the splash screen after the fonts have loaded (or an error was returned) and the UI is ready.
-      SplashScreen.hideAsync()
+      SplashScreen.hideAsync();
     }
-  }, [interLoaded, interError])
+  }, [interLoaded, interError]);
 
   if (!publishableKey) {
     throw new Error('Missing Publishable Key');
   }
 
   if (!interLoaded && !interError) {
-    return null
+    return null;
   }
 
   return (
@@ -42,7 +69,9 @@ export default function RootLayout() {
           <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme!}>
             <ModalProvider>
               <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Slot />
+                <AuthGuard>
+                  <Slot />
+                </AuthGuard>
               </ThemeProvider>
             </ModalProvider>
           </TamaguiProvider>
