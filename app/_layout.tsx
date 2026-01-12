@@ -1,9 +1,11 @@
 import '../tamagui-web.css';
 
 import { AuthGuard } from '@/components/AuthGuard';
+import { CurrentToast } from '@/components/CurrentToast';
 import { ModalProvider } from '@/contexts/ModalContext';
 import { ThemeProvider, useAppTheme } from '@/contexts/ThemeContext';
 import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
+import { ToastProvider, ToastViewport } from '@tamagui/toast';
 import { useFonts } from 'expo-font';
 import { Slot, SplashScreen } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -52,19 +54,23 @@ export default function RootLayout() {
 
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
-      <SafeAreaProvider>
-        <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-          <ClerkLoaded>
-            <ModalProvider>
-              <ThemeProvider>
-                <AuthGuard>
-                  <AppContent />
-                </AuthGuard>
-              </ThemeProvider>
-            </ModalProvider>
-          </ClerkLoaded>
-        </ClerkProvider>
-      </SafeAreaProvider>
+      <ToastProvider swipeDirection="horizontal" duration={3000} native>
+        <SafeAreaProvider>
+          <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+            <ClerkLoaded>
+              <ModalProvider>
+                <ThemeProvider>
+                  <AuthGuard>
+                    <AppContent />
+                  </AuthGuard>
+                </ThemeProvider>
+              </ModalProvider>
+            </ClerkLoaded>
+          </ClerkProvider>
+        </SafeAreaProvider>
+        <CurrentToast />
+        <ToastViewport top="$8" left={0} right={0} />
+      </ToastProvider>
     </TamaguiProvider>
   );
 }

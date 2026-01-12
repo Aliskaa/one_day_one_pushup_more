@@ -14,6 +14,7 @@ import {
     subscribeToProgress
 } from '@/utils/firebaseStorage';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import { useToastController } from '@tamagui/toast';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseProgressDataReturn {
@@ -36,6 +37,7 @@ export interface UseProgressDataReturn {
 export const useProgressData = (): UseProgressDataReturn => {
   const { userId } = useAuth();
   const { user } = useUser();
+  const toast = useToastController();
   
   const [days, setDays] = useState<DayDataType[]>([]);
   const [progressMap, setProgressMap] = useState<ProgressMapType>({});
@@ -149,6 +151,10 @@ export const useProgressData = (): UseProgressDataReturn => {
     
     // Validation
     if (numValue !== null && (isNaN(numValue) || numValue < 0 || numValue > UI_CONSTANTS.MAX_INPUT_VALUE)) {
+      toast.show('⚠️ Limite dépassée', {
+        message: `La valeur maximale est ${UI_CONSTANTS.MAX_INPUT_VALUE} pompes`,
+        duration: 3000,
+      });
       return;
     }
 
@@ -169,7 +175,7 @@ export const useProgressData = (): UseProgressDataReturn => {
       
       return newDays;
     });
-  }, [progressMap, debouncedSave]);
+  }, [progressMap, debouncedSave, toast]);
 
   // Rafraîchir les données
   const refreshData = useCallback(async () => {

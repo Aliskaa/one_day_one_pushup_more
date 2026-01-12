@@ -28,10 +28,14 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   itemDate.setHours(0, 0, 0, 0);
+  const lastDay = new Date(today);
+  lastDay.setDate(today.getDate() - 1);
+  const yesterday = new Date(lastDay);
+  yesterday.setHours(0, 0, 0, 0);
   
+  const isYesterday = itemDate.getTime() === yesterday.getTime();
   const isPast = itemDate < today;
   const isMissed = isPast && item.done === null;
-  const isLockedOrMissed = isLocked || isMissed;
   
   const isValidated = item.done !== null && item.done >= item.target;
   const isStarted = item.done !== null && item.done > 0;
@@ -138,7 +142,7 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
             onChangeText={(text) => onUpdate(index, text)}
             maxLength={4}
             selectTextOnFocus
-            editable={isToday}
+            editable={isToday || isYesterday}
           />
           
           <YStack 

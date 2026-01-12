@@ -21,6 +21,7 @@ import {
 } from '@/utils/achievementsStorage';
 import { useAuth } from '@clerk/clerk-expo';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePushNotifications } from './usePushNotifications';
 
 export interface UseAchievementsReturn {
   achievements: AchievementWithStatus[];
@@ -48,6 +49,7 @@ export const useAchievements = (
   progressMap: ProgressMapType
 ): UseAchievementsReturn => {
   const { userId } = useAuth();
+  const { sendAchievementNotification } = usePushNotifications();
   
   const [unlockedBadges, setUnlockedBadges] = useState<Record<string, UnlockedAchievement>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -112,6 +114,21 @@ export const useAchievements = (
               unlockedAt: new Date(),
               progress: stats.totalPushups,
             };
+
+            // Envoyer une notification pour cet achievement
+            const achievement = ACHIEVEMENTS.find(a => a.id === achievementId);
+            if (achievement) {
+              try {
+                await sendAchievementNotification(
+                  achievement.title,
+                  achievement.description,
+                  achievementId
+                );
+                console.log(`🔔 Notification envoyée pour ${achievement.title}`);
+              } catch (notifError) {
+                console.error('Erreur envoi notification achievement:', notifError);
+              }
+            }
           }
           
           setUnlockedBadges(newUnlockedBadges);

@@ -171,6 +171,23 @@ export function usePushNotifications() {
     }
   };
 
+  const sendAchievementNotification = async (achievementTitle: string, achievementDescription: string, achievementId: string) => {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '🏆 Achievement débloqué !',
+          body: `${achievementTitle} - ${achievementDescription}`,
+          sound: true,
+          priority: Notifications.AndroidNotificationPriority.HIGH,
+          data: { type: 'achievement', achievementId },
+        },
+        trigger: null,
+      });
+    } catch (error) {
+      console.error('Erreur notification achievement:', error);
+    }
+  };
+
   const sendMotivation = async (message: string) => {
     try {
       await Notifications.scheduleNotificationAsync({
@@ -209,6 +226,7 @@ export function usePushNotifications() {
     sendStreakReminder,
     sendCelebration,
     sendMotivation,
+    sendAchievementNotification,
     scheduleDailyReminder,
     cancelAllNotifications,
   };

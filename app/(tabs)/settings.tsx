@@ -3,13 +3,16 @@ import { NotificationSettings } from '@/components/NotificationSettings';
 import { APP_NAME } from '@/constants/constants';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@clerk/clerk-expo';
-import { ChevronRight, Moon, Sun, Shield, HelpCircle } from '@tamagui/lucide-icons';
-import React from 'react';
+import { ChevronRight, Moon, Sun, Shield, HelpCircle, Bell } from '@tamagui/lucide-icons';
+import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Avatar, Card, H1, H2, ScrollView, Separator, Switch, Text, XStack, YStack } from 'tamagui';
+import { Avatar, H1, H2, ScrollView, Separator, Switch, Text, XStack, YStack, Sheet, Button } from 'tamagui';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface MenuItemProps {
   icon: any;
+  iconColor?: string;
+  iconBg?: string;
   title: string;
   subtitle?: string;
   isSwitch?: boolean;
@@ -20,6 +23,8 @@ interface MenuItemProps {
 
 const MenuItem = ({
   icon: Icon,
+  iconColor = '$primary',
+  iconBg = '$backgroundHover',
   title,
   subtitle,
   isSwitch = false,
@@ -36,8 +41,8 @@ const MenuItem = ({
     animation="quick"
     onPress={isSwitch ? undefined : onPress}
   >
-    <YStack p="$2" bg="$backgroundHover" borderRadius={10}>
-      <Icon size={20} color="$primary" />
+    <YStack p="$2" bg={iconBg} borderRadius={10}>
+      <Icon size={20} color={iconColor} />
     </YStack>
 
     <YStack flex={1}>
@@ -47,16 +52,23 @@ const MenuItem = ({
 
     {isSwitch ? (
       <Switch
-        size="$2"
+        size="$4"
         checked={switchValue}
         onCheckedChange={onSwitchChange}
+        bg={switchValue ? (iconColor.startsWith('$') ? '$primary' : iconColor) : '#d1d5db'}
       >
-        <Switch.Thumb animation="bouncy" bg={switchValue ? '$primary' : '$borderColor'} />
+        <Switch.Thumb animation="bouncy" bg="white" />
       </Switch>
     ) : (
       <ChevronRight size={20} color="$borderColor" />
     )}
   </XStack>
+);
+
+const SettingsGroup = ({ children }: { children: React.ReactNode }) => (
+  <YStack overflow="hidden" borderRadius={20} bg="$background" borderWidth={1} borderColor="$borderColor">
+    {children}
+  </YStack>
 );
 
 export default function SettingsScreen() {
@@ -72,48 +84,61 @@ export default function SettingsScreen() {
           <YStack p="$4" gap="$5" pb="$8">
 
             {/* Header */}
-            <YStack mt="$2">
+            <YStack mt="$2" gap="$4">
               <H1 fontFamily="$heading" size="$8" color="$color">Paramètres</H1>
+              
+              {/* Profile Card avec Gradient */}
+              <YStack 
+                borderRadius={24} 
+                overflow="hidden" 
+                elevation="$4"
+                shadowColor="$shadowColor"
+                shadowRadius={10}
+              >
+                <LinearGradient
+                  colors={['#4f46e5', '#818cf8']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: 20 }}
+                >
+                  <XStack gap="$4" alignItems="center">
+                    <Avatar circular size="$8" borderWidth={2} borderColor="white">
+                      <Avatar.Image src={user?.imageUrl} />
+                      <Avatar.Fallback bg="$blue8" />
+                    </Avatar>
+                    <YStack flex={1}>
+                      <H2 fontFamily="$heading" size="$6" color="white">
+                        {user?.fullName || 'Utilisateur'}
+                      </H2>
+                      <Text fontSize={14} color="rgba(255,255,255,0.8)" numberOfLines={1}>
+                        {user?.primaryEmailAddress?.emailAddress}
+                      </Text>
+                    </YStack>
+                  </XStack>
+                </LinearGradient>
+              </YStack>
             </YStack>
 
-            {/* Profile Card */}
-            <Card elevate p="$4" borderRadius={24} bg="$background" animation="lazy" bordered borderColor="$borderColor">
-              <XStack gap="$4" alignItems="center">
-                <Avatar circular size="$6">
-                  <Avatar.Image src={user?.imageUrl} />
-                  <Avatar.Fallback bg="$primary" />
-                </Avatar>
-                <YStack flex={1}>
-                  <H2 fontFamily="$heading" size="$5" color="$color">
-                    {user?.fullName || 'Utilisateur'}
-                  </H2>
-                  <Text fontSize={14} color="$color" opacity={0.6} numberOfLines={1}>
-                    {user?.primaryEmailAddress?.emailAddress}
-                  </Text>
-                </YStack>
-              </XStack>
-            </Card>
 
             {/* General Section */}
             <YStack gap="$2">
-              <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">
-                Général
-              </Text>
+              <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">Apparence</Text>
               
-              {/* Notifications Settings Component */}
-              <NotificationSettings />
-
-              {/* Theme Card */}
-              <Card elevate overflow="hidden" borderRadius={20} bg="$background" bordered borderColor="$borderColor" mt="$2">
+              <SettingsGroup>
                 <MenuItem
                   icon={isDark ? Moon : Sun}
+                  iconColor={isDark ? '$purple10' : '$yellow10'}
+                  iconBg={isDark ? '$purple4' : '$yellow4'}
                   title="Mode Sombre"
                   subtitle={isSystemTheme ? 'Automatique (Système)' : (isDark ? 'Activé' : 'Désactivé')}
                   isSwitch
                   switchValue={isDark}
                   onSwitchChange={toggleTheme}
                 />
-              </Card>
+              </SettingsGroup>
+
+              {/* Notifications Settings Component */}
+              <NotificationSettings />
             </YStack>
 
             {/* Support Section (Ajouté pour compléter la page) */}
@@ -121,11 +146,21 @@ export default function SettingsScreen() {
               <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">
                 Support
               </Text>
-              <Card elevate overflow="hidden" borderRadius={20} bg="$background" bordered borderColor="$borderColor">
-                <MenuItem icon={HelpCircle} title="Aide & FAQ" />
+              <SettingsGroup>
+                <MenuItem 
+                  icon={HelpCircle} 
+                  iconColor="$green10"
+                  iconBg="$green4"
+                  title="Aide & FAQ" 
+                />
                 <Separator borderColor="$borderColor" />
-                <MenuItem icon={Shield} title="Confidentialité" />
-              </Card>
+                <MenuItem 
+                  icon={Shield} 
+                  iconColor="$blue10"
+                  iconBg="$blue4"
+                  title="Confidentialité" 
+                />
+              </SettingsGroup>
             </YStack>
 
             {/* Logout Zone */}
