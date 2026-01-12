@@ -1,9 +1,10 @@
 import { SignOutButton } from '@/components/SignOutButton';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { APP_NAME } from '@/constants/constants';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@clerk/clerk-expo';
-import { Bell, ChevronRight, Moon, Sun, Shield, HelpCircle } from '@tamagui/lucide-icons';
-import React, { useState } from 'react';
+import { ChevronRight, Moon, Sun, Shield, HelpCircle } from '@tamagui/lucide-icons';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, Card, H1, H2, ScrollView, Separator, Switch, Text, XStack, YStack } from 'tamagui';
 
@@ -62,9 +63,6 @@ export default function SettingsScreen() {
   const { user } = useUser();
   const { theme, toggleTheme, isSystemTheme } = useAppTheme();
 
-  // État local pour simuler les notifications (car ce n'est pas lié au thème)
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-
   const isDark = theme === 'dark';
 
   return (
@@ -101,19 +99,12 @@ export default function SettingsScreen() {
               <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">
                 Général
               </Text>
-              <Card elevate overflow="hidden" borderRadius={20} bg="$background" bordered borderColor="$borderColor">
-                {/* Switch Notifications : utilise son propre état */}
-                <MenuItem
-                  icon={Bell}
-                  title="Notifications"
-                  subtitle="Rappels quotidiens"
-                  isSwitch
-                  switchValue={notificationsEnabled}
-                  onSwitchChange={setNotificationsEnabled}
-                />
-                <Separator borderColor="$borderColor" />
+              
+              {/* Notifications Settings Component */}
+              <NotificationSettings />
 
-                {/* Switch Thème : utilise le contexte */}
+              {/* Theme Card */}
+              <Card elevate overflow="hidden" borderRadius={20} bg="$background" bordered borderColor="$borderColor" mt="$2">
                 <MenuItem
                   icon={isDark ? Moon : Sun}
                   title="Mode Sombre"

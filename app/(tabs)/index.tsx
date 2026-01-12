@@ -24,15 +24,19 @@ import {
   Flame
 } from '@tamagui/lucide-icons';
 import { useProgressData } from '@/hooks/useProgressData';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { TOTAL_TARGET_YEAR } from '@/constants/constants';
 
 export default function DashboardScreen() {
   const { todayIndex, updateDay, stats, isLoading, error } = useProgressData();
+  const { sendCelebration, sendStreakReminder } = usePushNotifications();
   const [localInputValue, setLocalInputValue] = useState('');
-  const theme = useTheme(); // Pour accéder aux couleurs hexadécimales si besoin
+  const [previousDone, setPreviousDone] = useState(0);
+  const theme = useTheme();
 
   useEffect(() => {
     setLocalInputValue(stats.todayDone?.toString() || '');
+    setPreviousDone(stats.todayDone || 0);
   }, [stats.todayDone]);
 
   const handleQuickAdd = (amount: number) => {
@@ -44,7 +48,23 @@ export default function DashboardScreen() {
 
   const handleChangeText = (text: string) => {
     setLocalInputValue(text);
-    if (todayIndex !== -1) updateDay(todayIndex, text);
+    if (todayIndex !== -1) {
+      updateDay(todayIndex, text);
+      
+      const newValue = parseInt(text) || 0;
+      
+      // Célébration si objectif atteint pour la première fois
+      if (newValue >= stats.todayTarget && previousDone < stats.todayTarget) {
+        sendCelebration(`🎉 Objectif du jour validé ! Vous avez fait ${newValue} pompes !`);
+      }
+      
+      // Rappel de streak si série en cours
+      if (stats.daysCompleted >= 3 && newValue === 0) {
+        sendStreakReminder(stats.daysCompleted);
+      }
+      
+      setPreviousDone(newValue);
+    }
   };
 
   // Utiliser stats.totalDone au lieu de recalculer
