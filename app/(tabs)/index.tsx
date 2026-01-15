@@ -27,6 +27,7 @@ import {
 import { useProgressData } from '@/hooks/useProgressData';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from '@/constants/constants';
+import { ProgressChart } from '@/components/ProgressChart';
 
 export default function DashboardScreen() {
   const { days, todayIndex, updateDay, stats, isLoading, error } = useProgressData();
@@ -98,7 +99,6 @@ export default function DashboardScreen() {
   }, [days]);
 
   // Utiliser stats.totalDone au lieu de recalculer
-  const progressPercent = Math.min(100, Math.max(0, (stats.totalDone / TOTAL_TARGET_YEAR) * 100));
   const isAhead = stats.ecart >= 0;
   const dayProgress = stats.todayTarget > 0 
     ? Math.min(100, ((stats.todayDone || 0) / stats.todayTarget) * 100) 
@@ -260,16 +260,17 @@ export default function DashboardScreen() {
             <YStack gap="$2" alignItems="center">
               <BarChart3 size={24} color="$primary" />
               <Text fontSize={11} fontWeight="800" color="$primary" textTransform="uppercase">
-                Total 2026
+                Total - Restant
               </Text>
               <H2 fontFamily="$heading" size="$5">
-                {stats.totalDone.toLocaleString()}/{(TOTAL_TARGET_YEAR - stats.totalDone).toLocaleString()}
+                {stats.totalDone.toLocaleString()} - {(TOTAL_TARGET_YEAR - stats.totalDone).toLocaleString()}
               </H2>
             </YStack>
           </Card>
         </XStack>
 
-        <Card elevate p="$4" borderRadius={24} bg="$background" animation="lazy">
+        <Card elevate p="$4" borderRadius={24} bg="$background" animation="lazy" 
+            borderTopWidth={4} borderTopColor="$warning">
           <YStack gap="$3">
             <XStack alignItems="center" gap="$2">
                 <Calendar size={16} color="$warning" />
@@ -304,22 +305,22 @@ export default function DashboardScreen() {
         </Card>
 
         <XStack gap="$3">
-          <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" animation="bouncy" animationDelay={100}>
+          <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" borderTopWidth={4} borderTopColor="$primary" animation="bouncy" animationDelay={100}>
             <YStack gap="$2">
               <XStack alignItems="center" gap="$2">
-                <Calendar size={16} color="$warning" />
+                <Calendar size={16} color="$primary" />
                 <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Jour de l'année</Text>
               </XStack>
               <Text fontFamily="$heading" fontSize={20}>
                 {todayIndex} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>/ {DAYS_IN_YEAR}</Text>
               </Text>
               <Progress value={(todayIndex / DAYS_IN_YEAR) * 100} size="$1" bg="$backgroundHover">
-                <Progress.Indicator animation="bouncy" bg="$warning" />
+                <Progress.Indicator animation="bouncy" bg="$primary" />
               </Progress>
             </YStack>
           </Card>
 
-          <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" animation="bouncy" animationDelay={200}>
+          <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" borderTopWidth={4} borderTopColor="$danger" animation="bouncy" animationDelay={200}>
              <YStack gap="$2">
               <XStack alignItems="center" gap="$2">
                 <Flame size={16} color="$danger" />
@@ -335,37 +336,8 @@ export default function DashboardScreen() {
           </Card>
         </XStack>
 
-        {/* 5. JAUGE ANNUELLE */}
-        <Card elevate p="$5" borderRadius={24} bg="$background" animation="lazy">
-          <YStack gap="$3">
-            <XStack justifyContent="space-between" alignItems="center">
-              <H2 fontFamily="$heading" size="$4">Progression Annuelle</H2>
-              <Target size={22} color="$primary" />
-            </XStack>
-            
-            <H1 fontFamily="$heading" size="$7" color="$primary">
-              {stats.percent}%
-            </H1>
-            
-            <YStack height={14} bg="$brandSoft" borderRadius={100} overflow="hidden">
-              <YStack 
-                height="100%" 
-                width={`${progressPercent}%`}
-                bg="$primary"
-                borderRadius={100}
-              />
-            </YStack>
-            
-            <XStack justifyContent="space-between">
-              <Text fontSize={12} color="$color" opacity={0.6}>
-                {stats.totalDone.toLocaleString()} faites
-              </Text>
-              <Text fontSize={12} color="$color" opacity={0.6}>
-                {(TOTAL_TARGET_YEAR - stats.totalDone).toLocaleString()} restantes
-              </Text>
-            </XStack>
-          </YStack>
-        </Card>
+        {/* 5. GRAPHIQUE DE PROGRESSION */}
+        <ProgressChart days={days} todayIndex={todayIndex} />
 
       </YStack>
     </ScrollView>
