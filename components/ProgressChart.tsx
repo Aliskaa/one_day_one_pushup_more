@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
-import { YStack, XStack, Text, Card, useTheme } from 'tamagui';
-import { LineChart } from 'react-native-gifted-charts';
 import { DayDataType } from '@/types/day';
-import { Calendar } from '@tamagui/lucide-icons';
+import { BarChart3 } from '@tamagui/lucide-icons';
+import React, { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
+import { Card, Text, useTheme, XStack, YStack } from 'tamagui';
 
 interface ProgressChartProps {
   days: DayDataType[];
@@ -63,7 +63,7 @@ export function ProgressChart({ days, todayIndex }: ProgressChartProps) {
         <YStack gap="$3">
           <XStack justifyContent="space-between" alignItems="center">
             <XStack alignItems="center" gap="$2">
-              <Calendar size={16} color="$success" />
+              <BarChart3 size={16} color="$success" />
               <Text fontSize={14} fontWeight="600" color="$color" opacity={0.7}>Progression</Text>
             </XStack>
             <XStack 
