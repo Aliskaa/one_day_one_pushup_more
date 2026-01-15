@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TextInput } from 'react-native';
 import { 
   YStack, 
@@ -21,14 +21,15 @@ import {
   BarChart3, 
   Calendar, 
   Target,
-  Flame
+  Flame,
+  Check
 } from '@tamagui/lucide-icons';
 import { useProgressData } from '@/hooks/useProgressData';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { TOTAL_TARGET_YEAR } from '@/constants/constants';
+import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from '@/constants/constants';
 
 export default function DashboardScreen() {
-  const { todayIndex, updateDay, stats, isLoading, error } = useProgressData();
+  const { days, todayIndex, updateDay, stats, isLoading, error } = useProgressData();
   const { sendCelebration, sendStreakReminder } = usePushNotifications();
   const [localInputValue, setLocalInputValue] = useState('');
   const [previousDone, setPreviousDone] = useState(0);
@@ -66,6 +67,35 @@ export default function DashboardScreen() {
       setPreviousDone(newValue);
     }
   };
+  const weekProgress = useMemo(() => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Dimanche
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    
+    const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+    const result = [];
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + mondayOffset + i);
+      
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const dayData = days.find(d => d.dateStr === dateStr);
+      
+      const isToday = i === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+      const isFuture = date > today && !isToday;
+      const isDone = dayData?.done !== null && dayData?.done !== undefined && dayData.done >= (dayData.target || 1);
+      const isMissed = dayData?.done !== null && dayData?.done !== undefined && dayData.done < (dayData.target || 1);
+      
+      result.push({
+        day: weekDays[i],
+        status: isFuture ? 'future' : (isDone ? 'success' : (isMissed ? 'failed' : 'pending')),
+        isToday
+      });
+    }
+    
+    return result;
+  }, [days]);
 
   // Utiliser stats.totalDone au lieu de recalculer
   const progressPercent = Math.min(100, Math.max(0, (stats.totalDone / TOTAL_TARGET_YEAR) * 100));
@@ -214,7 +244,7 @@ export default function DashboardScreen() {
             <YStack gap="$2" alignItems="center">
                {isAhead ? <TrendingUp size={24} color="$success" /> : <TrendingDown size={24} color="$danger" />}
               <Text fontSize={11} fontWeight="800" color={isAhead ? '$success' : '$danger'} textTransform="uppercase">
-                {isAhead ? 'En Banque' : 'Dette'}
+                {isAhead ? 'En Avance' : 'En Retard'}
               </Text>
               <H2 fontFamily="$heading" size="$5">
                 {stats.ecart > 0 ? '+' : ''}{stats.ecart}
@@ -233,23 +263,57 @@ export default function DashboardScreen() {
                 Total 2026
               </Text>
               <H2 fontFamily="$heading" size="$5">
-                {stats.totalDone}
+                {stats.totalDone.toLocaleString()}/{(TOTAL_TARGET_YEAR - stats.totalDone).toLocaleString()}
               </H2>
             </YStack>
           </Card>
         </XStack>
+
+        <Card elevate p="$4" borderRadius={24} bg="$background" animation="lazy">
+          <YStack gap="$3">
+            <XStack alignItems="center" gap="$2">
+                <Calendar size={16} color="$warning" />
+                <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Cette semaine</Text>
+              </XStack>
+            
+            <XStack justifyContent="space-between" gap="$2">
+              {weekProgress.map((day, idx) => (
+                <YStack key={idx} alignItems="center" gap="$2" flex={1}>
+                  <Text fontSize={10} fontWeight="700" color="$color" opacity={0.6}>
+                    {day.day}
+                  </Text>
+                  <YStack
+                    width={32}
+                    height={32}
+                    borderRadius={16}
+                    bg={day.status === 'success' ? '$success' : day.status === 'failed' ? '$red4' : '$backgroundHover'}
+                    alignItems="center"
+                    justifyContent="center"
+                    borderWidth={day.isToday ? 2 : 0}
+                    borderColor="$color"
+                  >
+                    {day.status === 'success' && <Check size={16} color="white" />}
+                    {day.status === 'failed' && <Text fontSize={12}>❌</Text>}
+                    {day.status === 'pending' && <Text fontSize={10} opacity={0.5}>-</Text>}
+                    {day.status === 'future' && <Text fontSize={10} opacity={0.5}>-</Text>}
+                  </YStack>
+                </YStack>
+              ))}
+            </XStack>
+          </YStack>
+        </Card>
 
         <XStack gap="$3">
           <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" animation="bouncy" animationDelay={100}>
             <YStack gap="$2">
               <XStack alignItems="center" gap="$2">
                 <Calendar size={16} color="$warning" />
-                <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Semaine</Text>
+                <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Jour de l'année</Text>
               </XStack>
               <Text fontFamily="$heading" fontSize={20}>
-                {stats.daysCompleted} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>jours</Text>
+                {todayIndex} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>/ {DAYS_IN_YEAR}</Text>
               </Text>
-              <Progress value={(stats.daysCompleted / 7) * 100} size="$1" bg="$backgroundHover">
+              <Progress value={(todayIndex / DAYS_IN_YEAR) * 100} size="$1" bg="$backgroundHover">
                 <Progress.Indicator animation="bouncy" bg="$warning" />
               </Progress>
             </YStack>
