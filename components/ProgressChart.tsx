@@ -49,7 +49,9 @@ export function ProgressChart({ days, todayIndex }: ProgressChartProps) {
       }
     });
 
-    return { theoreticalData, realData, maxValue: theoreticalCumul };
+    const maxVal = Math.max(theoreticalCumul, realCumul);
+
+    return { theoreticalData, realData, maxValue: maxVal };
   }, [days, todayIndex, theme]);
 
   const isAhead = useMemo(() => {
