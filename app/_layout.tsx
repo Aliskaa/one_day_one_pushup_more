@@ -14,6 +14,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
 import { tamaguiConfig } from '../tamagui.config';
 import { tokenCache } from '../utils/cache';
+import { TrainingProvider } from '@/contexts/TrainingContext';
 
 function AppContent() {
   const { theme, isLoading } = useAppTheme();
@@ -60,9 +61,11 @@ export default function RootLayout() {
             <ClerkLoaded>
               <ModalProvider>
                 <ThemeProvider>
+                  <TrainingProvider>
                   <AuthGuard>
                     <AppContent />
                   </AuthGuard>
+                  </TrainingProvider>
                 </ThemeProvider>
               </ModalProvider>
             </ClerkLoaded>

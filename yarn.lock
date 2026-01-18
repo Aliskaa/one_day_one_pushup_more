@@ -4014,7 +4014,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/bottom-tabs@npm:^7.4.0, @react-navigation/bottom-tabs@npm:^7.9.0":
+"@react-navigation/bottom-tabs@npm:^7.4.0":
   version: 7.9.1
   resolution: "@react-navigation/bottom-tabs@npm:7.9.1"
   dependencies:
@@ -4049,7 +4049,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/elements@npm:^2.9.3, @react-navigation/elements@npm:^2.9.4":
+"@react-navigation/elements@npm:^2.9.4":
   version: 2.9.4
   resolution: "@react-navigation/elements@npm:2.9.4"
   dependencies:
@@ -4087,7 +4087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:^7.1.6, @react-navigation/native@npm:^7.1.8":
+"@react-navigation/native@npm:^7.1.8":
   version: 7.1.27
   resolution: "@react-navigation/native@npm:7.1.27"
   dependencies:
@@ -11167,9 +11167,6 @@ __metadata:
     "@expo/metro-config": "npm:~54.0.2"
     "@expo/metro-runtime": "npm:~6.1.2"
     "@react-native-async-storage/async-storage": "npm:2.2.0"
-    "@react-navigation/bottom-tabs": "npm:^7.9.0"
-    "@react-navigation/elements": "npm:^2.9.3"
-    "@react-navigation/native": "npm:^7.1.6"
     "@tamagui/babel-plugin": "npm:^1.144.1"
     "@tamagui/cli": "npm:^1.144.1"
     "@tamagui/config": "npm:^1.144.1"

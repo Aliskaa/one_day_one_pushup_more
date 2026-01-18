@@ -22,6 +22,7 @@ import {
 import { useAuth } from '@clerk/clerk-expo';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePushNotifications } from './usePushNotifications';
+import { useTraining } from '@/contexts/TrainingContext';
 
 export interface UseAchievementsReturn {
   achievements: AchievementWithStatus[];
@@ -49,6 +50,7 @@ export const useAchievements = (
   progressMap: ProgressMapType
 ): UseAchievementsReturn => {
   const { userId } = useAuth();
+  const { trainingType } = useTraining();
   const { sendAchievementNotification } = usePushNotifications();
   
   const [unlockedBadges, setUnlockedBadges] = useState<Record<string, UnlockedAchievement>>({});
@@ -65,7 +67,7 @@ export const useAchievements = (
   // Charger les achievements depuis Firebase au démarrage
   useEffect(() => {
     const loadAchievements = async () => {
-      if (!userId) {
+      if (!userId || !trainingType) {
         setIsLoading(false);
         return;
       }
@@ -74,7 +76,7 @@ export const useAchievements = (
         setIsLoading(true);
         setError(null);
 
-        const data = await loadAchievementsFromFirebase(userId);
+        const data = await loadAchievementsFromFirebase(userId, trainingType);
         
         if (data) {
           setUnlockedBadges(data.unlockedBadges || {});
@@ -90,12 +92,12 @@ export const useAchievements = (
     };
 
     loadAchievements();
-  }, [userId]);
+  }, [userId, trainingType]);
 
   // Vérifier et débloquer les nouveaux achievements quand les stats changent
   useEffect(() => {
     const checkAndUnlock = async () => {
-      if (!userId || isLoading || days.length === 0) return;
+      if (!userId || !trainingType || isLoading || days.length === 0) return;
 
       try {
         const toUnlock = checkAchievementsToUnlock(stats, progressMap, days, unlockedBadges);
@@ -107,7 +109,7 @@ export const useAchievements = (
           const newUnlockedBadges = { ...unlockedBadges };
           
           for (const achievementId of toUnlock) {
-            await unlockAchievement(userId, achievementId, stats.totalPushups);
+            await unlockAchievement(userId, trainingType, achievementId, stats.totalPushups);
             
             newUnlockedBadges[achievementId] = {
               achievementId,
@@ -135,7 +137,7 @@ export const useAchievements = (
           setNewlyUnlocked(prev => [...prev, ...toUnlock]);
           
           // Sauvegarder les stats mises à jour
-          await saveAchievementsToFirebase(userId, newUnlockedBadges, stats);
+          await saveAchievementsToFirebase(userId, trainingType, newUnlockedBadges, stats);
         }
       } catch (err) {
         console.error('❌ Erreur lors de la vérification des achievements:', err);
@@ -162,11 +164,11 @@ export const useAchievements = (
 
   // Rafraîchir les achievements depuis Firebase
   const refreshAchievements = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || !trainingType) return;
 
     try {
       setIsLoading(true);
-      const data = await loadAchievementsFromFirebase(userId);
+      const data = await loadAchievementsFromFirebase(userId, trainingType);
       
       if (data) {
         setUnlockedBadges(data.unlockedBadges || {});
@@ -176,7 +178,7 @@ export const useAchievements = (
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [userId, trainingType]);
 
   return {
     achievements,

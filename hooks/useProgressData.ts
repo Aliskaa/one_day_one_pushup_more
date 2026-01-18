@@ -16,6 +16,7 @@ import {
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useToastController } from '@tamagui/toast';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTraining } from '@/contexts/TrainingContext';
 
 export interface UseProgressDataReturn {
   days: DayDataType[];
@@ -38,6 +39,7 @@ export const useProgressData = (): UseProgressDataReturn => {
   const { userId } = useAuth();
   const { user } = useUser();
   const toast = useToastController();
+  const { trainingType } = useTraining();
   
   const [days, setDays] = useState<DayDataType[]>([]);
   const [progressMap, setProgressMap] = useState<ProgressMapType>({});
@@ -60,7 +62,7 @@ export const useProgressData = (): UseProgressDataReturn => {
   // Chargement initial des données
   useEffect(() => {
     const loadData = async () => {
-      if (!userId) {
+      if (!userId || !trainingType) {
         setIsLoading(false);
         return;
       }
@@ -73,7 +75,7 @@ export const useProgressData = (): UseProgressDataReturn => {
         const generatedDays = generateYearData();
 
         // 2. Charger les données depuis Firebase
-        const savedProgress = await loadProgressFromFirebase(userId);
+        const savedProgress = await loadProgressFromFirebase(userId, trainingType);
 
         // 3. Fusionner les données
         const mergedDays = mergeDataWithProgress(generatedDays, savedProgress);
@@ -98,13 +100,13 @@ export const useProgressData = (): UseProgressDataReturn => {
     };
 
     loadData();
-  }, [userId]);
+  }, [userId, trainingType]);
 
   // Écoute des changements en temps réel (synchronisation multi-appareils)
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !trainingType) return;
 
-    const unsubscribe = subscribeToProgress(userId, (newProgressMap) => {
+    const unsubscribe = subscribeToProgress(userId, trainingType, (newProgressMap) => {
       setProgressMap(newProgressMap);
       
       // Mettre à jour les days avec les nouvelles données
@@ -117,11 +119,11 @@ export const useProgressData = (): UseProgressDataReturn => {
     });
 
     return () => unsubscribe();
-  }, [userId]);
+  }, [userId, trainingType]);
 
   // Fonction de sauvegarde avec debounce
   const debouncedSave = useCallback((updates: ProgressMapType) => {
-    if (!userId) return;
+    if (!userId || !trainingType) return;
 
     // Annuler le timeout précédent
     if (saveTimeoutRef.current) {
@@ -135,7 +137,7 @@ export const useProgressData = (): UseProgressDataReturn => {
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         const allUpdates = { ...progressMap, ...pendingUpdatesRef.current };
-        await saveProgressToFirebase(userId, allUpdates);
+        await saveProgressToFirebase(userId, trainingType, allUpdates);
         pendingUpdatesRef.current = {};
         console.log('💾 Sauvegarde effectuée');
       } catch (err) {
@@ -143,7 +145,7 @@ export const useProgressData = (): UseProgressDataReturn => {
         setError('Erreur de sauvegarde');
       }
     }, UI_CONSTANTS.DEBOUNCE_SAVE_DELAY);
-  }, [userId, progressMap]);
+  }, [userId, trainingType, progressMap]);
 
   // Mise à jour d'un jour
   const updateDay = useCallback((index: number, value: string) => {
@@ -179,11 +181,11 @@ export const useProgressData = (): UseProgressDataReturn => {
 
   // Rafraîchir les données
   const refreshData = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || !trainingType) return;
 
     try {
       setIsLoading(true);
-      const savedProgress = await loadProgressFromFirebase(userId);
+      const savedProgress = await loadProgressFromFirebase(userId, trainingType);
       const generatedDays = generateYearData();
       const mergedDays = mergeDataWithProgress(generatedDays, savedProgress);
       
@@ -195,7 +197,7 @@ export const useProgressData = (): UseProgressDataReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [userId, trainingType]);
 
   // Calcul des statistiques
   const stats = (() => {

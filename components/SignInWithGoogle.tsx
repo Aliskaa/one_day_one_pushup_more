@@ -33,8 +33,6 @@ export default function Page() {
   const onPress = useCallback(async () => {
     try {
       const linkedUrl = Linking.createURL("/oauth-native-callback", { scheme: "onedayonepushupmore" }); 
-      
-      console.log("Redirect URL générée :", linkedUrl);
 
       // Start the authentication process by calling `startSSOFlow()`
       const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
@@ -79,8 +77,9 @@ export default function Page() {
       borderColor="$borderColor"
       borderWidth={1}
       borderRadius={14}
+      m="$5"
       onPress={onPress}
-      icon={<Chrome size={20} color="#EA4335" />} // Couleur rouge Google classique
+      icon={<Chrome size={20} color="#EA4335" />}
       animation="bouncy"
       pressStyle={{ bg: '$backgroundHover', scale: 0.98 }}
     >

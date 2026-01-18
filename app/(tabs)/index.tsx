@@ -1,33 +1,37 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { TextInput } from 'react-native';
-import { 
-  YStack, 
-  XStack, 
-  Text, 
-  H1, 
-  H2,
-  Card, 
-  ScrollView, 
-  Button, 
-  Spinner,
-  useTheme,
-  Progress
-} from 'tamagui';
-import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  Activity, 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  Calendar, 
-  Target,
-  Flame,
-  Check
-} from '@tamagui/lucide-icons';
+import { ProgressChart } from '@/components/ProgressChart';
+import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from '@/constants/constants';
+import { useTraining } from '@/contexts/TrainingContext';
 import { useProgressData } from '@/hooks/useProgressData';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from '@/constants/constants';
-import { ProgressChart } from '@/components/ProgressChart';
+import {
+  Activity,
+  ArrowLeft,
+  BarChart3,
+  Calendar,
+  Check,
+  Flame,
+  TrendingDown,
+  TrendingUp
+} from '@tamagui/lucide-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
+import { TextInput, Image } from 'react-native';
+import {
+  Button,
+  Card,
+  H1,
+  H2,
+  Paragraph,
+  Progress,
+  ScrollView,
+  Spinner,
+  Text,
+  useTheme,
+  XStack,
+  YStack
+} from 'tamagui';
+import { TRAINING_LOGOS } from '@/constants/assets';
 
 export default function DashboardScreen() {
   const { days, todayIndex, updateDay, stats, isLoading, error } = useProgressData();
@@ -35,6 +39,8 @@ export default function DashboardScreen() {
   const [localInputValue, setLocalInputValue] = useState('');
   const [previousDone, setPreviousDone] = useState(0);
   const theme = useTheme();
+  const router = useRouter();
+  const { trainingType } = useTraining();
 
   useEffect(() => {
     setLocalInputValue(stats.todayDone?.toString() || '');
@@ -125,13 +131,20 @@ export default function DashboardScreen() {
       <YStack p="$4" gap="$4" pb="$8">
         
         {/* 1. HEADER */}
-        <YStack gap="$1" mb="$2">
-          <Text fontSize={14} color="$color" opacity={0.6} fontWeight="600" textTransform="uppercase" letterSpacing={1}>
-            {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-          </Text>
-          <H1 fontFamily="$heading" size="$6" color="$color">
-            Défi PushUp 2026 💪
-          </H1>
+        <YStack gap="$3" mb="$2" alignItems="center">
+          <Image 
+            source={TRAINING_LOGOS[trainingType || 'pushup']}
+            style={{ width: 80, height: 80 }}
+            resizeMode="contain"
+          />
+          <YStack alignItems="center" gap="$1">
+            <Text fontSize={14} color="$color" opacity={0.6} fontWeight="600" textTransform="uppercase" letterSpacing={1}>
+              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </Text>
+            <H1 fontFamily="$heading" size="$6" color="$color">
+              Défi {trainingType === 'pushup' ? 'Pompes' : 'Crunch'} 2026
+            </H1>
+          </YStack>
         </YStack>
 
         {/* 2. HERO CARD */}
@@ -165,7 +178,7 @@ export default function DashboardScreen() {
                   {stats.todayTarget}
                 </H1>
                 <Text color="rgba(255,255,255,0.8)" fontSize={16} fontWeight="600" letterSpacing={2}>
-                  POMPES
+                  {trainingType === 'pushup' ? 'POMPES' : 'CRUNCH'}
                 </Text>
               </YStack>
 

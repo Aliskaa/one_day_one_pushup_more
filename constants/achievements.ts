@@ -3,9 +3,7 @@
  */
 
 import { Achievement } from '@/types/achievement';
-
-// Objectif annuel: 1+2+3+...+365 = 66795 pompes
-export const ANNUAL_GOAL = 66795;
+import { DAYS_IN_YEAR } from './constants';
 
 export const ACHIEVEMENTS: Achievement[] = [
   // ===== CATÉGORIE: RÉGULARITÉ (STREAKS) =====
@@ -64,7 +62,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'pushups_100',
     title: 'Première centaine',
-    description: '100 pompes au total',
+    description: '100 répétitions au total',
     category: 'volume',
     icon: 'Dumbbell',
     color: '#06b6d4', // cyan
@@ -73,7 +71,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'pushups_500',
-    title: '500 pompes',
+    title: '500 répétitions',
     description: 'Demi-millier',
     category: 'volume',
     icon: 'Target',
@@ -83,7 +81,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'pushups_1000',
-    title: '1000 pompes',
+    title: '1000 répétitions',
     description: 'Millénaire',
     category: 'volume',
     icon: 'Milestone',
@@ -93,7 +91,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'pushups_5000',
-    title: '5000 pompes',
+    title: '5000 répétitions',
     description: 'Fusée musculaire',
     category: 'volume',
     icon: 'Rocket',
@@ -103,7 +101,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'pushups_10000',
-    title: '10 000 pompes',
+    title: '10 000 répétitions',
     description: 'Légende',
     category: 'volume',
     icon: 'Trophy',
@@ -113,7 +111,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'pushups_20000',
-    title: '20 000 pompes',
+    title: '20 000 répétitions',
     description: 'Montagne gravie',
     category: 'volume',
     icon: 'Mountain',
@@ -123,7 +121,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'pushups_30000',
-    title: '30 000 pompes',
+    title: '30 000 répétitions',
     description: 'Volcan conquis',
     category: 'volume',
     icon: 'Flame',
@@ -133,7 +131,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'pushups_50000',
-    title: '50 000 pompes',
+    title: '50 000 répétitions',
     description: 'Tour du monde',
     category: 'volume',
     icon: 'Globe',
@@ -208,7 +206,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'comeback_kid',
     title: 'Comeback kid',
-    description: 'Rattraper une dette de +10',
+    description: 'Rattraper un retard de +10',
     category: 'discipline',
     icon: 'RotateCcw',
     color: '#8b5cf6', // violet
@@ -218,7 +216,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'heroic_comeback',
     title: 'Rattrapage héroïque',
-    description: 'Rattraper +50 pompes de dette',
+    description: 'Rattraper un retard de +50',
     category: 'rare',
     icon: 'Swords',
     color: '#ef4444', // red
@@ -234,7 +232,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'annual',
     icon: 'Target',
     color: '#06b6d4', // cyan
-    requirement: Math.floor(ANNUAL_GOAL * 0.25),
+    requirement: Math.floor(DAYS_IN_YEAR * 0.25),
     requirementType: 'total_pushups',
   },
   {
@@ -244,7 +242,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'annual',
     icon: 'Medal',
     color: '#a855f7', // purple
-    requirement: Math.floor(ANNUAL_GOAL * 0.5),
+    requirement: Math.floor(DAYS_IN_YEAR * 0.5),
     requirementType: 'total_pushups',
   },
   {
@@ -254,17 +252,17 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'annual',
     icon: 'Award',
     color: '#f97316', // orange
-    requirement: Math.floor(ANNUAL_GOAL * 0.75),
+    requirement: Math.floor(DAYS_IN_YEAR * 0.75),
     requirementType: 'total_pushups',
   },
   {
     id: 'annual_goal',
     title: 'Objectif Annuel',
-    description: '66 795 pompes - Challenge complété !',
+    description: '66 795 répétitions - Challenge complété !',
     category: 'annual',
     icon: 'Trophy',
     color: '#eab308', // gold
-    requirement: ANNUAL_GOAL,
+    requirement: DAYS_IN_YEAR,
     requirementType: 'total_pushups',
   },
   {
@@ -274,7 +272,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'annual',
     icon: 'Gem',
     color: '#ec4899', // pink
-    requirement: ANNUAL_GOAL + 1,
+    requirement: DAYS_IN_YEAR + 1,
     requirementType: 'total_pushups',
   },
 

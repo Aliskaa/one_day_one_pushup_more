@@ -1,10 +1,8 @@
 import Logo from "@/components/Logo";
 import SignInWithGoogle from "@/components/SignInWithGoogle";
-import { APP_NAME } from "@/constants/constants";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  Card,
   H1,
   Paragraph,
   ScrollView,
@@ -33,7 +31,7 @@ export default function Page() {
 
               <YStack alignItems="center" mt="$4">
                 <H1 fontFamily="$heading" size="$8" color="$primary" textAlign="center">
-                  Bon retour
+                  Bienvenue
                 </H1>
                 <Paragraph
                   color="$color"
@@ -47,22 +45,7 @@ export default function Page() {
             </YStack>
 
             {/* 2. MAIN LOGIN CARD */}
-            <Card
-              elevate
-              size="$4"
-              bordered
-              borderColor="$borderColor"
-              borderRadius={24}
-              bg="$background"
-              p="$5"
-              gap="$4"
-              animation="lazy"
-              enterStyle={{ opacity: 0, scale: 0.95, y: 10 }}
-            >
-              <YStack>
-                <SignInWithGoogle />
-              </YStack>
-            </Card>
+            <SignInWithGoogle />
           </YStack>
         </ScrollView>
       </SafeAreaView>

@@ -37,12 +37,6 @@ export interface UnlockedAchievement {
   progress: number;       // Valeur atteinte au moment du débloquage
 }
 
-export interface UserAchievementsDoc {
-  unlockedBadges: Record<string, UnlockedAchievement>;
-  stats: AchievementStats;
-  lastUpdated: Date;
-}
-
 export interface AchievementStats {
   totalPushups: number;
   currentStreak: number;

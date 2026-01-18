@@ -1,16 +1,19 @@
 import { Calendar } from '@tamagui/lucide-icons';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { H2, Spinner, Text, YStack } from 'tamagui';
 
 import { DayRow } from '@/components/DayRow';
 import { TodayButton } from '@/components/TodayButton';
 import { UI_CONSTANTS } from '@/constants/constants';
 import { useProgressData } from '@/hooks/useProgressData';
+import { useTraining } from '@/contexts/TrainingContext';
 import { DayDataType } from '@/types/day';
+import { TRAINING_LOGOS } from '@/constants/assets';
 
 export default function DaysListScreen() {
   const { days, todayIndex, updateDay, isLoading, error } = useProgressData();
+  const { trainingType } = useTraining();
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -31,18 +34,20 @@ export default function DaysListScreen() {
   }, [todayIndex]);
 
   const ListHeader = () => (
-    <YStack px="$4" pt="$6" pb="$4" gap="$2">
-      <YStack flexDirection="row" alignItems="center" gap="$3">
-        <YStack bg="$brandSoft" p="$2" borderRadius="$4">
-             <Calendar size={24} color="$primary" />
-        </YStack>
+    <YStack px="$4" pt="$6" pb="$4" gap="$3" alignItems="center">
+      <Image 
+        source={TRAINING_LOGOS[trainingType || 'pushup']}
+        style={{ width: 60, height: 60 }}
+        resizeMode="contain"
+      />
+      <YStack alignItems="center" gap="$1">
         <H2 fontFamily="$heading" size="$6" color="$color">
           Mon Calendrier
         </H2>
+        <Text fontSize={15} color="$color" opacity={0.6} textAlign="center">
+          365 jours de discipline, une {trainingType === 'pushup' ? 'pompe' : 'crunch'} à la fois.
+        </Text>
       </YStack>
-      <Text fontSize={15} color="$color" opacity={0.6} ml="$1">
-        365 jours de discipline, une pompe à la fois.
-      </Text>
     </YStack>
   );
 

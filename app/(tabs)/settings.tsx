@@ -2,12 +2,16 @@ import { SignOutButton } from '@/components/SignOutButton';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { APP_NAME } from '@/constants/constants';
 import { useAppTheme } from '@/contexts/ThemeContext';
+import { useTraining } from '@/contexts/TrainingContext';
 import { useUser } from '@clerk/clerk-expo';
-import { ChevronRight, Moon, Sun, Shield, HelpCircle, Bell } from '@tamagui/lucide-icons';
+import { ChevronRight, Moon, Sun, Shield, HelpCircle, Bell, Dumbbell } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, H1, H2, ScrollView, Separator, Switch, Text, XStack, YStack, Sheet, Button } from 'tamagui';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { Image } from 'react-native';
+import { TRAINING_LOGOS } from '@/constants/assets';
 
 interface MenuItemProps {
   icon: any;
@@ -74,6 +78,9 @@ const SettingsGroup = ({ children }: { children: React.ReactNode }) => (
 export default function SettingsScreen() {
   const { user } = useUser();
   const { theme, toggleTheme, isSystemTheme } = useAppTheme();
+  const { trainingType, selectTraining } = useTraining();
+  const router = useRouter();
+  const [showTrainingSheet, setShowTrainingSheet] = useState(false);
 
   const isDark = theme === 'dark';
 
@@ -119,6 +126,22 @@ export default function SettingsScreen() {
               </YStack>
             </YStack>
 
+
+            {/* Training Section */}
+            <YStack gap="$2">
+              <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">Entraînement</Text>
+              
+              <SettingsGroup>
+                <MenuItem
+                  icon={Dumbbell}
+                  iconColor="$orange10"
+                  iconBg="$orange4"
+                  title="Défi actuel"
+                  subtitle={trainingType === 'pushup' ? 'Pompes' : trainingType === 'crunch' ? 'Crunch' : 'Non sélectionné'}
+                  onPress={() => setShowTrainingSheet(true)}
+                />
+              </SettingsGroup>
+            </YStack>
 
             {/* General Section */}
             <YStack gap="$2">
@@ -173,6 +196,88 @@ export default function SettingsScreen() {
 
           </YStack>
         </ScrollView>
+
+        {/* Sheet pour changer de défi */}
+        <Sheet
+          modal
+          open={showTrainingSheet}
+          onOpenChange={setShowTrainingSheet}
+          snapPoints={[40]}
+          dismissOnSnapToBottom
+        >
+          <Sheet.Overlay animation="lazy" enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
+          <Sheet.Frame bg="$background" padding="$4" borderTopLeftRadius={20} borderTopRightRadius={20}>
+            <YStack gap="$4" pb="$4">
+              <YStack alignItems="center" gap="$2">
+                <YStack width={40} height={4} bg="$borderColor" borderRadius={10} />
+                <H2 size="$6" color="$color" mt="$2">Changer de défi</H2>
+                <Text fontSize={14} color="$color" opacity={0.6} textAlign="center">
+                  Sélectionnez un nouveau défi. Vos progrès seront sauvegardés séparément.
+                </Text>
+              </YStack>
+
+              <YStack gap="$3">
+                <Button
+                  size="$5"
+                  bg={trainingType === 'pushup' ? '$primary' : '$backgroundHover'}
+                  borderWidth={trainingType === 'pushup' ? 0 : 1}
+                  borderColor="$borderColor"
+                  pressStyle={{ opacity: 0.8 }}
+                  onPress={() => {
+                    selectTraining('pushup');
+                    setShowTrainingSheet(false);
+                    router.replace('/(tabs)');
+                  }}
+                >
+                  <XStack gap="$3" alignItems="center">
+                    <Image 
+                      source={TRAINING_LOGOS.pushup}
+                      style={{ width: 32, height: 32 }}
+                      resizeMode="contain"
+                    />
+                    <Text fontSize={16} fontWeight="600" color={trainingType === 'pushup' ? 'white' : '$color'}>
+                      Pompes
+                    </Text>
+                  </XStack>
+                </Button>
+
+                <Button
+                  size="$5"
+                  bg={trainingType === 'crunch' ? '$primary' : '$backgroundHover'}
+                  borderWidth={trainingType === 'crunch' ? 0 : 1}
+                  borderColor="$borderColor"
+                  pressStyle={{ opacity: 0.8 }}
+                  onPress={() => {
+                    selectTraining('crunch');
+                    setShowTrainingSheet(false);
+                    router.replace('/(tabs)');
+                  }}
+                >
+                  <XStack gap="$3" alignItems="center">
+                    <Image 
+                      source={TRAINING_LOGOS.crunch}
+                      style={{ width: 32, height: 32 }}
+                      resizeMode="contain"
+                    />
+                    <Text fontSize={16} fontWeight="600" color={trainingType === 'crunch' ? 'white' : '$color'}>
+                      Crunch
+                    </Text>
+                  </XStack>
+                </Button>
+              </YStack>
+
+              <Button
+                size="$4"
+                variant="outlined"
+                borderColor="$borderColor"
+                color="$color"
+                onPress={() => setShowTrainingSheet(false)}
+              >
+                Annuler
+              </Button>
+            </YStack>
+          </Sheet.Frame>
+        </Sheet>
       </SafeAreaView>
     </YStack>
   );

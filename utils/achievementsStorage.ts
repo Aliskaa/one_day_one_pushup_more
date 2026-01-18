@@ -7,8 +7,8 @@ import {
   AchievementStats,
   AchievementWithStatus,
   UnlockedAchievement,
-  UserAchievementsDoc
 } from '@/types/achievement';
+import { UserAchievementsDoc } from '@/types/firebase';
 import { ProgressMapType } from '@/types/utils';
 import {
   doc,
@@ -17,25 +17,13 @@ import {
   setDoc,
   Unsubscribe,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { ACHIEVEMENTS_COLLECTION, db, USERS_COLLECTION } from './firebase';
+import { TrainingName } from '@/contexts/TrainingContext';
+import { getAchievementsDocRef, createTargetsByDateMap, getTodayString } from './firebaseHelpers';
 
-// Collections Firestore
-const USERS_COLLECTION = 'users';
-const ACHIEVEMENTS_COLLECTION = 'achievements';
-
-/**
- * Récupère le document de référence pour les achievements d'un utilisateur
- */
-const getUserAchievementsRef = (userId: string) => {
-  return doc(db, USERS_COLLECTION, userId, ACHIEVEMENTS_COLLECTION, 'data');
-};
-
-/**
- * Charge les achievements depuis Firestore
- */
-export const loadAchievementsFromFirebase = async (userId: string): Promise<UserAchievementsDoc | null> => {
+export const loadAchievementsFromFirebase = async (userId: string, trainingType: TrainingName): Promise<UserAchievementsDoc | null> => {
   try {
-    const docRef = getUserAchievementsRef(userId);
+    const docRef = getAchievementsDocRef(userId, trainingType);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
@@ -59,11 +47,12 @@ export const loadAchievementsFromFirebase = async (userId: string): Promise<User
  */
 export const saveAchievementsToFirebase = async (
   userId: string,
+  trainingType: TrainingName,
   unlockedBadges: Record<string, UnlockedAchievement>,
   stats: AchievementStats
 ): Promise<void> => {
   try {
-    const docRef = getUserAchievementsRef(userId);
+    const docRef = getAchievementsDocRef(userId, trainingType);
     
     const data: UserAchievementsDoc = {
       unlockedBadges,
@@ -84,11 +73,12 @@ export const saveAchievementsToFirebase = async (
  */
 export const unlockAchievement = async (
   userId: string,
+  trainingType: TrainingName,
   achievementId: string,
   progress: number
 ): Promise<void> => {
   try {
-    const docRef = getUserAchievementsRef(userId);
+    const docRef = getAchievementsDocRef(userId, trainingType);
     
     const newUnlock: UnlockedAchievement = {
       achievementId,
@@ -113,9 +103,10 @@ export const unlockAchievement = async (
  */
 export const subscribeToAchievements = (
   userId: string,
+  trainingType: TrainingName,
   onUpdate: (data: UserAchievementsDoc | null) => void
 ): Unsubscribe => {
-  const docRef = getUserAchievementsRef(userId);
+  const docRef = getAchievementsDocRef(userId, trainingType);
   
   return onSnapshot(docRef, (docSnap) => {
     if (docSnap.exists()) {
@@ -137,20 +128,14 @@ export const calculateStatsFromProgress = (
   days: { dateStr: string; target: number }[]
 ): AchievementStats => {
   const sortedDates = Object.keys(progressMap).sort();
+  const targetsByDate = createTargetsByDateMap(days);
   
   let totalPushups = 0;
   let daysCompleted = 0;
   let perfectDays = 0;
   let bestSingleDay = 0;
-  let currentStreak = 0;
   let bestStreak = 0;
   let tempStreak = 0;
-  
-  // Créer une map des targets par date
-  const targetsByDate: Record<string, number> = {};
-  days.forEach(day => {
-    targetsByDate[day.dateStr] = day.target;
-  });
   
   // Calculer les stats
   for (const dateStr of sortedDates) {
@@ -179,8 +164,8 @@ export const calculateStatsFromProgress = (
   }
   
   // Calculer le streak actuel (en partant de la fin)
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const todayStr = getTodayString();
+  let currentStreak = 0;
   
   // Trouver l'index de today ou le dernier jour avant today
   const reversedDates = [...sortedDates].reverse();
@@ -215,12 +200,7 @@ export const checkAchievementsToUnlock = (
   alreadyUnlocked: Record<string, UnlockedAchievement>
 ): string[] => {
   const newUnlocks: string[] = [];
-  
-  // Créer une map des targets par date
-  const targetsByDate: Record<string, number> = {};
-  days.forEach(day => {
-    targetsByDate[day.dateStr] = day.target;
-  });
+  const targetsByDate = createTargetsByDateMap(days);
   
   // Calculer le max debt payoff (différence entre done et target quand done > target)
   let maxDebtPayoff = 0;
@@ -302,11 +282,7 @@ export const buildAchievementsWithStatus = (
   days: { dateStr: string; target: number }[],
   unlockedBadges: Record<string, UnlockedAchievement>
 ): AchievementWithStatus[] => {
-  // Créer une map des targets par date
-  const targetsByDate: Record<string, number> = {};
-  days.forEach(day => {
-    targetsByDate[day.dateStr] = day.target;
-  });
+  const targetsByDate = createTargetsByDateMap(days);
   
   // Calculer le max debt payoff
   let maxDebtPayoff = 0;

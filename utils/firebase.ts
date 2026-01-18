@@ -18,3 +18,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 // Initialisation de Firestore
 export const db = getFirestore(app);
+
+
+// Collections Firestore
+export const USERS_COLLECTION = 'users';
+export const TRAINING_COLLECTION = 'training';
+export const PROGRESS_COLLECTION = 'progress';
+export const ACHIEVEMENTS_COLLECTION = 'achievements';

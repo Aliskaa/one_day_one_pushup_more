@@ -1,5 +1,6 @@
 import { useAchievements } from '@/hooks/useAchievements';
 import { useProgressData } from '@/hooks/useProgressData';
+import { useTraining } from '@/contexts/TrainingContext';
 import { AchievementCategory, AchievementWithStatus } from '@/types/achievement';
 import {
   Award,
@@ -32,8 +33,9 @@ import {
 } from '@tamagui/lucide-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Image } from 'react-native';
 import { Card, H2, Progress, ScrollView, Text, XStack, YStack } from 'tamagui';
+import { TRAINING_LOGOS } from '@/constants/assets';
 
 // Map des icônes par nom
 const ICON_MAP: Record<string, any> = {
@@ -91,6 +93,7 @@ const CATEGORY_ORDER: AchievementCategory[] = [
 export default function AchievementsScreen() {
   // Récupérer les données de progression
   const { days, stats: progressStats } = useProgressData();
+  const { trainingType } = useTraining();
   
   // Créer le progressMap à partir des days
   const progressMap = useMemo(() => {
@@ -257,16 +260,11 @@ export default function AchievementsScreen() {
             end={{ x: 1, y: 1 }}
           >
             <YStack gap="$2" alignItems="center">
-              <YStack
-                width={70}
-                height={70}
-                borderRadius="$8"
-                bg="rgba(255,255,255,0.2)"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Award size={36} color="#fff" />
-              </YStack>
+              <Image 
+                source={TRAINING_LOGOS[trainingType || 'pushup']}
+                style={{ width: 70, height: 70 }}
+                resizeMode="contain"
+              />
               <H2 fontFamily="$heading" color="#fff" size="$6">
                 Accomplissements
               </H2>
@@ -285,7 +283,7 @@ export default function AchievementsScreen() {
                 {stats.totalPushups.toLocaleString()}
               </Text>
               <Text fontSize={12} color="$color" opacity={0.6}>
-                Total pompes
+                Total {trainingType === 'pushup' ? 'pompes' : trainingType === 'crunch' ? 'crunchs' : 'reps'}
               </Text>
             </YStack>
             <YStack alignItems="center" gap="$1">

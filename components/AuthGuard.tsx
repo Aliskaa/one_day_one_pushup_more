@@ -2,9 +2,11 @@ import { useAuth } from '@clerk/clerk-expo';
 import { useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { Spinner, YStack } from 'tamagui';
+import { useTraining } from '@/contexts/TrainingContext';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
+  const { trainingType } = useTraining();
   const segments = useSegments();
   const router = useRouter();
 
@@ -12,16 +14,33 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!isLoaded) return;
 
     const isOnSignIn = segments[0] === 'sign-in';
+    const isOnIndex = !segments[0] || segments.join('/') === '';
+    const isOnTabs = segments[0] === '(tabs)';
 
+    // Pas connecté : rediriger vers sign-in
     if (!isSignedIn && !isOnSignIn) {
       router.replace('/sign-in');
-    } else if (isSignedIn && isOnSignIn) {
-      // Utilise un délai pour laisser les routes se monter
-      setTimeout(() => {
-        router.replace('/(tabs)');
-      }, 100);
+      return;
     }
-  }, [isSignedIn, isLoaded, segments, router]);
+
+    // Connecté sur sign-in : rediriger vers index
+    if (isSignedIn && isOnSignIn) {
+      router.replace('/');
+      return;
+    }
+
+    // Connecté mais pas de training sélectionné : rester/aller sur index
+    if (isSignedIn && !trainingType && isOnTabs) {
+      router.replace('/');
+      return;
+    }
+
+    // Connecté avec training sélectionné sur index : aller aux tabs
+    if (isSignedIn && trainingType && isOnIndex) {
+      router.replace('/(tabs)');
+      return;
+    }
+  }, [isSignedIn, isLoaded, trainingType, segments, router]);
 
   if (!isLoaded) {
     return (

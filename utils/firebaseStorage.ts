@@ -3,9 +3,10 @@
  * Remplace AsyncStorage par Firestore pour la synchronisation cloud
  */
 
-import { START_YEAR } from '@/constants/constants';
+import { DAYS_IN_YEAR, START_YEAR } from '@/constants/constants';
 import { DayDataType } from '@/types/day';
 import { ProgressMapType } from '@/types/utils';
+import { UserProgressDoc } from '@/types/firebase';
 import {
     doc,
     getDoc,
@@ -14,44 +15,19 @@ import {
     Unsubscribe,
     updateDoc
 } from 'firebase/firestore';
-import { db } from './firebase';
-
-// Collections Firestore
-const USERS_COLLECTION = 'users';
-const PROGRESS_COLLECTION = 'progress';
-
-/**
- * Structure des données utilisateur dans Firestore
- */
-interface UserProgressDoc {
-  year: number;
-  progressMap: ProgressMapType;
-  lastUpdated: Date;
-  totalDone: number;
-}
-
-/**
- * Calcule le nombre de jours dans une année (gère les années bissextiles)
- */
-const getDaysInYear = (year: number): number => {
-  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-  return isLeapYear ? 366 : 365;
-};
+import { db, PROGRESS_COLLECTION, TRAINING_COLLECTION, USERS_COLLECTION } from './firebase';
+import { TrainingName } from '@/contexts/TrainingContext';
+import { getProgressDocRef, formatDateString } from './firebaseHelpers';
 
 /**
  * Génère les données pour toute l'année
  */
 export const generateYearData = (): DayDataType[] => {
   const generatedDays: DayDataType[] = [];
-  const daysInYear = getDaysInYear(START_YEAR);
   
-  for (let i = 0; i < daysInYear; i++) {
+  for (let i = 0; i < DAYS_IN_YEAR; i++) {
     const currentDate = new Date(START_YEAR, 0, 1 + i);
-    
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-    const day = String(currentDate.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
+    const dateStr = formatDateString(currentDate);
     
     generatedDays.push({
       dateStr,
@@ -63,7 +39,7 @@ export const generateYearData = (): DayDataType[] => {
   
   console.log('🗓️ Génération des dates:', {
     first: generatedDays[0]?.dateStr,
-    last: generatedDays[daysInYear - 1]?.dateStr,
+    last: generatedDays[DAYS_IN_YEAR - 1]?.dateStr,
     total: generatedDays.length,
   });
   
@@ -71,18 +47,11 @@ export const generateYearData = (): DayDataType[] => {
 };
 
 /**
- * Récupère le document de référence pour un utilisateur
- */
-const getUserProgressRef = (userId: string) => {
-  return doc(db, USERS_COLLECTION, userId, PROGRESS_COLLECTION, `year_${START_YEAR}`);
-};
-
-/**
  * Charge les données de progression depuis Firestore
  */
-export const loadProgressFromFirebase = async (userId: string): Promise<ProgressMapType> => {
+export const loadProgressFromFirebase = async (userId: string, trainingType: TrainingName): Promise<ProgressMapType> => {
   try {
-    const docRef = getUserProgressRef(userId);
+    const docRef = getProgressDocRef(userId, trainingType);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
@@ -106,11 +75,12 @@ export const loadProgressFromFirebase = async (userId: string): Promise<Progress
  * Sauvegarde les données de progression dans Firestore
  */
 export const saveProgressToFirebase = async (
-  userId: string, 
+  userId: string,
+  trainingType: TrainingName,
   progressMap: ProgressMapType
 ): Promise<void> => {
   try {
-    const docRef = getUserProgressRef(userId);
+    const docRef = getProgressDocRef(userId, trainingType);
     
     // Calcul du total pour les stats
     const totalDone = Object.values(progressMap).reduce((sum, val) => sum + (val || 0), 0);
@@ -135,11 +105,12 @@ export const saveProgressToFirebase = async (
  */
 export const updateDayProgress = async (
   userId: string,
+  trainingType: TrainingName,
   dateStr: string,
   value: number | null
 ): Promise<void> => {
   try {
-    const docRef = getUserProgressRef(userId);
+    const docRef = getProgressDocRef(userId, trainingType);
     
     await updateDoc(docRef, {
       [`progressMap.${dateStr}`]: value,
@@ -150,7 +121,7 @@ export const updateDayProgress = async (
   } catch (error) {
     // Si le document n'existe pas encore, on le crée
     console.log('Document inexistant, création...');
-    await saveProgressToFirebase(userId, { [dateStr]: value ?? 0 });
+    await saveProgressToFirebase(userId, trainingType, { [dateStr]: value ?? 0 });
   }
 };
 
@@ -160,9 +131,10 @@ export const updateDayProgress = async (
  */
 export const subscribeToProgress = (
   userId: string,
+  trainingType: TrainingName,
   onUpdate: (progressMap: ProgressMapType) => void
 ): Unsubscribe => {
-  const docRef = getUserProgressRef(userId);
+  const docRef = getProgressDocRef(userId, trainingType);
   
   return onSnapshot(docRef, (docSnap) => {
     if (docSnap.exists()) {
@@ -190,9 +162,9 @@ export const mergeDataWithProgress = (
 /**
  * Supprime toutes les données de l'utilisateur pour l'année en cours
  */
-export const clearUserData = async (userId: string): Promise<void> => {
+export const clearUserData = async (userId: string, trainingType: TrainingName): Promise<void> => {
   try {
-    const docRef = getUserProgressRef(userId);
+    const docRef = getProgressDocRef(userId, trainingType);
     await setDoc(docRef, {
       year: START_YEAR,
       progressMap: {},
@@ -209,9 +181,9 @@ export const clearUserData = async (userId: string): Promise<void> => {
 /**
  * Récupère les statistiques globales de l'utilisateur
  */
-export const getUserStats = async (userId: string) => {
+export const getUserStats = async (userId: string, trainingType: TrainingName) => {
   try {
-    const docRef = getUserProgressRef(userId);
+    const docRef = getProgressDocRef(userId, trainingType);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
