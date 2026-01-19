@@ -1,6 +1,7 @@
+import { useTraining } from '@/contexts/TrainingContext';
 import { useAchievements } from '@/hooks/useAchievements';
 import { useProgressData } from '@/hooks/useProgressData';
-import { useTraining } from '@/contexts/TrainingContext';
+import { SvgTraining } from '@/icons/Training';
 import { AchievementCategory, AchievementWithStatus } from '@/types/achievement';
 import {
   Award,
@@ -33,9 +34,8 @@ import {
 } from '@tamagui/lucide-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
-import { ActivityIndicator, Image } from 'react-native';
-import { Card, H2, Progress, ScrollView, Text, XStack, YStack } from 'tamagui';
-import { TRAINING_LOGOS } from '@/constants/assets';
+import { ActivityIndicator } from 'react-native';
+import { Card, H2, ScrollView, Text, XStack, YStack } from 'tamagui';
 
 // Map des icônes par nom
 const ICON_MAP: Record<string, any> = {
@@ -94,7 +94,7 @@ export default function AchievementsScreen() {
   // Récupérer les données de progression
   const { days, stats: progressStats } = useProgressData();
   const { trainingType } = useTraining();
-  
+
   // Créer le progressMap à partir des days
   const progressMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -105,14 +105,14 @@ export default function AchievementsScreen() {
     });
     return map;
   }, [days]);
-  
+
   // Utiliser le hook achievements
-  const { 
-    achievements, 
-    stats, 
-    unlockedCount, 
-    totalCount, 
-    isLoading 
+  const {
+    achievements,
+    stats,
+    unlockedCount,
+    totalCount,
+    isLoading
   } = useAchievements(days, progressMap);
 
   // Grouper les achievements par catégorie
@@ -126,11 +126,11 @@ export default function AchievementsScreen() {
       milestone: [],
       rare: [],
     };
-    
+
     achievements.forEach(achievement => {
       grouped[achievement.category].push(achievement);
     });
-    
+
     return grouped;
   }, [achievements]);
 
@@ -139,35 +139,35 @@ export default function AchievementsScreen() {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Dimanche
     const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    
+
     const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
     const result = [];
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + mondayOffset + i);
-      
+
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       const dayData = days.find(d => d.dateStr === dateStr);
-      
+
       const done = dayData?.done || 0;
       const target = dayData?.target || 1;
       const percent = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 0;
-      
+
       result.push({
         day: weekDays[i],
         done,
         percent,
       });
     }
-    
+
     return result;
   }, [days]);
 
   // Composant pour afficher un badge
   const BadgeCard = ({ achievement }: { achievement: AchievementWithStatus }) => {
     const Icon = ICON_MAP[achievement.icon] || Trophy;
-    
+
     return (
       <Card
         elevate={achievement.unlocked}
@@ -189,12 +189,12 @@ export default function AchievementsScreen() {
             alignItems="center"
             justifyContent="center"
           >
-            <Icon 
-              size={24} 
-              color={achievement.unlocked ? achievement.color : '#9ca3af'} 
+            <Icon
+              size={24}
+              color={achievement.unlocked ? achievement.color : '#9ca3af'}
             />
           </YStack>
-          
+
           <YStack flex={1} gap="$1">
             <Text fontFamily="$heading" fontSize={16} color="$color">
               {achievement.title}
@@ -202,7 +202,7 @@ export default function AchievementsScreen() {
             <Text fontSize={13} color="$color" opacity={0.6}>
               {achievement.description}
             </Text>
-            
+
             {/* Barre de progression si non débloqué */}
             {!achievement.unlocked && (
               <XStack alignItems="center" gap="$2" mt="$1">
@@ -220,14 +220,14 @@ export default function AchievementsScreen() {
               </XStack>
             )}
           </YStack>
-          
+
           {achievement.unlocked && (
-            <YStack 
-              width={28} 
-              height={28} 
-              borderRadius="$10" 
-              bg="$success" 
-              alignItems="center" 
+            <YStack
+              width={28}
+              height={28}
+              borderRadius="$10"
+              bg="$success"
+              alignItems="center"
               justifyContent="center"
             >
               <Text fontSize={14} color="white" fontWeight="bold">✓</Text>
@@ -250,7 +250,7 @@ export default function AchievementsScreen() {
   return (
     <ScrollView bg="$backgroundHover" showsVerticalScrollIndicator={false}>
       <YStack p="$4" gap="$4" pb="$8">
-        
+
         {/* Header */}
         <Card elevate size="$4" p="$0" overflow="hidden" borderRadius={24} animation="bouncy">
           <LinearGradient
@@ -260,11 +260,7 @@ export default function AchievementsScreen() {
             end={{ x: 1, y: 1 }}
           >
             <YStack gap="$2" alignItems="center">
-              <Image 
-                source={TRAINING_LOGOS[trainingType || 'pushup']}
-                style={{ width: 70, height: 70 }}
-                resizeMode="contain"
-              />
+              <SvgTraining size={70} color="#fff" />
               <H2 fontFamily="$heading" color="#fff" size="$6">
                 Accomplissements
               </H2>
@@ -310,7 +306,7 @@ export default function AchievementsScreen() {
           <H2 fontFamily="$heading" size="$4" color="$color">
             📅 Cette semaine
           </H2>
-          
+
           <Card elevate p="$4" borderRadius={20} bg="$background">
             <XStack gap="$2" justifyContent="space-between">
               {weekProgress.map((day, idx) => (
@@ -346,9 +342,9 @@ export default function AchievementsScreen() {
         {CATEGORY_ORDER.map(category => {
           const categoryAchievements = achievementsByCategory[category];
           if (categoryAchievements.length === 0) return null;
-          
+
           const unlockedInCategory = categoryAchievements.filter(a => a.unlocked).length;
-          
+
           return (
             <YStack key={category} gap="$3">
               <XStack justifyContent="space-between" alignItems="center">
@@ -359,7 +355,7 @@ export default function AchievementsScreen() {
                   {unlockedInCategory}/{categoryAchievements.length}
                 </Text>
               </XStack>
-              
+
               {categoryAchievements.map(achievement => (
                 <BadgeCard key={achievement.id} achievement={achievement} />
               ))}

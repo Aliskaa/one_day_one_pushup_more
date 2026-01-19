@@ -1,15 +1,14 @@
-import { Calendar } from '@tamagui/lucide-icons';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { H2, Spinner, Text, YStack } from 'tamagui';
 
 import { DayRow } from '@/components/DayRow';
 import { TodayButton } from '@/components/TodayButton';
 import { UI_CONSTANTS } from '@/constants/constants';
-import { useProgressData } from '@/hooks/useProgressData';
 import { useTraining } from '@/contexts/TrainingContext';
+import { useProgressData } from '@/hooks/useProgressData';
+import { SvgTraining } from '@/icons/Training';
 import { DayDataType } from '@/types/day';
-import { TRAINING_LOGOS } from '@/constants/assets';
 
 export default function DaysListScreen() {
   const { days, todayIndex, updateDay, isLoading, error } = useProgressData();
@@ -35,11 +34,7 @@ export default function DaysListScreen() {
 
   const ListHeader = () => (
     <YStack px="$4" pt="$6" pb="$4" gap="$3" alignItems="center">
-      <Image 
-        source={TRAINING_LOGOS[trainingType || 'pushup']}
-        style={{ width: 60, height: 60 }}
-        resizeMode="contain"
-      />
+      <SvgTraining size={70} color="$color" />
       <YStack alignItems="center" gap="$1">
         <H2 fontFamily="$heading" size="$6" color="$color">
           Mon Calendrier
@@ -101,7 +96,7 @@ export default function DaysListScreen() {
           windowSize={10}
           removeClippedSubviews={true}
           ListHeaderComponent={ListHeader}
-          contentContainerStyle={{ 
+          contentContainerStyle={{
             paddingBottom: UI_CONSTANTS.LIST_BOTTOM_PADDING,
           }}
           showsVerticalScrollIndicator={false}

@@ -18,7 +18,7 @@ import {
   loadAchievementsFromFirebase,
   saveAchievementsToFirebase,
   unlockAchievement
-} from '@/utils/achievementsStorage';
+} from '@/services/achievementsStorage';
 import { useAuth } from '@clerk/clerk-expo';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePushNotifications } from './usePushNotifications';

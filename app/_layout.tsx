@@ -13,7 +13,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
 import { tamaguiConfig } from '../tamagui.config';
-import { tokenCache } from '../utils/cache';
+import { tokenCache } from '../services/cache';
 import { TrainingProvider } from '@/contexts/TrainingContext';
 
 function AppContent() {

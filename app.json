@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/adaptive-icon-foreground.png",
       "resizeMode": "contain",
-      "backgroundColor": "#5246B9"
+      "backgroundImage": "./assets/images/adaptive-icon-background.png"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -24,7 +24,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon-foreground.png",
-        "backgroundColor": "#5246B9"
+        "backgroundImage": "./assets/images/adaptive-icon-background.png"
       },
       "package": "com.aliskaa.onedayonepushupmore",
       "googleServicesFile": "./google-services.json",

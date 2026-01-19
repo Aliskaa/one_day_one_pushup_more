@@ -12,7 +12,7 @@ import {
     mergeDataWithProgress,
     saveProgressToFirebase,
     subscribeToProgress
-} from '@/utils/firebaseStorage';
+} from '@/services/firebaseStorage';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useToastController } from '@tamagui/toast';
 import { useCallback, useEffect, useRef, useState } from 'react';

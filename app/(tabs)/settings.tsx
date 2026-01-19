@@ -12,6 +12,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Image } from 'react-native';
 import { TRAINING_LOGOS } from '@/constants/assets';
+import SvgPushUp from '@/icons/Pushup';
+import SvgCrunch from '@/icons/Crunch';
 
 interface MenuItemProps {
   icon: any;
@@ -230,11 +232,8 @@ export default function SettingsScreen() {
                   }}
                 >
                   <XStack gap="$3" alignItems="center">
-                    <Image 
-                      source={TRAINING_LOGOS.pushup}
-                      style={{ width: 32, height: 32 }}
-                      resizeMode="contain"
-                    />
+                    
+                    <SvgPushUp size={32} color={trainingType === 'pushup' ? 'white' : '$color'} />
                     <Text fontSize={16} fontWeight="600" color={trainingType === 'pushup' ? 'white' : '$color'}>
                       Pompes
                     </Text>
@@ -254,11 +253,7 @@ export default function SettingsScreen() {
                   }}
                 >
                   <XStack gap="$3" alignItems="center">
-                    <Image 
-                      source={TRAINING_LOGOS.crunch}
-                      style={{ width: 32, height: 32 }}
-                      resizeMode="contain"
-                    />
+                    <SvgCrunch size={32} color={trainingType === 'crunch' ? 'white' : '$color'} />
                     <Text fontSize={16} fontWeight="600" color={trainingType === 'crunch' ? 'white' : '$color'}>
                       Crunch
                     </Text>

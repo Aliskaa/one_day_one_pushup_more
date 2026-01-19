@@ -1,5 +1,7 @@
 import { CardButton } from '@/components/CardButton';
 import { TrainingName, useTraining } from '@/contexts/TrainingContext';
+import SvgCrunch from '@/icons/Crunch';
+import SvgPushUp from '@/icons/Pushup';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +11,6 @@ import {
   ScrollView,
   YStack
 } from "tamagui";
-import { TRAINING_LOGOS } from '@/constants/assets';
 
 
 export default function Index() {
@@ -43,8 +44,8 @@ export default function Index() {
               </Paragraph>
             </YStack>
 
-            <CardButton logo={TRAINING_LOGOS.pushup} title="Pompes" onClick={() => handleSelectTraining('pushup')} />
-            <CardButton logo={TRAINING_LOGOS.crunch} title="Crunch" onClick={() => handleSelectTraining('crunch')} />
+            <CardButton logo={<SvgPushUp size={75} color='$color'/>} title="Pompes" onClick={() => handleSelectTraining('pushup')} />
+            <CardButton logo={<SvgCrunch size={75} color='$color'/>} title="Crunch" onClick={() => handleSelectTraining('crunch')} />
           </YStack>
         </ScrollView>
       </SafeAreaView>
