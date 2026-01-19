@@ -4,13 +4,13 @@
     "slug": "one-day-one-pushup-more",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo_one_day_one_pushup_more.png",
+    "icon": "./assets/images/adaptive-icon-foreground.png",
     "scheme": "onedayonepushupmore",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/logo_one_day_one_pushup_more.png",
+      "image": "./assets/images/adaptive-icon-foreground.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#5246B9"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -23,8 +23,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo_one_day_one_pushup_more.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/adaptive-icon-foreground.png",
+        "backgroundColor": "#5246B9"
       },
       "package": "com.aliskaa.onedayonepushupmore",
       "googleServicesFile": "./google-services.json",
