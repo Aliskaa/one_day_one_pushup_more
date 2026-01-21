@@ -148,7 +148,7 @@ export const calculateStatsFromProgress = (
       }
       
       const target = targetsByDate[dateStr] || 0;
-      if (done >= target && target > 0) {
+      if (done === target && target > 0) {
         perfectDays++;
       }
       

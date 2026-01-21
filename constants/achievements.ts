@@ -3,7 +3,7 @@
  */
 
 import { Achievement } from '@/types/achievement';
-import { DAYS_IN_YEAR } from './constants';
+import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from './constants';
 
 export const ACHIEVEMENTS: Achievement[] = [
   // ===== CATÉGORIE: RÉGULARITÉ (STREAKS) =====
@@ -228,31 +228,31 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'quarter_goal',
     title: 'Quart du chemin',
-    description: '25% de l\'objectif annuel',
+    description: '25% de l\'objectif annuel (16 699 pompes)',
     category: 'annual',
     icon: 'Target',
     color: '#06b6d4', // cyan
-    requirement: Math.floor(DAYS_IN_YEAR * 0.25),
+    requirement: Math.floor(TOTAL_TARGET_YEAR * 0.25),
     requirementType: 'total_pushups',
   },
   {
     id: 'half_goal',
     title: 'Mi-parcours',
-    description: '50% de l\'objectif annuel',
+    description: '50% de l\'objectif annuel (33 398 pompes)',
     category: 'annual',
     icon: 'Medal',
     color: '#a855f7', // purple
-    requirement: Math.floor(DAYS_IN_YEAR * 0.5),
+    requirement: Math.floor(TOTAL_TARGET_YEAR * 0.5),
     requirementType: 'total_pushups',
   },
   {
     id: 'three_quarter_goal',
     title: 'Trois quarts',
-    description: '75% de l\'objectif annuel',
+    description: '75% de l\'objectif annuel (50 096 pompes)',
     category: 'annual',
     icon: 'Award',
     color: '#f97316', // orange
-    requirement: Math.floor(DAYS_IN_YEAR * 0.75),
+    requirement: Math.floor(TOTAL_TARGET_YEAR * 0.75),
     requirementType: 'total_pushups',
   },
   {
@@ -262,17 +262,17 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'annual',
     icon: 'Trophy',
     color: '#eab308', // gold
-    requirement: DAYS_IN_YEAR,
+    requirement: TOTAL_TARGET_YEAR,
     requirementType: 'total_pushups',
   },
   {
     id: 'beyond_limits',
     title: 'Au-delà des limites',
-    description: 'Dépasser l\'objectif annuel',
+    description: 'Dépasser l\'objectif annuel (66 796+ pompes)',
     category: 'annual',
     icon: 'Gem',
     color: '#ec4899', // pink
-    requirement: DAYS_IN_YEAR + 1,
+    requirement: TOTAL_TARGET_YEAR + 1,
     requirementType: 'total_pushups',
   },
 
