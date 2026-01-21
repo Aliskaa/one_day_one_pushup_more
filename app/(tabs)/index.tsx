@@ -2,6 +2,7 @@ import { ProgressChart } from '@/components/ProgressChart';
 import RefreshableScreen from '@/components/RefreshScreen';
 import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from '@/constants/constants';
 import { useTraining } from '@/contexts/TrainingContext';
+import { useAchievements } from '@/hooks/useAchievements';
 import { useProgressData } from '@/hooks/useProgressData';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { SvgTraining } from '@/icons/Training';
@@ -38,6 +39,29 @@ export default function DashboardScreen() {
   const theme = useTheme();
   const { trainingType } = useTraining();
   const [loading, setLoading] = useState(false);
+
+  // Calcul de la série actuelle (Streak)
+  const currentStreak = useMemo(() => {
+    if (!days || todayIndex < 0) return 0;
+    let streak = 0;
+    
+    // Si aujourd'hui est validé, on l'inclut dans la streak
+    const todayDay = days[todayIndex];
+    if (todayDay && todayDay.done !== null && todayDay.done >= todayDay.target) {
+      streak++;
+    }
+    
+    // On remonte les jours précédents pour voir si la chaîne est continue
+    for (let i = todayIndex - 1; i >= 0; i--) {
+      const day = days[i];
+      if (day && day.done !== null && day.done >= day.target) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }, [days, todayIndex]);
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -336,18 +360,19 @@ export default function DashboardScreen() {
             </YStack>
           </Card>
 
-          <Card elevate flex={1} p="$4" borderRadius={20} bg="$background" borderTopWidth={4} borderTopColor="$danger" animation="bouncy" animationDelay={200}>
-             <YStack gap="$2">
-              <XStack alignItems="center" gap="$2">
+          <Card 
+            elevate flex={1} p="$4" borderRadius={20} bg="$background"
+            borderTopWidth={4} borderTopColor="$danger"
+            animation="bouncy"
+          >
+            <YStack gap="$2" alignItems="center">
                 <Flame size={16} color="$danger" />
-                <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Série</Text>
-              </XStack>
-              <Text fontFamily="$heading" fontSize={20}>
-                 {stats.daysCompleted} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>/ {todayIndex + 1}</Text>
+              <Text fontSize={11} fontWeight="800" color="$danger" textTransform="uppercase">
+                Série en cours
               </Text>
-              <Progress value={(stats.daysCompleted / (todayIndex + 1)) * 100} size="$1" bg="$backgroundHover">
-                <Progress.Indicator animation="bouncy" bg="$danger" />
-              </Progress>
+              <H2 fontFamily="$heading" size="$5">
+                 {currentStreak}
+              </H2>
             </YStack>
           </Card>
         </XStack>

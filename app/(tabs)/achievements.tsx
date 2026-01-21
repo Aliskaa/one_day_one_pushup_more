@@ -92,7 +92,7 @@ const CATEGORY_ORDER: AchievementCategory[] = [
 
 export default function AchievementsScreen() {
   // Récupérer les données de progression
-  const { days, stats: progressStats } = useProgressData();
+  const { days } = useProgressData();
   const { trainingType } = useTraining();
 
   // Créer le progressMap à partir des days
