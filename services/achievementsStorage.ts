@@ -3,6 +3,7 @@
  */
 
 import { ACHIEVEMENTS } from '@/constants/achievements';
+import { TrainingName } from '@/contexts/TrainingContext';
 import {
   AchievementStats,
   AchievementWithStatus,
@@ -11,15 +12,12 @@ import {
 import { UserAchievementsDoc } from '@/types/firebase';
 import { ProgressMapType } from '@/types/utils';
 import {
-  doc,
   getDoc,
   onSnapshot,
   setDoc,
-  Unsubscribe,
+  Unsubscribe
 } from 'firebase/firestore';
-import { ACHIEVEMENTS_COLLECTION, db, USERS_COLLECTION } from './firebase';
-import { TrainingName } from '@/contexts/TrainingContext';
-import { getAchievementsDocRef, createTargetsByDateMap, getTodayString } from './firebaseHelpers';
+import { createTargetsByDateMap, getAchievementsDocRef, getTodayString } from './firebaseHelpers';
 
 export const loadAchievementsFromFirebase = async (userId: string, trainingType: TrainingName): Promise<UserAchievementsDoc | null> => {
   try {

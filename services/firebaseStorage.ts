@@ -4,20 +4,18 @@
  */
 
 import { DAYS_IN_YEAR, START_YEAR } from '@/constants/constants';
-import { DayDataType } from '@/types/day';
-import { ProgressMapType } from '@/types/utils';
-import { UserProgressDoc } from '@/types/firebase';
-import {
-    doc,
-    getDoc,
-    onSnapshot,
-    setDoc,
-    Unsubscribe,
-    updateDoc
-} from 'firebase/firestore';
-import { db, PROGRESS_COLLECTION, TRAINING_COLLECTION, USERS_COLLECTION } from './firebase';
 import { TrainingName } from '@/contexts/TrainingContext';
-import { getProgressDocRef, formatDateString } from './firebaseHelpers';
+import { DayDataType } from '@/types/day';
+import { UserProgressDoc } from '@/types/firebase';
+import { ProgressMapType } from '@/types/utils';
+import {
+  getDoc,
+  onSnapshot,
+  setDoc,
+  Unsubscribe,
+  updateDoc
+} from 'firebase/firestore';
+import { formatDateString, getProgressDocRef } from './firebaseHelpers';
 
 /**
  * Génère les données pour toute l'année

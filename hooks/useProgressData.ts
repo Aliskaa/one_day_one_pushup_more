@@ -4,19 +4,19 @@
  */
 
 import { START_YEAR, UI_CONSTANTS } from '@/constants/constants';
+import { useTraining } from '@/contexts/TrainingContext';
+import {
+  generateYearData,
+  loadProgressFromFirebase,
+  mergeDataWithProgress,
+  saveProgressToFirebase,
+  subscribeToProgress
+} from '@/services/firebaseStorage';
 import { DayDataType } from '@/types/day';
 import { ProgressMapType } from '@/types/utils';
-import {
-    generateYearData,
-    loadProgressFromFirebase,
-    mergeDataWithProgress,
-    saveProgressToFirebase,
-    subscribeToProgress
-} from '@/services/firebaseStorage';
-import { useAuth, useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/clerk-expo';
 import { useToastController } from '@tamagui/toast';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTraining } from '@/contexts/TrainingContext';
 
 export interface UseProgressDataReturn {
   days: DayDataType[];
@@ -37,7 +37,6 @@ export interface UseProgressDataReturn {
 
 export const useProgressData = (): UseProgressDataReturn => {
   const { userId } = useAuth();
-  const { user } = useUser();
   const toast = useToastController();
   const { trainingType } = useTraining();
   

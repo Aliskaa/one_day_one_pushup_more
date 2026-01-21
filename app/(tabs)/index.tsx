@@ -1,4 +1,5 @@
 import { ProgressChart } from '@/components/ProgressChart';
+import RefreshableScreen from '@/components/RefreshScreen';
 import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from '@/constants/constants';
 import { useTraining } from '@/contexts/TrainingContext';
 import { useProgressData } from '@/hooks/useProgressData';
@@ -14,7 +15,6 @@ import {
   TrendingUp
 } from '@tamagui/lucide-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { TextInput } from 'react-native';
 import {
@@ -23,7 +23,6 @@ import {
   H1,
   H2,
   Progress,
-  ScrollView,
   Spinner,
   Text,
   useTheme,
@@ -32,13 +31,19 @@ import {
 } from 'tamagui';
 
 export default function DashboardScreen() {
-  const { days, todayIndex, updateDay, stats, isLoading, error } = useProgressData();
+  const { days, todayIndex, updateDay, stats, isLoading, error, refreshData } = useProgressData();
   const { sendCelebration, sendStreakReminder } = usePushNotifications();
   const [localInputValue, setLocalInputValue] = useState('');
   const [previousDone, setPreviousDone] = useState(0);
   const theme = useTheme();
-  const router = useRouter();
   const { trainingType } = useTraining();
+  const [loading, setLoading] = useState(false);
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    await refreshData();
+    setLoading(false);
+  };
 
   useEffect(() => {
     setLocalInputValue(stats.todayDone?.toString() || '');
@@ -72,6 +77,7 @@ export default function DashboardScreen() {
       setPreviousDone(newValue);
     }
   };
+
   const weekProgress = useMemo(() => {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Dimanche
@@ -108,7 +114,7 @@ export default function DashboardScreen() {
     ? Math.min(100, ((stats.todayDone || 0) / stats.todayTarget) * 100) 
     : 0;
 
-  if (isLoading) {
+  if (isLoading && !loading) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" bg="$background">
         <Spinner size="large" color="$primary" />
@@ -125,7 +131,10 @@ export default function DashboardScreen() {
   }
 
   return (
-    <ScrollView bg="$backgroundHover" showsVerticalScrollIndicator={false}>
+      <RefreshableScreen
+      isRefreshing={loading} 
+      onRefresh={handleRefresh}
+    >
       <YStack p="$4" gap="$4" pb="$8">
         
         {/* 1. HEADER */}
@@ -222,7 +231,7 @@ export default function DashboardScreen() {
               />
               
               <XStack gap="$2">
-                {[1, 5, 10].map((amount) => (
+                {[1, 10, 25].map((amount) => (
                   <Button
                     key={amount}
                     size="$4"
@@ -319,9 +328,9 @@ export default function DashboardScreen() {
                 <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Jour de l'année</Text>
               </XStack>
               <Text fontFamily="$heading" fontSize={20}>
-                {todayIndex} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>/ {DAYS_IN_YEAR}</Text>
+                {todayIndex + 1} <Text fontSize={14} fontWeight="400" color="$color" opacity={0.6}>/ {DAYS_IN_YEAR}</Text>
               </Text>
-              <Progress value={(todayIndex / DAYS_IN_YEAR) * 100} size="$1" bg="$backgroundHover">
+              <Progress value={((todayIndex + 1) / DAYS_IN_YEAR) * 100} size="$1" bg="$backgroundHover">
                 <Progress.Indicator animation="bouncy" bg="$primary" />
               </Progress>
             </YStack>
@@ -347,6 +356,6 @@ export default function DashboardScreen() {
         <ProgressChart days={days} todayIndex={todayIndex} />
 
       </YStack>
-    </ScrollView>
+    </RefreshableScreen>
   );
 }
