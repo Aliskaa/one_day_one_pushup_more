@@ -3,6 +3,7 @@ import { useAchievements } from '@/hooks/useAchievements';
 import { useProgressData } from '@/hooks/useProgressData';
 import { SvgTraining } from '@/icons/Training';
 import { AchievementCategory, AchievementWithStatus } from '@/types/achievement';
+import { getCurrentWeekDays, getDayProgressPercent } from '@/helpers/dateUtils';
 import {
   Award,
   BadgeCheck,
@@ -136,32 +137,19 @@ export default function AchievementsScreen() {
 
   // Calculer le progrès de la semaine
   const weekProgress = useMemo(() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Dimanche
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-    const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-    const result = [];
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + mondayOffset + i);
-
-      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      const dayData = days.find(d => d.dateStr === dateStr);
-
+    const weekDays = getCurrentWeekDays(days);
+    
+    return weekDays.map(({ day, dayData }) => {
       const done = dayData?.done || 0;
       const target = dayData?.target || 1;
-      const percent = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 0;
+      const percent = getDayProgressPercent(done, target);
 
-      result.push({
-        day: weekDays[i],
+      return {
+        day,
         done,
         percent,
-      });
-    }
-
-    return result;
+      };
+    });
   }, [days]);
 
   // Composant pour afficher un badge

@@ -5,6 +5,7 @@
 
 import { START_YEAR, UI_CONSTANTS } from '@/constants/constants';
 import { useTraining } from '@/contexts/TrainingContext';
+import { getTodayIndex } from '@/helpers/dateUtils';
 import {
   generateYearData,
   loadProgressFromFirebase,
@@ -54,13 +55,7 @@ export const useProgressData = (): UseProgressDataReturn => {
   const pendingUpdatesRef = useRef<ProgressMapType>({});
 
   // Calcul de l'index d'aujourd'hui
-  const todayIndex = (() => {
-    const today = new Date();
-    const startOfYear = new Date(START_YEAR, 0, 1);
-    const diffTime = today.getTime() - startOfYear.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays >= 0 && diffDays < days.length ? diffDays : -1;
-  })();
+  const todayIndex = getTodayIndex(START_YEAR, days.length);
 
   // Chargement initial des données
   useEffect(() => {

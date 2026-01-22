@@ -6,6 +6,7 @@ import { useTraining } from '@/contexts/TrainingContext';
 import { useProgressData } from '@/hooks/useProgressData';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { SvgTraining } from '@/icons/Training';
+import { getCurrentWeekDays, isDayCompleted, isDayMissed } from '@/helpers/dateUtils';
 import {
   Activity,
   BarChart3,
@@ -80,33 +81,18 @@ export default function DashboardScreen() {
   };
 
   const weekProgress = useMemo(() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Dimanche
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-    const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-    const result = [];
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + mondayOffset + i);
-
-      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      const dayData = days.find(d => d.dateStr === dateStr);
-
-      const isToday = i === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
-      const isFuture = date > today && !isToday;
-      const isDone = dayData?.done !== null && dayData?.done !== undefined && dayData.done >= (dayData.target || 1);
-      const isMissed = dayData?.done !== null && dayData?.done !== undefined && dayData.done < (dayData.target || 1);
-
-      result.push({
-        day: weekDays[i],
+    const weekDays = getCurrentWeekDays(days);
+    
+    return weekDays.map(({ day, isToday, isFuture, dayData }) => {
+      const isDone = isDayCompleted(dayData?.done, dayData?.target || 1);
+      const isMissed = isDayMissed(dayData?.done, dayData?.target || 1);
+      
+      return {
+        day,
         status: isFuture ? 'future' : (isDone ? 'success' : (isMissed ? 'failed' : 'pending')),
         isToday
-      });
-    }
-
-    return result;
+      };
+    });
   }, [days]);
 
   // Utiliser stats.totalDone au lieu de recalculer

@@ -8,6 +8,9 @@ import { db, USERS_COLLECTION, TRAINING_COLLECTION, PROGRESS_COLLECTION, ACHIEVE
 import { START_YEAR } from '@/constants/constants';
 import log from './logger';
 
+// Ré-export des utilitaires de date pour compatibilité
+export { formatDateString, getTodayString } from '@/helpers/dateUtils';
+
 /**
  * Génère une référence de document pour la progression d'un utilisateur
  */
@@ -20,23 +23,6 @@ export const getProgressDocRef = (userId: string, trainingType: TrainingName): D
  */
 export const getAchievementsDocRef = (userId: string, trainingType: TrainingName): DocumentReference => {
   return doc(db, USERS_COLLECTION, userId, TRAINING_COLLECTION, trainingType, `year_${START_YEAR}`, ACHIEVEMENTS_COLLECTION);
-};
-
-/**
- * Génère une date au format string YYYY-MM-DD
- */
-export const formatDateString = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-/**
- * Récupère la date d'aujourd'hui au format string
- */
-export const getTodayString = (): string => {
-  return formatDateString(new Date());
 };
 
 /**
