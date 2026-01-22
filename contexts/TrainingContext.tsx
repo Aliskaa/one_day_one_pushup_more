@@ -1,4 +1,5 @@
 import { storageService } from "@/services/asyncStorage";
+import log from "@/services/logger";
 import { createContext, useContext, useEffect, useState } from "react";
 
 export type TrainingName = 'pushup' | 'crunch';
@@ -25,7 +26,7 @@ export const TrainingProvider = ({ children }: { children: React.ReactNode }) =>
           setTrainingType(saved);
         }
       } catch (error) {
-        console.error('Erreur chargement training:', error);
+        log.error('Erreur chargement training:', error);
       } finally {
         setIsLoading(false);
       }
@@ -38,7 +39,7 @@ export const TrainingProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       await storageService.setItem(TRAINING_STORAGE_KEY, type);
     } catch (error) {
-      console.error('Erreur sauvegarde training:', error);
+      log.error('Erreur sauvegarde training:', error);
     }
   };
 

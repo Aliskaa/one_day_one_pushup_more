@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import { getRandomMessage, getStreakMessage, REMINDER_MESSAGES, CELEBRATION_MESSAGES } from '@/constants/messages';
 import Constants from 'expo-constants';
 import { storageService } from '@/services/asyncStorage';
+import log from '@/services/logger';
 
 const NOTIFICATION_SETTINGS_KEY = '@notification_settings';
 
@@ -46,7 +47,7 @@ export function usePushNotifications() {
           if (token) setExpoPushToken(token);
         })
         .catch(error => {
-          console.warn('Notifications push non disponibles:', error.message);
+          log.warn('Notifications push non disponibles:', error.message);
           // Continuer sans notifications push
         });
 
@@ -57,7 +58,7 @@ export function usePushNotifications() {
 
       // Listener pour les interactions avec les notifications
       const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-        console.log('Notification clicked:', response);
+        log.info('Notification clicked:', response);
         // Vous pouvez naviguer vers une page spécifique ici
       });
 
@@ -84,7 +85,7 @@ export function usePushNotifications() {
         setSettings(saved);
       }
     } catch (error) {
-      console.error('Erreur chargement paramètres notifications:', error);
+      log.error('Erreur chargement paramètres notifications:', error);
     }
   };
 
@@ -93,7 +94,7 @@ export function usePushNotifications() {
       await storageService.setItem(NOTIFICATION_SETTINGS_KEY, newSettings);
       setSettings(newSettings);
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres notifications:', error);
+      log.error('Erreur sauvegarde paramètres notifications:', error);
     }
   };
 
@@ -125,9 +126,9 @@ export function usePushNotifications() {
         },
       });
 
-      console.log(`Notification quotidienne programmée à ${time}`);
+      log.info(`Notification quotidienne programmée à ${time}`);
     } catch (error) {
-      console.error('Erreur planification notification:', error);
+      log.error('Erreur planification notification:', error);
     }
   };
 
@@ -150,7 +151,7 @@ export function usePushNotifications() {
         },
       });
     } catch (error) {
-      console.error('Erreur notification streak:', error);
+      log.error('Erreur notification streak:', error);
     }
   };
 
@@ -167,7 +168,7 @@ export function usePushNotifications() {
         trigger: null, // Immédiat
       });
     } catch (error) {
-      console.error('Erreur notification célébration:', error);
+      log.error('Erreur notification célébration:', error);
     }
   };
 
@@ -184,7 +185,7 @@ export function usePushNotifications() {
         trigger: null,
       });
     } catch (error) {
-      console.error('Erreur notification achievement:', error);
+      log.error('Erreur notification achievement:', error);
     }
   };
 
@@ -200,16 +201,16 @@ export function usePushNotifications() {
         trigger: null,
       });
     } catch (error) {
-      console.error('Erreur notification motivation:', error);
+      log.error('Erreur notification motivation:', error);
     }
   };
 
   const cancelAllNotifications = async () => {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
-      console.log('Toutes les notifications annulées');
+      log.info('Toutes les notifications annulées');
     } catch (error) {
-      console.error('Erreur annulation notifications:', error);
+      log.error('Erreur annulation notifications:', error);
     }
   };
 
@@ -255,7 +256,7 @@ async function registerForPushNotificationsAsync() {
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Permission de notification refusée');
+      log.info('Permission de notification refusée');
       return;
     }
 
@@ -265,13 +266,13 @@ async function registerForPushNotificationsAsync() {
       // Il est recommandé de passer le projectId si vous utilisez EAS
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
       token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-      console.log('Push token:', token);
+      log.info('Push token:', token);
     } catch (error) {
-      console.warn('Push token non disponible (FCM non configuré):', error);
+      log.warn('Push token non disponible (FCM non configuré):', error);
       // Les notifications locales fonctionneront toujours
     }
   } else {
-    console.log('Les notifications push nécessitent un vrai device');
+    log.info('Les notifications push nécessitent un vrai device');
   }
 
   return token;

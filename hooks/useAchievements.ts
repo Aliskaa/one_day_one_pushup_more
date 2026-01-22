@@ -23,6 +23,7 @@ import { useAuth } from '@clerk/clerk-expo';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePushNotifications } from './usePushNotifications';
 import { useTraining } from '@/contexts/TrainingContext';
+import log from '@/services/logger';
 
 export interface UseAchievementsReturn {
   achievements: AchievementWithStatus[];
@@ -82,9 +83,9 @@ export const useAchievements = (
           setUnlockedBadges(data.unlockedBadges || {});
         }
         
-        console.log('🏆 Achievements chargés');
+        log.info('🏆 Achievements chargés');
       } catch (err) {
-        console.error('❌ Erreur chargement achievements:', err);
+        log.error('❌ Erreur chargement achievements:', err);
         setError('Impossible de charger les achievements');
       } finally {
         setIsLoading(false);
@@ -103,7 +104,7 @@ export const useAchievements = (
         const toUnlock = checkAchievementsToUnlock(stats, progressMap, days, unlockedBadges);
         
         if (toUnlock.length > 0) {
-          console.log('🎉 Nouveaux achievements à débloquer:', toUnlock);
+          log.info('🎉 Nouveaux achievements à débloquer:', toUnlock);
           
           // Débloquer chaque achievement
           const newUnlockedBadges = { ...unlockedBadges };
@@ -126,9 +127,9 @@ export const useAchievements = (
                   achievement.description,
                   achievementId
                 );
-                console.log(`🔔 Notification envoyée pour ${achievement.title}`);
+                log.info(`🔔 Notification envoyée pour ${achievement.title}`);
               } catch (notifError) {
-                console.error('Erreur envoi notification achievement:', notifError);
+                log.error('Erreur envoi notification achievement:', notifError);
               }
             }
           }
@@ -140,7 +141,7 @@ export const useAchievements = (
           await saveAchievementsToFirebase(userId, trainingType, newUnlockedBadges, stats);
         }
       } catch (err) {
-        console.error('❌ Erreur lors de la vérification des achievements:', err);
+        log.error('❌ Erreur lors de la vérification des achievements:', err);
       }
     };
 
@@ -174,7 +175,7 @@ export const useAchievements = (
         setUnlockedBadges(data.unlockedBadges || {});
       }
     } catch (err) {
-      console.error('❌ Erreur refresh achievements:', err);
+      log.error('❌ Erreur refresh achievements:', err);
     } finally {
       setIsLoading(false);
     }

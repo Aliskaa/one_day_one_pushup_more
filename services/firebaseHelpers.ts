@@ -6,6 +6,7 @@ import { TrainingName } from '@/contexts/TrainingContext';
 import { doc, DocumentReference } from 'firebase/firestore';
 import { db, USERS_COLLECTION, TRAINING_COLLECTION, PROGRESS_COLLECTION, ACHIEVEMENTS_COLLECTION } from './firebase';
 import { START_YEAR } from '@/constants/constants';
+import log from './logger';
 
 /**
  * Génère une référence de document pour la progression d'un utilisateur
@@ -42,7 +43,7 @@ export const getTodayString = (): string => {
  * Gestion centralisée des erreurs Firebase
  */
 export const handleFirebaseError = (operation: string, error: unknown): void => {
-  console.error(`❌ Erreur lors de ${operation}:`, error);
+  log.error(`❌ Erreur lors de ${operation}:`, error);
 };
 
 /**

@@ -1,6 +1,8 @@
+import { useTraining } from '@/contexts/TrainingContext';
 import { useProgressData } from '@/hooks/useProgressData';
 import { storageService } from '@/services/asyncStorage';
 import { generateWorkoutAdvice } from '@/services/googleAi';
+import log from '@/services/logger';
 import { Bot, Quote, Sparkles } from '@tamagui/lucide-icons';
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, Card, H3, Paragraph, Spinner, XStack, YStack } from 'tamagui';
@@ -9,14 +11,15 @@ export default function WorkoutScreen() {
     const [advice, setAdvice] = useState("");
     const [loading, setLoading] = useState(false);
     const [isCheckingCache, setIsCheckingCache] = useState(true);
+    const { trainingType } = useTraining();
 
     // On récupère aussi 'days' et 'todayIndex' pour avoir la date exacte gérée par l'app
     const { stats, days, todayIndex } = useProgressData(); //
 
     // Sécurité : si on est hors limites (ex: fin d'année), on ne fait rien
     const todayDateStr = (todayIndex >= 0 && days[todayIndex]) ? days[todayIndex].dateStr : null;
-    const STORAGE_KEY = `coach_advice_${todayDateStr}`;
-    const ADVICE_PREFIX = "coach_advice_";
+    const STORAGE_KEY = `coach_advice_${trainingType}_${todayDateStr}`;
+    const ADVICE_PREFIX = `coach_advice_${trainingType}_`;
 
     // 1. Charger le message depuis le cache au montage ou changement de jour
     useEffect(() => {
@@ -28,7 +31,7 @@ export default function WorkoutScreen() {
                 setIsCheckingCache(true);
 
                 const cached = await storageService.getItem<string>(STORAGE_KEY);
-                console.log("📂 Cache vérifié :", cached ? "Trouvé" : "Vide");
+                log.warn("📂 Cache vérifié :", cached ? "Trouvé" : "Vide");
 
                 if (cached) {
                     setAdvice(cached);
@@ -37,7 +40,7 @@ export default function WorkoutScreen() {
                 // Nettoyage des vieux conseils (en tâche de fond, pas besoin d'await bloquant)
                 storageService.cleanupOldKeys(ADVICE_PREFIX, STORAGE_KEY);
             } catch (e) {
-                console.error("Erreur cache", e);
+                log.error("Erreur cache", e);
             } finally {
                 // IMPORTANT : On signale que la vérification est TERMINÉE
                 setIsCheckingCache(false);
@@ -61,15 +64,15 @@ export default function WorkoutScreen() {
                 setLoading(true);
                 try {
                     // Appel API Gemini
-                    console.log("🤖 Génération IA lancée...");
+                    log.info("🤖 Génération IA lancée...");
                     const text = await generateWorkoutAdvice(stats); //
 
                     // Mise à jour de l'état ET sauvegarde locale pour la journée
                     setAdvice(text);
                     await storageService.setItem(STORAGE_KEY, text);
-                    console.log("💾 Conseil sauvegardé");
+                    log.info("💾 Conseil sauvegardé");
                 } catch (error) {
-                    console.error("Erreur génération advice", error);
+                    log.error("Erreur génération advice", error);
                 } finally {
                     setLoading(false);
                 }

@@ -12,6 +12,7 @@ import {
   saveProgressToFirebase,
   subscribeToProgress
 } from '@/services/firebaseStorage';
+import log from '@/services/logger';
 import { DayDataType } from '@/types/day';
 import { ProgressMapType } from '@/types/utils';
 import { useAuth } from '@clerk/clerk-expo';
@@ -85,12 +86,12 @@ export const useProgressData = (): UseProgressDataReturn => {
         setDays(mergedDays);
         setProgressMap(savedProgress);
 
-        console.log('✅ Données chargées:', {
+        log.info('✅ Données chargées:', {
           totalDays: mergedDays.length,
           savedEntries: Object.keys(savedProgress).length,
         });
       } catch (err) {
-        console.error('❌ Erreur de chargement:', err);
+        log.error('❌ Erreur de chargement:', err);
         setError('Impossible de charger les données');
 
         // Fallback: générer les données localement
@@ -141,9 +142,9 @@ export const useProgressData = (): UseProgressDataReturn => {
         const allUpdates = { ...progressMap, ...pendingUpdatesRef.current };
         await saveProgressToFirebase(userId, trainingType, allUpdates);
         pendingUpdatesRef.current = {};
-        console.log('💾 Sauvegarde effectuée');
+        log.info('💾 Sauvegarde effectuée');
       } catch (err) {
-        console.error('❌ Erreur de sauvegarde:', err);
+        log.error('❌ Erreur de sauvegarde:', err);
         setError('Erreur de sauvegarde');
       }
     }, UI_CONSTANTS.DEBOUNCE_SAVE_DELAY);
@@ -194,7 +195,7 @@ export const useProgressData = (): UseProgressDataReturn => {
       setDays(mergedDays);
       setProgressMap(savedProgress);
     } catch (err) {
-      console.error('❌ Erreur de rafraîchissement:', err);
+      log.error('❌ Erreur de rafraîchissement:', err);
       setError('Erreur de rafraîchissement');
     } finally {
       setIsLoading(false);

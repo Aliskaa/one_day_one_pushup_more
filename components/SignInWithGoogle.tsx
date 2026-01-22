@@ -1,12 +1,12 @@
 import { useSSO } from '@clerk/clerk-expo'
 import { Chrome } from '@tamagui/lucide-icons'
-import * as AuthSession from 'expo-auth-session'
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import React, { useCallback, useEffect } from 'react'
 import { Platform } from 'react-native'
 import { Button, Text } from "tamagui"
 import * as Linking from "expo-linking";
+import log from '@/services/logger'
 
 // Preloads the browser for Android devices to reduce authentication load time
 // See: https://docs.expo.dev/guides/authentication/#improving-user-experience
@@ -51,7 +51,7 @@ export default function Page() {
           // See https://clerk.com/docs/guides/development/custom-flows/overview#session-tasks
           navigate: async ({ session }) => {
             if (session?.currentTask) {
-              console.log(session?.currentTask)
+              log.info(session?.currentTask)
               router.push('/sign-in')
               return
             }
@@ -67,7 +67,7 @@ export default function Page() {
     } catch (err) {
       // See https://clerk.com/docs/guides/development/custom-flows/error-handling
       // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      log.error(JSON.stringify(err, null, 2))
     }
   }, [])
 

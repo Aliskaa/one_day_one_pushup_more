@@ -18,6 +18,7 @@ import {
   Unsubscribe
 } from 'firebase/firestore';
 import { createTargetsByDateMap, getAchievementsDocRef, getTodayString } from './firebaseHelpers';
+import log from './logger';
 
 export const loadAchievementsFromFirebase = async (userId: string, trainingType: TrainingName): Promise<UserAchievementsDoc | null> => {
   try {
@@ -26,16 +27,16 @@ export const loadAchievementsFromFirebase = async (userId: string, trainingType:
     
     if (docSnap.exists()) {
       const data = docSnap.data() as UserAchievementsDoc;
-      console.log('🏆 Achievements chargés depuis Firebase:', {
+      log.info('🏆 Achievements chargés depuis Firebase:', {
         unlockedCount: Object.keys(data.unlockedBadges || {}).length,
       });
       return data;
     }
     
-    console.log('📝 Aucun achievement existant');
+    log.info('📝 Aucun achievement existant');
     return null;
   } catch (error) {
-    console.error('❌ Erreur lors du chargement des achievements:', error);
+    log.error('❌ Erreur lors du chargement des achievements:', error);
     throw error;
   }
 };
@@ -59,9 +60,9 @@ export const saveAchievementsToFirebase = async (
     };
     
     await setDoc(docRef, data, { merge: true });
-    console.log('💾 Achievements sauvegardés dans Firebase');
+    log.info('💾 Achievements sauvegardés dans Firebase');
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde des achievements:', error);
+    log.error('❌ Erreur lors de la sauvegarde des achievements:', error);
     throw error;
   }
 };
@@ -89,9 +90,9 @@ export const unlockAchievement = async (
       lastUpdated: new Date(),
     }, { merge: true });
     
-    console.log(`🎉 Achievement débloqué: ${achievementId}`);
+    log.info(`🎉 Achievement débloqué: ${achievementId}`);
   } catch (error) {
-    console.error('❌ Erreur lors du débloquage:', error);
+    log.error('❌ Erreur lors du débloquage:', error);
     throw error;
   }
 };
@@ -114,7 +115,7 @@ export const subscribeToAchievements = (
       onUpdate(null);
     }
   }, (error) => {
-    console.error('❌ Erreur de synchronisation achievements:', error);
+    log.error('❌ Erreur de synchronisation achievements:', error);
   });
 };
 

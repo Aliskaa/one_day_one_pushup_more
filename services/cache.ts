@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
+import log from './logger';
 
 interface TokenCache {
   getToken: (key: string) => Promise<string | null>;
@@ -12,13 +13,13 @@ const createTokenCache = (): TokenCache => {
       try {
         const item = await SecureStore.getItemAsync(key)
         if (item) {
-          console.log(`${key} was used 🔐 \n`)
+          log.info(`${key} was used 🔐 \n`)
         } else {
-          console.log('No values stored under key: ' + key)
+          log.warn('No values stored under key: ' + key)
         }
         return item
       } catch (error) {
-        console.error('secure store get item error: ', error)
+        log.error('secure store get item error: ', error)
         await SecureStore.deleteItemAsync(key)
         return null
       }

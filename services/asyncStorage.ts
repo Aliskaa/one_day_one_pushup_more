@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import log from "./logger";
 
 export const storageService = {/**
    * Sauvegarde une valeur (String, Nombre, Objet, Tableau...)
@@ -11,7 +12,7 @@ export const storageService = {/**
             const jsonValue = typeof value === 'string' ? value : JSON.stringify(value);
             await AsyncStorage.setItem(key, jsonValue);
         } catch (e) {
-            console.error(`❌ Erreur AsyncStorage [setItem] pour la clé "${key}":`, e);
+            log.error(`❌ Erreur AsyncStorage [setItem] pour la clé "${key}":`, e);
         }
     },/**
    * Récupère une valeur.
@@ -31,7 +32,7 @@ export const storageService = {/**
                 return jsonValue as unknown as T;
             }
         } catch (e) {
-            console.error(`❌ Erreur AsyncStorage [getItem] pour la clé "${key}":`, e);
+            log.error(`❌ Erreur AsyncStorage [getItem] pour la clé "${key}":`, e);
             return null;
         }
     },
@@ -43,7 +44,7 @@ export const storageService = {/**
         try {
             await AsyncStorage.removeItem(key);
         } catch (e) {
-            console.error(`❌ Erreur AsyncStorage [removeItem] pour la clé "${key}":`, e);
+            log.error(`❌ Erreur AsyncStorage [removeItem] pour la clé "${key}":`, e);
         }
     },
 
@@ -54,9 +55,9 @@ export const storageService = {/**
     clearAll: async (): Promise<void> => {
         try {
             await AsyncStorage.clear();
-            console.log('🧹 AsyncStorage vidé entièrement.');
+            log.info('🧹 AsyncStorage vidé entièrement.');
         } catch (e) {
-            console.error('❌ Erreur AsyncStorage [clearAll]:', e);
+            log.error('❌ Erreur AsyncStorage [clearAll]:', e);
         }
     },
 
@@ -78,10 +79,10 @@ export const storageService = {/**
             // 3. Supprimer en lot (plus performant)
             if (keysToRemove.length > 0) {
                 await AsyncStorage.multiRemove(keysToRemove);
-                console.log(`🧹 Nettoyage : ${keysToRemove.length} anciens conseils supprimés.`);
+                log.info(`🧹 Nettoyage : ${keysToRemove.length} anciens conseils supprimés.`);
             }
         } catch (e) {
-            console.error('❌ Erreur lors du nettoyage des anciennes clés:', e);
+            log.error('❌ Erreur lors du nettoyage des anciennes clés:', e);
         }
     }
 };

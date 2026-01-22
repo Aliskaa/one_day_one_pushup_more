@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { storageService } from '@/services/asyncStorage';
+import log from '@/services/logger';
 
 type ThemeName = 'light' | 'dark';
 
@@ -33,7 +34,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         setOverrideTheme(savedTheme);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement du thème:', error);
+      log.error('Erreur lors du chargement du thème:', error);
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +48,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         await storageService.setItem(THEME_STORAGE_KEY, theme);
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde du thème:', error);
+      log.error('Erreur lors de la sauvegarde du thème:', error);
     }
   };
 

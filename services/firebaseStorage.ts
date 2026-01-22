@@ -16,6 +16,7 @@ import {
   updateDoc
 } from 'firebase/firestore';
 import { formatDateString, getProgressDocRef } from './firebaseHelpers';
+import log from './logger';
 
 /**
  * Génère les données pour toute l'année
@@ -35,7 +36,7 @@ export const generateYearData = (): DayDataType[] => {
     });
   }
   
-  console.log('🗓️ Génération des dates:', {
+  log.info('🗓️ Génération des dates:', {
     first: generatedDays[0]?.dateStr,
     last: generatedDays[DAYS_IN_YEAR - 1]?.dateStr,
     total: generatedDays.length,
@@ -54,17 +55,17 @@ export const loadProgressFromFirebase = async (userId: string, trainingType: Tra
     
     if (docSnap.exists()) {
       const data = docSnap.data() as UserProgressDoc;
-      console.log('✅ Données chargées depuis Firebase:', {
+      log.info('✅ Données chargées depuis Firebase:', {
         totalEntries: Object.keys(data.progressMap || {}).length,
         lastUpdated: data.lastUpdated
       });
       return data.progressMap || {};
     }
     
-    console.log('📝 Aucune donnée existante, création du document...');
+    log.info('📝 Aucune donnée existante, création du document...');
     return {};
   } catch (error) {
-    console.error('❌ Erreur lors du chargement Firebase:', error);
+    log.error('❌ Erreur lors du chargement Firebase:', error);
     throw error;
   }
 };
@@ -91,9 +92,9 @@ export const saveProgressToFirebase = async (
     };
     
     await setDoc(docRef, data, { merge: true });
-    console.log('💾 Données sauvegardées dans Firebase');
+    log.info('💾 Données sauvegardées dans Firebase');
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde Firebase:', error);
+    log.error('❌ Erreur lors de la sauvegarde Firebase:', error);
     throw error;
   }
 };
@@ -115,10 +116,10 @@ export const updateDayProgress = async (
       lastUpdated: new Date(),
     });
     
-    console.log(`✅ Jour ${dateStr} mis à jour: ${value}`);
+    log.info(`✅ Jour ${dateStr} mis à jour: ${value}`);
   } catch (error) {
     // Si le document n'existe pas encore, on le crée
-    console.log('Document inexistant, création...');
+    log.info('Document inexistant, création...');
     await saveProgressToFirebase(userId, trainingType, { [dateStr]: value ?? 0 });
   }
 };
@@ -140,7 +141,7 @@ export const subscribeToProgress = (
       onUpdate(data.progressMap || {});
     }
   }, (error) => {
-    console.error('❌ Erreur de synchronisation:', error);
+    log.error('❌ Erreur de synchronisation:', error);
   });
 };
 
@@ -169,9 +170,9 @@ export const clearUserData = async (userId: string, trainingType: TrainingName):
       lastUpdated: new Date(),
       totalDone: 0,
     });
-    console.log('🗑️ Données réinitialisées');
+    log.info('🗑️ Données réinitialisées');
   } catch (error) {
-    console.error('❌ Erreur lors de la réinitialisation:', error);
+    log.error('❌ Erreur lors de la réinitialisation:', error);
     throw error;
   }
 };
@@ -200,7 +201,7 @@ export const getUserStats = async (userId: string, trainingType: TrainingName) =
     
     return { totalDone: 0, daysCompleted: 0, lastUpdated: null };
   } catch (error) {
-    console.error('❌ Erreur lors de la récupération des stats:', error);
+    log.error('❌ Erreur lors de la récupération des stats:', error);
     throw error;
   }
 };

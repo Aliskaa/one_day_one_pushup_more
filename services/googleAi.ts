@@ -1,5 +1,6 @@
 import { ProgressDataStats } from "@/hooks/useProgressData";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import log from "./logger";
 
 const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_AI_KEY;
 
@@ -38,7 +39,7 @@ export const generateWorkoutAdvice = async (stats: ProgressDataStats) => {
 
         return text;
     } catch (error) {
-        console.error("Error generating workout advice:", error);
+        log.error("Error generating workout advice:", error);
         return "Continue comme ça, tu fais du super boulot ! Chaque répétition te rapproche de ton objectif.";
     }
 }
