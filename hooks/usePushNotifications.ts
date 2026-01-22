@@ -113,7 +113,7 @@ export function usePushNotifications() {
       // Programmer la notification quotidienne
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "💪 C'est l'heure des pompes !",
+          title: "💪 C'est l'heure des répétitions !",
           body: getRandomMessage(REMINDER_MESSAGES),
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
@@ -176,7 +176,7 @@ export function usePushNotifications() {
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '🏆 Achievement débloqué !',
+          title: '🏆 Objectif débloqué !',
           body: `${achievementTitle} - ${achievementDescription}`,
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
