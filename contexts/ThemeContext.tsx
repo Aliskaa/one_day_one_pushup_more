@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storageService } from '@/services/asyncStorage';
 
 type ThemeName = 'light' | 'dark';
 
@@ -28,7 +28,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loadTheme = async () => {
     try {
-      const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+      const savedTheme = await  storageService.getItem<ThemeName | null>(THEME_STORAGE_KEY);
       if (savedTheme === 'light' || savedTheme === 'dark') {
         setOverrideTheme(savedTheme);
       }
@@ -42,9 +42,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const saveTheme = async (theme: ThemeName | null) => {
     try {
       if (theme === null) {
-        await AsyncStorage.removeItem(THEME_STORAGE_KEY);
+        await storageService.removeItem(THEME_STORAGE_KEY);
       } else {
-        await AsyncStorage.setItem(THEME_STORAGE_KEY, theme);
+        await storageService.setItem(THEME_STORAGE_KEY, theme);
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du thème:', error);

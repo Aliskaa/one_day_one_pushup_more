@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getRandomMessage, getStreakMessage, REMINDER_MESSAGES, CELEBRATION_MESSAGES } from '@/constants/messages';
 import Constants from 'expo-constants';
+import { storageService } from '@/services/asyncStorage';
 
 const NOTIFICATION_SETTINGS_KEY = '@notification_settings';
 
@@ -79,9 +79,9 @@ export function usePushNotifications() {
 
   const loadSettings = async () => {
     try {
-      const saved = await AsyncStorage.getItem(NOTIFICATION_SETTINGS_KEY);
+      const saved = await storageService.getItem<NotificationSettings>(NOTIFICATION_SETTINGS_KEY);
       if (saved) {
-        setSettings(JSON.parse(saved));
+        setSettings(saved);
       }
     } catch (error) {
       console.error('Erreur chargement paramètres notifications:', error);
@@ -90,7 +90,7 @@ export function usePushNotifications() {
 
   const saveSettings = async (newSettings: NotificationSettings) => {
     try {
-      await AsyncStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(newSettings));
+      await storageService.setItem(NOTIFICATION_SETTINGS_KEY, newSettings);
       setSettings(newSettings);
     } catch (error) {
       console.error('Erreur sauvegarde paramètres notifications:', error);

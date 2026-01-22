@@ -18,6 +18,16 @@ import { useAuth } from '@clerk/clerk-expo';
 import { useToastController } from '@tamagui/toast';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+export type ProgressDataStats = {
+  totalDone: number;
+  daysCompleted: number;
+  todayTarget: number;
+  todayDone: number | null;
+  ecart: number;
+  percent: number;
+  streak: number;
+};
+
 export interface UseProgressDataReturn {
   days: DayDataType[];
   todayIndex: number;
@@ -25,26 +35,19 @@ export interface UseProgressDataReturn {
   error: string | null;
   updateDay: (index: number, value: string) => void;
   refreshData: () => Promise<void>;
-  stats: {
-    totalDone: number;
-    daysCompleted: number;
-    todayTarget: number;
-    todayDone: number | null;
-    ecart: number;
-    percent: number;
-  };
+  stats: ProgressDataStats;
 }
 
 export const useProgressData = (): UseProgressDataReturn => {
   const { userId } = useAuth();
   const toast = useToastController();
   const { trainingType } = useTraining();
-  
+
   const [days, setDays] = useState<DayDataType[]>([]);
   const [progressMap, setProgressMap] = useState<ProgressMapType>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Référence pour le debounce de sauvegarde
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingUpdatesRef = useRef<ProgressMapType>({});
@@ -81,7 +84,7 @@ export const useProgressData = (): UseProgressDataReturn => {
 
         setDays(mergedDays);
         setProgressMap(savedProgress);
-        
+
         console.log('✅ Données chargées:', {
           totalDays: mergedDays.length,
           savedEntries: Object.keys(savedProgress).length,
@@ -89,7 +92,7 @@ export const useProgressData = (): UseProgressDataReturn => {
       } catch (err) {
         console.error('❌ Erreur de chargement:', err);
         setError('Impossible de charger les données');
-        
+
         // Fallback: générer les données localement
         const generatedDays = generateYearData();
         setDays(generatedDays);
@@ -107,9 +110,9 @@ export const useProgressData = (): UseProgressDataReturn => {
 
     const unsubscribe = subscribeToProgress(userId, trainingType, (newProgressMap) => {
       setProgressMap(newProgressMap);
-      
+
       // Mettre à jour les days avec les nouvelles données
-      setDays(prevDays => 
+      setDays(prevDays =>
         prevDays.map(day => ({
           ...day,
           done: newProgressMap[day.dateStr] ?? null,
@@ -149,7 +152,7 @@ export const useProgressData = (): UseProgressDataReturn => {
   // Mise à jour d'un jour
   const updateDay = useCallback((index: number, value: string) => {
     const numValue = value === '' ? null : parseInt(value, 10);
-    
+
     // Validation
     if (numValue !== null && (isNaN(numValue) || numValue < 0 || numValue > UI_CONSTANTS.MAX_INPUT_VALUE)) {
       toast.show('⚠️ Limite dépassée', {
@@ -162,18 +165,18 @@ export const useProgressData = (): UseProgressDataReturn => {
     setDays(prevDays => {
       const newDays = [...prevDays];
       const day = newDays[index];
-      
+
       if (day) {
         newDays[index] = { ...day, done: numValue };
-        
+
         // Mettre à jour le progressMap local
         const newProgressMap = { ...progressMap, [day.dateStr]: numValue ?? 0 };
         setProgressMap(newProgressMap);
-        
+
         // Sauvegarder avec debounce
         debouncedSave({ [day.dateStr]: numValue ?? 0 });
       }
-      
+
       return newDays;
     });
   }, [progressMap, debouncedSave, toast]);
@@ -187,7 +190,7 @@ export const useProgressData = (): UseProgressDataReturn => {
       const savedProgress = await loadProgressFromFirebase(userId, trainingType);
       const generatedDays = generateYearData();
       const mergedDays = mergeDataWithProgress(generatedDays, savedProgress);
-      
+
       setDays(mergedDays);
       setProgressMap(savedProgress);
     } catch (err) {
@@ -202,19 +205,33 @@ export const useProgressData = (): UseProgressDataReturn => {
   const stats = (() => {
     const totalDone = days.reduce((sum, day) => sum + (day.done || 0), 0);
     const daysCompleted = days.filter(d => d.done !== null && d.done >= d.target).length;
-    
+
     const today = days[todayIndex];
     const todayTarget = today?.target || 0;
     const todayDone = today?.done ?? null;
-    
+
     // Calcul de l'écart (positif = en avance, négatif = en retard)
     const expectedCumul = days.slice(0, todayIndex + 1).reduce((sum, d) => sum + d.target, 0);
     const realCumul = days.slice(0, todayIndex + 1).reduce((sum, d) => sum + (d.done || 0), 0);
     const ecart = realCumul - expectedCumul;
-    
+
     // Pourcentage de progression annuelle
     const totalTarget = days.reduce((sum, d) => sum + d.target, 0);
     const percent = totalTarget > 0 ? Math.round((totalDone / totalTarget) * 100 * 10) / 10 : 0;
+
+    // Calcul de la série en cours (streak)
+    let streak = 0;
+    if (today && today.done !== null && today.done >= today.target) {
+      streak++;
+    }
+    for (let i = todayIndex - 1; i >= 0; i--) {
+      const day = days[i];
+      if (day && day.done !== null && day.done >= day.target) {
+        streak++;
+      } else {
+        break;
+      }
+    }
 
     return {
       totalDone,
@@ -223,6 +240,7 @@ export const useProgressData = (): UseProgressDataReturn => {
       todayDone,
       ecart,
       percent,
+      streak,
     };
   })();
 

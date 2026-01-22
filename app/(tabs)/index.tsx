@@ -1,8 +1,8 @@
 import { ProgressChart } from '@/components/ProgressChart';
 import RefreshableScreen from '@/components/RefreshScreen';
+import WorkoutScreen from '@/components/WorkoutScreen';
 import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from '@/constants/constants';
 import { useTraining } from '@/contexts/TrainingContext';
-import { useAchievements } from '@/hooks/useAchievements';
 import { useProgressData } from '@/hooks/useProgressData';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { SvgTraining } from '@/icons/Training';
@@ -40,29 +40,6 @@ export default function DashboardScreen() {
   const { trainingType } = useTraining();
   const [loading, setLoading] = useState(false);
 
-  // Calcul de la série actuelle (Streak)
-  const currentStreak = useMemo(() => {
-    if (!days || todayIndex < 0) return 0;
-    let streak = 0;
-    
-    // Si aujourd'hui est validé, on l'inclut dans la streak
-    const todayDay = days[todayIndex];
-    if (todayDay && todayDay.done !== null && todayDay.done >= todayDay.target) {
-      streak++;
-    }
-    
-    // On remonte les jours précédents pour voir si la chaîne est continue
-    for (let i = todayIndex - 1; i >= 0; i--) {
-      const day = days[i];
-      if (day && day.done !== null && day.done >= day.target) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  }, [days, todayIndex]);
-
   const handleRefresh = async () => {
     setLoading(true);
     await refreshData();
@@ -85,19 +62,19 @@ export default function DashboardScreen() {
     setLocalInputValue(text);
     if (todayIndex !== -1) {
       updateDay(todayIndex, text);
-      
+
       const newValue = parseInt(text) || 0;
-      
+
       // Célébration si objectif atteint pour la première fois
       if (newValue >= stats.todayTarget && previousDone < stats.todayTarget) {
-        sendCelebration(`🎉 Objectif du jour validé ! Vous avez fait ${newValue} pompes !`);
+        sendCelebration(`🎉 Objectif du jour validé ! Vous avez fait ${newValue} ${trainingType === 'pushup' ? 'pompes' : 'crunchs'} !`);
       }
-      
+
       // Rappel de streak si série en cours
-      if (stats.daysCompleted >= 3 && newValue === 0) {
-        sendStreakReminder(stats.daysCompleted);
+      if (stats.streak >= 3 && newValue === 0) {
+        sendStreakReminder(stats.streak);
       }
-      
+
       setPreviousDone(newValue);
     }
   };
@@ -106,36 +83,36 @@ export default function DashboardScreen() {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Dimanche
     const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    
+
     const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
     const result = [];
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + mondayOffset + i);
-      
+
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       const dayData = days.find(d => d.dateStr === dateStr);
-      
+
       const isToday = i === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
       const isFuture = date > today && !isToday;
       const isDone = dayData?.done !== null && dayData?.done !== undefined && dayData.done >= (dayData.target || 1);
       const isMissed = dayData?.done !== null && dayData?.done !== undefined && dayData.done < (dayData.target || 1);
-      
+
       result.push({
         day: weekDays[i],
         status: isFuture ? 'future' : (isDone ? 'success' : (isMissed ? 'failed' : 'pending')),
         isToday
       });
     }
-    
+
     return result;
   }, [days]);
 
   // Utiliser stats.totalDone au lieu de recalculer
   const isAhead = stats.ecart >= 0;
-  const dayProgress = stats.todayTarget > 0 
-    ? Math.min(100, ((stats.todayDone || 0) / stats.todayTarget) * 100) 
+  const dayProgress = stats.todayTarget > 0
+    ? Math.min(100, ((stats.todayDone || 0) / stats.todayTarget) * 100)
     : 0;
 
   if (isLoading && !loading) {
@@ -155,12 +132,12 @@ export default function DashboardScreen() {
   }
 
   return (
-      <RefreshableScreen
-      isRefreshing={loading} 
+    <RefreshableScreen
+      isRefreshing={loading}
       onRefresh={handleRefresh}
     >
       <YStack p="$4" gap="$4" pb="$8">
-        
+
         {/* 1. HEADER */}
         <YStack gap="$3" mb="$2" alignItems="center">
           <SvgTraining size={70} color="$color" />
@@ -174,12 +151,14 @@ export default function DashboardScreen() {
           </YStack>
         </YStack>
 
+        <WorkoutScreen />
+
         {/* 2. HERO CARD */}
-        <Card 
-          elevate 
-          size="$4" 
-          p="$0" 
-          overflow="hidden" 
+        <Card
+          elevate
+          size="$4"
+          p="$0"
+          overflow="hidden"
           borderRadius={24}
           animation="bouncy"
           hoverStyle={{ scale: 0.98 }}
@@ -199,7 +178,7 @@ export default function DashboardScreen() {
                 </Text>
                 <Activity size={24} color="#fff" />
               </XStack>
-              
+
               <YStack alignItems="center" py="$2">
                 <H1 fontFamily="$heading" fontSize={72} lineHeight={72} color="#fff">
                   {stats.todayTarget}
@@ -232,7 +211,7 @@ export default function DashboardScreen() {
             <H2 fontFamily="$heading" size="$4" color="$color">
               ✍️ Saisir ma performance
             </H2>
-            
+
             <XStack gap="$3" alignItems="center">
               <TextInput
                 style={{
@@ -253,7 +232,7 @@ export default function DashboardScreen() {
                 value={localInputValue}
                 onChangeText={handleChangeText}
               />
-              
+
               <XStack gap="$2">
                 {[1, 10, 25].map((amount) => (
                   <Button
@@ -264,7 +243,7 @@ export default function DashboardScreen() {
                     borderRadius={14}
                     onPress={() => handleQuickAdd(amount)}
                     animation="quick"
-                    pressStyle={{ scale: 0.9, bg: '$brandLight'}}
+                    pressStyle={{ scale: 0.9, bg: '$brandLight' }}
                   >
                     <Text fontFamily="$heading" fontWeight="700">+{amount}</Text>
                   </Button>
@@ -276,13 +255,13 @@ export default function DashboardScreen() {
 
         {/* 4. STATS GRID */}
         <XStack gap="$3">
-          <Card 
+          <Card
             elevate flex={1} p="$4" borderRadius={20} bg="$background"
             borderTopWidth={4} borderTopColor={isAhead ? '$success' : '$danger'}
             animation="bouncy"
           >
             <YStack gap="$2" alignItems="center">
-               {isAhead ? <TrendingUp size={24} color="$success" /> : <TrendingDown size={24} color="$danger" />}
+              {isAhead ? <TrendingUp size={24} color="$success" /> : <TrendingDown size={24} color="$danger" />}
               <Text fontSize={11} fontWeight="800" color={isAhead ? '$success' : '$danger'} textTransform="uppercase">
                 {isAhead ? 'En Avance' : 'En Retard'}
               </Text>
@@ -292,7 +271,7 @@ export default function DashboardScreen() {
             </YStack>
           </Card>
 
-          <Card 
+          <Card
             elevate flex={1} p="$4" borderRadius={20} bg="$background"
             borderTopWidth={4} borderTopColor="$primary"
             animation="bouncy"
@@ -309,14 +288,14 @@ export default function DashboardScreen() {
           </Card>
         </XStack>
 
-        <Card elevate p="$4" borderRadius={24} bg="$background" animation="lazy" 
-            borderTopWidth={4} borderTopColor="$warning">
+        <Card elevate p="$4" borderRadius={24} bg="$background" animation="lazy"
+          borderTopWidth={4} borderTopColor="$warning">
           <YStack gap="$3">
             <XStack alignItems="center" gap="$2">
-                <Calendar size={16} color="$warning" />
-                <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Cette semaine</Text>
-              </XStack>
-            
+              <Calendar size={16} color="$warning" />
+              <Text fontSize={12} fontWeight="600" color="$color" opacity={0.7}>Cette semaine</Text>
+            </XStack>
+
             <XStack justifyContent="space-between" gap="$2">
               {weekProgress.map((day, idx) => (
                 <YStack key={idx} alignItems="center" gap="$2" flex={1}>
@@ -360,18 +339,18 @@ export default function DashboardScreen() {
             </YStack>
           </Card>
 
-          <Card 
+          <Card
             elevate flex={1} p="$4" borderRadius={20} bg="$background"
             borderTopWidth={4} borderTopColor="$danger"
             animation="bouncy"
           >
             <YStack gap="$2" alignItems="center">
-                <Flame size={16} color="$danger" />
+              <Flame size={16} color="$danger" />
               <Text fontSize={11} fontWeight="800" color="$danger" textTransform="uppercase">
                 Série en cours
               </Text>
               <H2 fontFamily="$heading" size="$5">
-                 {currentStreak}
+                {stats.streak}
               </H2>
             </YStack>
           </Card>

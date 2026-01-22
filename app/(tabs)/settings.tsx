@@ -1,19 +1,17 @@
-import { SignOutButton } from '@/components/SignOutButton';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { SignOutButton } from '@/components/SignOutButton';
 import { APP_NAME } from '@/constants/constants';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { useTraining } from '@/contexts/TrainingContext';
+import SvgCrunch from '@/icons/Crunch';
+import SvgPushUp from '@/icons/Pushup';
 import { useUser } from '@clerk/clerk-expo';
-import { ChevronRight, Moon, Sun, Shield, HelpCircle, Bell, Dumbbell } from '@tamagui/lucide-icons';
-import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Avatar, H1, H2, ScrollView, Separator, Switch, Text, XStack, YStack, Sheet, Button } from 'tamagui';
+import { ChevronRight, Dumbbell, HelpCircle, Moon, Shield, Sun } from '@tamagui/lucide-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Image } from 'react-native';
-import { TRAINING_LOGOS } from '@/constants/assets';
-import SvgPushUp from '@/icons/Pushup';
-import SvgCrunch from '@/icons/Crunch';
+import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar, Button, H1, H2, ScrollView, Separator, Sheet, Switch, Text, XStack, YStack } from 'tamagui';
 
 interface MenuItemProps {
   icon: any;

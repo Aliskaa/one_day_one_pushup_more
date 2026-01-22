@@ -2664,6 +2664,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@google/generative-ai@npm:^0.24.1":
+  version: 0.24.1
+  resolution: "@google/generative-ai@npm:0.24.1"
+  checksum: 10/992a82e2d4a58d6eb0545254fe05e2da074c08560a9d51fb29c6f2a44db8c66ba44d87bc04e61b3676f5adc9ab94e527f171ee1395edf4ccbead3472fd8efff8
+  languageName: node
+  linkType: hard
+
 "@grpc/grpc-js@npm:~1.9.0":
   version: 1.9.15
   resolution: "@grpc/grpc-js@npm:1.9.15"
@@ -11166,6 +11173,7 @@ __metadata:
     "@clerk/clerk-expo": "npm:^2.19.16"
     "@expo/metro-config": "npm:~54.0.2"
     "@expo/metro-runtime": "npm:~6.1.2"
+    "@google/generative-ai": "npm:^0.24.1"
     "@react-native-async-storage/async-storage": "npm:2.2.0"
     "@tamagui/babel-plugin": "npm:^1.144.1"
     "@tamagui/cli": "npm:^1.144.1"

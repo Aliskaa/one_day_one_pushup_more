@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { storageService } from "@/services/asyncStorage";
 import { createContext, useContext, useEffect, useState } from "react";
 
 export type TrainingName = 'pushup' | 'crunch';
@@ -20,7 +20,7 @@ export const TrainingProvider = ({ children }: { children: React.ReactNode }) =>
   useEffect(() => {
     const loadTraining = async () => {
       try {
-        const saved = await AsyncStorage.getItem(TRAINING_STORAGE_KEY);
+        const saved = await storageService.getItem<TrainingName | null>(TRAINING_STORAGE_KEY);
         if (saved && (saved === 'pushup' || saved === 'crunch')) {
           setTrainingType(saved);
         }
@@ -36,7 +36,7 @@ export const TrainingProvider = ({ children }: { children: React.ReactNode }) =>
   const selectTraining = async (type: TrainingName) => {
     setTrainingType(type);
     try {
-      await AsyncStorage.setItem(TRAINING_STORAGE_KEY, type);
+      await storageService.setItem(TRAINING_STORAGE_KEY, type);
     } catch (error) {
       console.error('Erreur sauvegarde training:', error);
     }
@@ -47,11 +47,11 @@ export const TrainingProvider = ({ children }: { children: React.ReactNode }) =>
     return null;
   }
 
-    return (
-      <TrainingContext.Provider value={{ trainingType, selectTraining }}>
-        {children}
-      </TrainingContext.Provider>
-    );
+  return (
+    <TrainingContext.Provider value={{ trainingType, selectTraining }}>
+      {children}
+    </TrainingContext.Provider>
+  );
 };
 
 export const useTraining = () => {
