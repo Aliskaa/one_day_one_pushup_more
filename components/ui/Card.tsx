@@ -1,4 +1,4 @@
-import { styled, Card as TamaguiCard, CardProps as TamaguiCardProps } from 'tamagui';
+import { styled, Card as TamaguiCard, CardProps as TamaguiCardProps, YStack, XStack, Text, Progress } from 'tamagui';
 import { forwardRef } from 'react';
 
 // ============================================================================
@@ -292,3 +292,114 @@ export const Card = forwardRef<any, CardProps>((props, ref) => {
 });
 
 Card.displayName = 'Card';
+
+// ============================================================================
+// ACHIEVEMENT CARD COMPONENT (Composant fonctionnel pour achievements)
+// ============================================================================
+
+import { Lock, Trophy } from '@tamagui/lucide-icons';
+import type { AchievementCategory } from '@/types/achievement';
+import { ICON_MAP } from '@/constants/achievements';
+
+interface AchievementCardComponentProps {
+  title: string;
+  description: string;
+  rarity?: AchievementCategory;
+  unlocked: boolean;
+  progress: number;
+  icon?: string;
+  color?: string;
+}
+
+const RARITY_COLORS = {
+  streak: '$red8',
+  volume: '$blue8',
+  performance: '$orange8',
+  discipline: '$green8',
+  annual: '$purple8',
+  milestone: '$amber8',
+  rare: '$pink8',
+} as const;
+
+export function AchievementCardComponent({
+  title,
+  description,
+  rarity = 'milestone',
+  unlocked,
+  progress,
+  icon = 'Trophy',
+  color,
+}: AchievementCardComponentProps) {
+  const rarityColor = color || RARITY_COLORS[rarity] || '$purple8';
+  const bgColor = unlocked ? rarityColor : '$backgroundHover';
+  const textColor = unlocked ? 'white' : '$color';
+  const descColor = unlocked ? 'rgba(255,255,255,0.8)' : '$colorMuted';
+
+  const Icon = ICON_MAP[icon] || Trophy;
+
+  return (
+    <BaseCard
+      backgroundColor={bgColor}
+      padding="$4"
+      borderWidth={unlocked ? 0 : 1}
+      borderColor="$borderColor"
+      opacity={unlocked ? 1 : 0.7}
+      elevated
+    >
+      <XStack gap="$3" alignItems="center">
+        {/* Icon */}
+        <YStack
+          width={50}
+          height={50}
+          backgroundColor={unlocked ? 'rgba(255,255,255,0.2)' : '$background'}
+          borderRadius={25}
+          alignItems="center"
+          justifyContent="center"
+        >
+          {unlocked ? (
+            <Icon size={28} color="white" />
+          ) : (
+            <Lock size={24} color="$colorMuted" />
+          )}
+        </YStack>
+
+        {/* Content */}
+        <YStack flex={1} gap="$1">
+          <Text fontSize={15} fontWeight="700" color={textColor}>
+            {title}
+          </Text>
+          <Text fontSize={13} color={descColor} lineHeight={18}>
+            {description}
+          </Text>
+
+          {/* Progress bar for locked achievements */}
+          {!unlocked && progress > 0 && (
+            <YStack gap="$1" marginTop="$2">
+              <XStack justifyContent="space-between" alignItems="center">
+                <Text fontSize={11} color="$colorMuted" fontWeight="600">
+                  Progression
+                </Text>
+                <Text fontSize={11} color="$color" fontWeight="700">
+                  {progress.toFixed(0)}%
+                </Text>
+              </XStack>
+              <Progress value={progress} max={100} height={6}>
+                <Progress.Indicator animation="bouncy" backgroundColor={rarityColor} />
+              </Progress>
+            </YStack>
+          )}
+
+          {/* Unlocked badge */}
+          {unlocked && (
+            <XStack gap="$1" alignItems="center" marginTop="$1">
+              <Trophy size={12} color="white" />
+              <Text fontSize={11} fontWeight="600" color="white">
+                Débloqué
+              </Text>
+            </XStack>
+          )}
+        </YStack>
+      </XStack>
+    </BaseCard>
+  );
+}

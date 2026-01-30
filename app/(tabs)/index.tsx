@@ -7,6 +7,7 @@ import {
   StatCard,
   StreakDisplay,
   TodayObjective,
+  AnimatedCounter,
 } from '@/components/ui';
 import WorkoutScreen from '@/components/WorkoutScreen';
 import { useTraining } from '@/contexts/TrainingContext';
@@ -168,9 +169,13 @@ export default function DashboardScreen() {
                       <Trophy size={20} color="$primary" />
                       <Text fontSize={12} color="$colorMuted" fontWeight="600">Total</Text>
                     </XStack>
-                    <H2 fontSize={32} fontWeight="800" color="$primary">
-                      {stats.totalDone}
-                    </H2>
+                    <AnimatedCounter
+                      value={stats.totalDone}
+                      fontSize={32}
+                      fontWeight="800"
+                      color="$primary"
+                      duration={800}
+                    />
                     <Text fontSize={12} color="$colorMuted">
                       {trainingType === 'pushup' ? 'pompes' : 'crunchs'}
                     </Text>
@@ -186,9 +191,14 @@ export default function DashboardScreen() {
                       )}
                       <Text fontSize={12} color="$colorMuted" fontWeight="600">Écart</Text>
                     </XStack>
-                    <H2 fontSize={32} fontWeight="800" color={isAhead ? '$success' : '$primary'}>
-                      {isAhead ? '+' : ''}{stats.ecart}
-                    </H2>
+                    <AnimatedCounter
+                      value={stats.ecart}
+                      fontSize={32}
+                      fontWeight="800"
+                      color={isAhead ? '$success' : '$primary'}
+                      prefix={isAhead ? '+' : ''}
+                      duration={800}
+                    />
                     <Text fontSize={12} color="$colorMuted">
                       {isAhead ? 'en avance' : 'en retard'}
                     </Text>
@@ -203,9 +213,13 @@ export default function DashboardScreen() {
                       <Calendar size={20} color="$color" />
                       <Text fontSize={12} color="$colorMuted" fontWeight="600">Jours</Text>
                     </XStack>
-                    <H2 fontSize={28} fontWeight="800" color="$color">
-                      {days.filter(d => (d.done || 0) >= (d.target || 1)).length}
-                    </H2>
+                    <AnimatedCounter
+                      value={days.filter(d => (d.done || 0) >= (d.target || 1)).length}
+                      fontSize={28}
+                      fontWeight="800"
+                      color="$color"
+                      duration={800}
+                    />
                     <Text fontSize={12} color="$colorMuted">
                       / {days.length} complétés
                     </Text>
@@ -217,9 +231,14 @@ export default function DashboardScreen() {
                       <Target size={20} color="$color" />
                       <Text fontSize={12} color="$colorMuted" fontWeight="600">Taux</Text>
                     </XStack>
-                    <H2 fontSize={28} fontWeight="800" color="$color">
-                      {days.length > 0 ? Math.round((days.filter(d => (d.done || 0) >= (d.target || 1)).length / days.length) * 100) : 0}%
-                    </H2>
+                    <AnimatedCounter
+                      value={days.length > 0 ? Math.round((days.filter(d => (d.done || 0) >= (d.target || 1)).length / days.length) * 100) : 0}
+                      fontSize={28}
+                      fontWeight="800"
+                      color="$color"
+                      suffix="%"
+                      duration={800}
+                    />
                     <Text fontSize={12} color="$colorMuted">
                       de réussite
                     </Text>

@@ -4,6 +4,37 @@
 
 import { Achievement } from '@/types/achievement';
 import { DAYS_IN_YEAR, TOTAL_TARGET_YEAR } from './constants';
+import { Footprints, Calendar, CalendarCheck, Star, Crown, Dumbbell, Target, Milestone, Rocket, Trophy, Mountain, Flame, Globe, CheckCircle, TrendingUp, Zap, Sparkles, Shield, RotateCcw, Swords, Medal, Award, Gem, CalendarDays, CalendarRange, PartyPopper, BadgeCheck } from '@tamagui/lucide-icons';
+
+export const ICON_MAP: Record<string, any> = {
+  Footprints,
+  Calendar,
+  CalendarCheck,
+  Star,
+  Crown,
+  Dumbbell,
+  Target,
+  Milestone,
+  Rocket,
+  Trophy,
+  Mountain,
+  Flame,
+  Globe,
+  CheckCircle,
+  TrendingUp,
+  Zap,
+  Sparkles,
+  Shield,
+  RotateCcw,
+  Swords,
+  Medal,
+  Award,
+  Gem,
+  CalendarDays,
+  CalendarRange,
+  PartyPopper,
+  BadgeCheck,
+};
 
 export const ACHIEVEMENTS: Achievement[] = [
   // ===== CATÉGORIE: RÉGULARITÉ (STREAKS) =====

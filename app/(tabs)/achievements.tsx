@@ -1,9 +1,6 @@
-import { useTraining } from '@/contexts/TrainingContext';
-import { useAchievements } from '@/hooks/useAchievements';
-import { useProgressData } from '@/hooks/useProgressData';
-import { SvgTraining } from '@/icons/Training';
-import { AchievementCategory, AchievementWithStatus } from '@/types/achievement';
-import { getCurrentWeekDays, getDayProgressPercent } from '@/helpers/dateUtils';
+import React, { useState, useMemo } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { YStack, XStack, Text, H2, ScrollView, Button } from 'tamagui';
 import {
   Award,
   BadgeCheck,
@@ -14,6 +11,7 @@ import {
   CheckCircle,
   Crown,
   Dumbbell,
+  Filter,
   Flame,
   Footprints,
   Gem,
@@ -33,70 +31,32 @@ import {
   Trophy,
   Zap,
 } from '@tamagui/lucide-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useMemo } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { Card, H2, ScrollView, Text, XStack, YStack } from 'tamagui';
+import { StatCard, Card, AchievementCardComponent, AnimatedCounter } from '@/components/ui';
+import { useProgressData } from '@/hooks/useProgressData';
+import { useAchievements } from '@/hooks/useAchievements';
+import { useTraining } from '@/contexts/TrainingContext';
+import { AchievementCategory } from '@/types/achievement';
+import log from '@/services/logger';
 
-// Map des icônes par nom
-const ICON_MAP: Record<string, any> = {
-  Footprints,
-  Calendar,
-  CalendarCheck,
-  Star,
-  Crown,
-  Dumbbell,
-  Target,
-  Milestone,
-  Rocket,
-  Trophy,
-  Mountain,
-  Flame,
-  Globe,
-  CheckCircle,
-  TrendingUp,
-  Zap,
-  Sparkles,
-  Shield,
-  RotateCcw,
-  Swords,
-  Medal,
-  Award,
-  Gem,
-  CalendarDays,
-  CalendarRange,
-  PartyPopper,
-  BadgeCheck,
-};
+const CATEGORY_CONFIG = {
+  all: { label: 'Tous', icon: Trophy, color: '$purple8' },
+  streak: { label: 'Régularité', icon: Flame, color: '$red8' },
+  volume: { label: 'Volume', icon: Target, color: '$blue8' },
+  performance: { label: 'Performance', icon: Medal, color: '$orange8' },
+  discipline: { label: 'Discipline', icon: Trophy, color: '$green8' },
+  annual: { label: 'Annuels', icon: Target, color: '$purple8' },
+  milestone: { label: 'Milestones', icon: Medal, color: '$amber8' },
+  rare: { label: 'Rares', icon: Trophy, color: '$pink8' },
+} as const;
 
-// Labels des catégories
-const CATEGORY_LABELS: Record<AchievementCategory, string> = {
-  streak: '🔥 Régularité',
-  volume: '💪 Volume',
-  performance: '⚡ Performance',
-  discipline: '🎯 Discipline',
-  annual: '🏆 Objectifs Annuels',
-  milestone: '📅 Milestones',
-  rare: '🌟 Exploits Rares',
-};
-
-// Ordre des catégories pour l'affichage
-const CATEGORY_ORDER: AchievementCategory[] = [
-  'streak',
-  'volume',
-  'performance',
-  'discipline',
-  'annual',
-  'milestone',
-  'rare',
-];
+type FilterType = AchievementCategory | 'all';
 
 export default function AchievementsScreen() {
-  // Récupérer les données de progression
   const { days } = useProgressData();
   const { trainingType } = useTraining();
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
 
-  // Créer le progressMap à partir des days
+  // Créer le progressMap
   const progressMap = useMemo(() => {
     const map: Record<string, number> = {};
     days.forEach(day => {
@@ -107,251 +67,232 @@ export default function AchievementsScreen() {
     return map;
   }, [days]);
 
-  // Utiliser le hook achievements
-  const {
-    achievements,
-    stats,
-    unlockedCount,
-    totalCount,
-    isLoading
-  } = useAchievements(days, progressMap);
+  const { achievements, stats, unlockedCount, totalCount, isLoading } = useAchievements(days, progressMap);
 
-  // Grouper les achievements par catégorie
-  const achievementsByCategory = useMemo(() => {
-    const grouped: Record<AchievementCategory, AchievementWithStatus[]> = {
-      streak: [],
-      volume: [],
-      performance: [],
-      discipline: [],
-      annual: [],
-      milestone: [],
-      rare: [],
-    };
+  // Filtrer les achievements
+  const filteredAchievements = useMemo(() => {
+    if (selectedFilter === 'all') return achievements;
+    return achievements.filter(a => a.category === selectedFilter);
+  }, [achievements, selectedFilter]);
 
-    achievements.forEach(achievement => {
-      grouped[achievement.category].push(achievement);
-    });
+  // Grouper par statut
+  const { unlocked, locked } = useMemo(() => {
+    const unlocked = filteredAchievements.filter(a => a.unlocked);
+    const locked = filteredAchievements.filter(a => !a.unlocked).sort((a, b) => b.progressPercent - a.progressPercent);
+    return { unlocked, locked };
+  }, [filteredAchievements]);
 
-    return grouped;
-  }, [achievements]);
-
-  // Calculer le progrès de la semaine
-  const weekProgress = useMemo(() => {
-    const weekDays = getCurrentWeekDays(days);
-    
-    return weekDays.map(({ day, dayData }) => {
-      const done = dayData?.done || 0;
-      const target = dayData?.target || 1;
-      const percent = getDayProgressPercent(done, target);
-
-      return {
-        day,
-        done,
-        percent,
-      };
-    });
-  }, [days]);
-
-  // Composant pour afficher un badge
-  const BadgeCard = ({ achievement }: { achievement: AchievementWithStatus }) => {
-    const Icon = ICON_MAP[achievement.icon] || Trophy;
-
-    return (
-      <Card
-        elevate={achievement.unlocked}
-        p="$4"
-        borderRadius={20}
-        bg={achievement.unlocked ? '$background' : '$backgroundHover'}
-        opacity={achievement.unlocked ? 1 : 0.7}
-        borderLeftWidth={4}
-        borderLeftColor={achievement.unlocked ? achievement.color : '$borderColor'}
-        animation="lazy"
-        pressStyle={{ scale: 0.98 }}
-      >
-        <XStack alignItems="center" gap="$3">
-          <YStack
-            width={50}
-            height={50}
-            borderRadius="$10"
-            bg={achievement.unlocked ? `${achievement.color}20` : '$borderColor'}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Icon
-              size={24}
-              color={achievement.unlocked ? achievement.color : '#9ca3af'}
-            />
-          </YStack>
-
-          <YStack flex={1} gap="$1">
-            <Text fontFamily="$heading" fontSize={16} color="$color">
-              {achievement.title}
-            </Text>
-            <Text fontSize={13} color="$color" opacity={0.6}>
-              {achievement.description}
-            </Text>
-
-            {/* Barre de progression si non débloqué */}
-            {!achievement.unlocked && (
-              <XStack alignItems="center" gap="$2" mt="$1">
-                <YStack flex={1} height={4} bg="$borderColor" borderRadius={2} overflow="hidden">
-                  <YStack
-                    height="100%"
-                    width={`${achievement.progressPercent}%`}
-                    bg={achievement.color}
-                    borderRadius={2}
-                  />
-                </YStack>
-                <Text fontSize={11} color="$color" opacity={0.5}>
-                  {Math.round(achievement.progressPercent)}%
-                </Text>
-              </XStack>
-            )}
-          </YStack>
-
-          {achievement.unlocked && (
-            <YStack
-              width={28}
-              height={28}
-              borderRadius="$10"
-              bg="$success"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text fontSize={14} color="white" fontWeight="bold">✓</Text>
-            </YStack>
-          )}
-        </XStack>
-      </Card>
-    );
-  };
+  log.debug(unlocked);
 
   if (isLoading) {
     return (
-      <YStack flex={1} bg="$backgroundHover" alignItems="center" justifyContent="center">
-        <ActivityIndicator size="large" color="#c026d3" />
-        <Text mt="$4" color="$color" opacity={0.6}>Chargement des achievements...</Text>
+      <YStack flex={1} alignItems="center" justifyContent="center" backgroundColor="$background">
+        <Text>Chargement...</Text>
       </YStack>
     );
   }
 
   return (
-    <ScrollView bg="$backgroundHover" showsVerticalScrollIndicator={false}>
-      <YStack p="$4" gap="$4" pb="$8">
+    <YStack flex={1} backgroundColor="$backgroundHover">
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <YStack padding="$4" gap="$5" paddingBottom="$10">
 
-        {/* Header */}
-        <Card elevate size="$4" p="$0" overflow="hidden" borderRadius={24} animation="bouncy">
-          <LinearGradient
-            colors={['#c026d3', '#db2777']}
-            style={{ padding: 24 }}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <YStack gap="$2" alignItems="center">
-              <SvgTraining size={70} color="#fff" />
-              <H2 fontFamily="$heading" color="#fff" size="$6">
+            {/* HEADER */}
+            <YStack gap="$2" alignItems="center" paddingTop="$2">
+              <Trophy size={48} color="$achievement" />
+              <H2 fontSize={28} fontWeight="800" color="$color">
                 Accomplissements
               </H2>
-              <Text color="rgba(255,255,255,0.8)" fontSize={14} fontWeight="600">
-                {unlockedCount} / {totalCount} débloqués
+              <Text fontSize={14} color="$colorMuted" textAlign="center">
+                Débloquez tous les badges en progressant
               </Text>
             </YStack>
-          </LinearGradient>
-        </Card>
 
-        {/* Stats rapides */}
-        <Card elevate p="$4" borderRadius={20} bg="$background">
-          <XStack justifyContent="space-around">
-            <YStack alignItems="center" gap="$1">
-              <Text fontSize={24} fontWeight="bold" color="$primary">
-                {stats.totalPushups.toLocaleString()}
+            {/* STATS GLOBALES */}
+            <YStack gap="$3">
+              <Text fontSize={14} fontWeight="700" color="$colorMuted" textTransform="uppercase" marginLeft="$2">
+                Progression globale
               </Text>
-              <Text fontSize={12} color="$color" opacity={0.6}>
-                Total {trainingType === 'pushup' ? 'pompes' : trainingType === 'crunch' ? 'crunchs' : 'reps'}
-              </Text>
-            </YStack>
-            <YStack alignItems="center" gap="$1">
-              <Text fontSize={24} fontWeight="bold" color="$success">
-                {stats.currentStreak}
-              </Text>
-              <Text fontSize={12} color="$color" opacity={0.6}>
-                Streak actuel
-              </Text>
-            </YStack>
-            <YStack alignItems="center" gap="$1">
-              <Text fontSize={24} fontWeight="bold" color="$warning">
-                {stats.bestStreak}
-              </Text>
-              <Text fontSize={12} color="$color" opacity={0.6}>
-                Meilleur streak
-              </Text>
-            </YStack>
-          </XStack>
-        </Card>
-
-        {/* Progrès de la semaine */}
-        <YStack gap="$3">
-          <H2 fontFamily="$heading" size="$4" color="$color">
-            📅 Cette semaine
-          </H2>
-
-          <Card elevate p="$4" borderRadius={20} bg="$background">
-            <XStack gap="$2" justifyContent="space-between">
-              {weekProgress.map((day, idx) => (
-                <YStack key={idx} alignItems="center" gap="$2" flex={1}>
-                  <Text fontSize={11} fontWeight="700" color="$color" opacity={0.6}>
-                    {day.day}
+              <XStack gap="$3">
+                <StatCard flex={1} variant="achievement">
+                  <XStack alignItems="center" gap="$2">
+                    <Trophy size={20} color="$achievement" />
+                    <Text fontSize={11} color="$colorMuted" fontWeight="600">Débloqués</Text>
+                  </XStack>
+                  <AnimatedCounter 
+                    value={unlockedCount} 
+                    fontSize={32} 
+                    fontWeight="800" 
+                    color="$achievement" 
+                  />
+                  <Text fontSize={11} color="$colorMuted">
+                    / {totalCount} badges
                   </Text>
-                  <YStack
-                    height={80}
-                    width={12}
-                    bg="$backgroundHover"
-                    borderRadius={8}
-                    justifyContent="flex-end"
-                    overflow="hidden"
-                  >
-                    <YStack
-                      height={`${day.percent}%`}
-                      width="100%"
-                      bg={day.percent === 100 ? '$success' : day.percent > 0 ? '$warning' : 'transparent'}
-                      borderRadius={10}
-                    />
-                  </YStack>
-                  <Text fontSize={10} color="$color" opacity={0.8} fontWeight="600">
-                    {day.done}
+                </StatCard>
+
+                <StatCard flex={1}>
+                  <XStack alignItems="center" gap="$2">
+                    <Target size={20} color="$color" />
+                    <Text fontSize={11} color="$colorMuted" fontWeight="600">Taux</Text>
+                  </XStack>
+                  <AnimatedCounter 
+                    value={totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0}
+                    fontSize={32} 
+                    fontWeight="800" 
+                    color="$color"
+                    suffix="%"
+                  />
+                  <Text fontSize={11} color="$colorMuted">
+                    complété
                   </Text>
-                </YStack>
-              ))}
-            </XStack>
-          </Card>
-        </YStack>
+                </StatCard>
+              </XStack>
 
-        {/* Badges par catégorie */}
-        {CATEGORY_ORDER.map(category => {
-          const categoryAchievements = achievementsByCategory[category];
-          if (categoryAchievements.length === 0) return null;
+              {/* Stats Secondaires */}
+              <XStack gap="$3">
+                <StatCard flex={1} variant="streak">
+                  <Text fontSize={11} color="$colorMuted" fontWeight="600">Streak</Text>
+                  <AnimatedCounter 
+                    value={stats.currentStreak} 
+                    fontSize={28} 
+                    fontWeight="800" 
+                    color="$streak" 
+                  />
+                  <Text fontSize={10} color="$colorMuted">jours</Text>
+                </StatCard>
 
-          const unlockedInCategory = categoryAchievements.filter(a => a.unlocked).length;
+                <StatCard flex={1} variant="primary">
+                  <Text fontSize={11} color="$colorMuted" fontWeight="600">Total</Text>
+                  <AnimatedCounter 
+                    value={stats.totalPushups} 
+                    fontSize={24} 
+                    fontWeight="800" 
+                    color="$primary" 
+                  />
+                  <Text fontSize={10} color="$colorMuted">{trainingType === 'pushup' ? 'pompes' : 'crunchs'}</Text>
+                </StatCard>
 
-          return (
-            <YStack key={category} gap="$3">
-              <XStack justifyContent="space-between" alignItems="center">
-                <H2 fontFamily="$heading" size="$4" color="$color">
-                  {CATEGORY_LABELS[category]}
-                </H2>
-                <Text fontSize={12} color="$color" opacity={0.5}>
-                  {unlockedInCategory}/{categoryAchievements.length}
+                <StatCard flex={1}>
+                  <Text fontSize={11} color="$colorMuted" fontWeight="600">Record</Text>
+                  <AnimatedCounter 
+                    value={stats.bestStreak} 
+                    fontSize={28} 
+                    fontWeight="800" 
+                    color="$color" 
+                  />
+                  <Text fontSize={10} color="$colorMuted">jours</Text>
+                </StatCard>
+              </XStack>
+            </YStack>
+
+            {/* FILTRES */}
+            <YStack gap="$3">
+              <XStack alignItems="center" gap="$2">
+                <Filter size={16} color="$colorMuted" />
+                <Text fontSize={14} fontWeight="700" color="$colorMuted" textTransform="uppercase">
+                  Catégories
                 </Text>
               </XStack>
 
-              {categoryAchievements.map(achievement => (
-                <BadgeCard key={achievement.id} achievement={achievement} />
-              ))}
-            </YStack>
-          );
-        })}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <XStack gap="$2" paddingRight="$4">
+                  {(Object.keys(CATEGORY_CONFIG) as FilterType[]).map((filter) => {
+                    const config = CATEGORY_CONFIG[filter];
+                    const Icon = config.icon;
+                    const isSelected = selectedFilter === filter;
 
-      </YStack>
-    </ScrollView>
+                    return (
+                      <Button
+                        key={filter}
+                        size="$3"
+                        backgroundColor={isSelected ? '$primary' : '$background'}
+                        borderColor={isSelected ? '$primary' : '$borderColor'}
+                        borderWidth={1}
+                        onPress={() => setSelectedFilter(filter)}
+                        pressStyle={{ scale: 0.95 }}
+                      >
+                        <XStack gap="$2" alignItems="center">
+                          <Icon size={16} color={isSelected ? 'white' : '$colorMuted'} />
+                          <Text 
+                            fontSize={13} 
+                            fontWeight="600" 
+                            color={isSelected ? 'white' : '$color'}
+                          >
+                            {config.label}
+                          </Text>
+                        </XStack>
+                      </Button>
+                    );
+                  })}
+                </XStack>
+              </ScrollView>
+            </YStack>
+
+            {/* ACHIEVEMENTS DÉBLOQUÉS */}
+            {unlocked.length > 0 && (
+              <YStack gap="$3">
+                <XStack alignItems="center" justifyContent="space-between">
+                  <Text fontSize={16} fontWeight="700" color="$color">
+                    ✓ Débloqués ({unlocked.length})
+                  </Text>
+                </XStack>
+
+                <YStack gap="$3">
+                  {unlocked.map((achievement) => (
+                    <AchievementCardComponent
+                      key={achievement.id}
+                      title={achievement.title}
+                      description={achievement.description}
+                      rarity={achievement.category}
+                      unlocked={true}
+                      progress={100}
+                      icon={achievement.icon}
+                      color={achievement.color}
+                    />
+                  ))}
+                </YStack>
+              </YStack>
+            )}
+
+            {/* ACHIEVEMENTS VERROUILLÉS */}
+            {locked.length > 0 && (
+              <YStack gap="$3">
+                <XStack alignItems="center" justifyContent="space-between">
+                  <Text fontSize={16} fontWeight="700" color="$color">
+                    🔒 À débloquer ({locked.length})
+                  </Text>
+                </XStack>
+
+                <YStack gap="$3">
+                  {locked.map((achievement) => (
+                    <AchievementCardComponent
+                      key={achievement.id}
+                      title={achievement.title}
+                      description={achievement.description}
+                      rarity={achievement.category}
+                      unlocked={false}
+                      progress={achievement.progressPercent}
+                      icon={achievement.icon}
+                      color={achievement.color}
+                    />
+                  ))}
+                </YStack>
+              </YStack>
+            )}
+
+            {/* Message si aucun résultat */}
+            {filteredAchievements.length === 0 && (
+              <Card elevated padding="$6" alignItems="center">
+                <Text fontSize={14} color="$colorMuted" textAlign="center">
+                  Aucun achievement dans cette catégorie
+                </Text>
+              </Card>
+            )}
+
+          </YStack>
+        </ScrollView>
+      </SafeAreaView>
+    </YStack>
   );
 }

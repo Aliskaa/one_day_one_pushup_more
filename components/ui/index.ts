@@ -27,6 +27,7 @@ export {
   CompactCard,
   HeroCard,
   AchievementCard,
+  AchievementCardComponent,
   WorkoutCard,
   type CardProps,
 } from './Card';
@@ -94,3 +95,6 @@ export {
   StreakIcon,
   type StreakDisplayProps,
 } from './StreakDisplay';
+
+// Animations
+export { AnimatedCounter } from './AnimatedCounter';
