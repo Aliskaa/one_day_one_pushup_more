@@ -1,4 +1,5 @@
 import { ProgressChart } from '@/components/ProgressChart';
+import { TrendChart } from '@/components/TrendChart';
 import RefreshableScreen from '@/components/RefreshScreen';
 import {
   Card,
@@ -296,14 +297,17 @@ export default function DashboardScreen() {
               {/* COACH IA */}
               <WorkoutScreen />
 
-              {/* GRAPHIQUE DE PROGRESSION */}
+              {/* GRAPHIQUES */}
               <YStack gap="$3">
                 <H2 fontSize={20} fontWeight="700" color="$color">
-                  Progression
+                  Analyses
                 </H2>
-                <Card elevated>
-                  <ProgressChart days={days} todayIndex={todayIndex} />
-                </Card>
+                
+                {/* Graphique de progression */}
+                <ProgressChart days={days} todayIndex={todayIndex} />
+                
+                {/* Graphique de tendance */}
+                <TrendChart days={days} todayIndex={todayIndex} />
               </YStack>
 
             </YStack>

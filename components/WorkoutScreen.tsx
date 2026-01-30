@@ -3,14 +3,15 @@ import { useProgressData } from '@/hooks/useProgressData';
 import { storageService } from '@/services/asyncStorage';
 import { generateWorkoutAdvice } from '@/services/googleAi';
 import log from '@/services/logger';
-import { Bot, Quote, Sparkles } from '@tamagui/lucide-icons';
+import { Bot, Quote, Sparkles, RefreshCw } from '@tamagui/lucide-icons';
 import React, { useEffect, useState } from 'react';
-import { AnimatePresence, Card, H3, Paragraph, Spinner, XStack, YStack } from 'tamagui';
+import { AnimatePresence, Card, H3, Paragraph, Spinner, XStack, YStack, Button } from 'tamagui';
 
 export default function WorkoutScreen() {
     const [advice, setAdvice] = useState("");
     const [loading, setLoading] = useState(false);
     const [isCheckingCache, setIsCheckingCache] = useState(true);
+    const [previousAdvice, setPreviousAdvice] = useState<string>("");
     const { trainingType } = useTraining();
 
     // On récupère aussi 'days' et 'todayIndex' pour avoir la date exacte gérée par l'app
@@ -35,6 +36,7 @@ export default function WorkoutScreen() {
 
                 if (cached) {
                     setAdvice(cached);
+                    setPreviousAdvice(cached);
                 }
 
                 // Nettoyage des vieux conseils (en tâche de fond, pas besoin d'await bloquant)
@@ -63,12 +65,13 @@ export default function WorkoutScreen() {
             if (goalReached && !loading) {
                 setLoading(true);
                 try {
-                    // Appel API Gemini
+                    // Appel API Gemini avec l'historique
                     log.info("🤖 Génération IA lancée...");
-                    const text = await generateWorkoutAdvice(stats); //
+                    const text = await generateWorkoutAdvice(stats, previousAdvice);
 
                     // Mise à jour de l'état ET sauvegarde locale pour la journée
                     setAdvice(text);
+                    setPreviousAdvice(text);
                     await storageService.setItem(STORAGE_KEY, text);
                     log.info("💾 Conseil sauvegardé");
                 } catch (error) {
@@ -87,6 +90,26 @@ export default function WorkoutScreen() {
         todayDateStr,
         isCheckingCache
     ]);
+
+    // Fonction pour régénérer le conseil
+    const handleRegenerate = async () => {
+        if (loading || !todayDateStr) return;
+        
+        setLoading(true);
+        try {
+            log.info("🔄 Régénération du conseil...");
+            const text = await generateWorkoutAdvice(stats, previousAdvice);
+            
+            setAdvice(text);
+            setPreviousAdvice(text);
+            await storageService.setItem(STORAGE_KEY, text);
+            log.info("💾 Nouveau conseil sauvegardé");
+        } catch (error) {
+            log.error("Erreur régénération advice", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Affichage : On ne montre rien si pas de conseil et pas de chargement
     if ((!advice && !loading) || isCheckingCache) {
@@ -108,8 +131,25 @@ export default function WorkoutScreen() {
                         <Bot size={24} color="$color" />
                         <H3 fontSize="$5">Coach IA</H3>
                     </XStack>
-                    {/* On peut afficher un Spinner ici pendant le chargement */}
-                    {loading ? <Spinner size="small" color="$blue10" /> : <Sparkles size={16} color="$yellow10Dark" />}
+                    <XStack gap="$2" alignItems="center">
+                        {loading ? (
+                            <Spinner size="small" color="$blue10" />
+                        ) : (
+                            <>
+                                <Button
+                                    size="$2"
+                                    chromeless
+                                    circular
+                                    onPress={handleRegenerate}
+                                    disabled={loading}
+                                    icon={<RefreshCw size={14} color="$colorMuted" />}
+                                    pressStyle={{ scale: 0.9 }}
+                                    hoverStyle={{ backgroundColor: '$backgroundHover' }}
+                                />
+                                <Sparkles size={16} color="$yellow10Dark" />
+                            </>
+                        )}
+                    </XStack>
                 </XStack>
 
                 <AnimatePresence>

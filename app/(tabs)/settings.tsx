@@ -172,7 +172,7 @@ export default function SettingsScreen() {
               <NotificationSettings />
             </YStack>
 
-            {/* Support BookOpen*/}
+            {/* Support */}
             <YStack gap="$2">
               <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">Support</Text>
 
@@ -184,27 +184,6 @@ export default function SettingsScreen() {
                   title="Revoir l'introduction"
                   subtitle="Découvrez à nouveau l'application"
                   onPress={handleReviewOnboarding}
-                />
-                <Separator borderColor="$borderColor" />
-                <MenuItem
-                  icon={HelpCircle}
-                  iconColor="$green10"
-                  iconBg="$green4"
-                  title="Aide & FAQ"
-                />
-                <Separator borderColor="$borderColor" />
-                <MenuItem
-                  icon={Shield}
-                  iconColor="$purple10"
-                  iconBg="$purplen4"
-                  title="Aide & FAQ"
-                />
-                <Separator borderColor="$borderColor" />
-                <MenuItem
-                  icon={Shield}
-                  iconColor="$blue10"
-                  iconBg="$blue4"
-                  title="Confidentialité"
                 />
               </SettingsGroup>
             </YStack>
