@@ -6,12 +6,13 @@ import { useTraining } from '@/contexts/TrainingContext';
 import SvgCrunch from '@/icons/Crunch';
 import SvgPushUp from '@/icons/Pushup';
 import { useUser } from '@clerk/clerk-expo';
-import { ChevronRight, Dumbbell, HelpCircle, Moon, Shield, Sun } from '@tamagui/lucide-icons';
+import { ChevronRight, Dumbbell, HelpCircle, Moon, Shield, Sun, BookOpen } from '@tamagui/lucide-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, Button, H1, H2, ScrollView, Separator, Sheet, Switch, Text, XStack, YStack } from 'tamagui';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface MenuItemProps {
   icon: any;
@@ -84,6 +85,13 @@ export default function SettingsScreen() {
 
   const isDark = theme === 'dark';
 
+  const handleReviewOnboarding = async () => {
+    // Réinitialiser le flag d'onboarding
+    await AsyncStorage.removeItem('onboarding_completed');
+    // Rediriger vers l'onboarding
+    router.push('/onboarding');
+  };
+
   return (
     <YStack flex={1} bg="$backgroundHover">
       <SafeAreaView style={{ flex: 1 }}>
@@ -93,11 +101,11 @@ export default function SettingsScreen() {
             {/* Header */}
             <YStack mt="$2" gap="$4">
               <H1 fontFamily="$heading" size="$8" color="$color">Paramètres</H1>
-              
+
               {/* Profile Card avec Gradient */}
-              <YStack 
-                borderRadius={24} 
-                overflow="hidden" 
+              <YStack
+                borderRadius={24}
+                overflow="hidden"
                 elevation="$4"
                 shadowColor="$shadowColor"
                 shadowRadius={10}
@@ -130,7 +138,7 @@ export default function SettingsScreen() {
             {/* Training Section */}
             <YStack gap="$2">
               <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">Entraînement</Text>
-              
+
               <SettingsGroup>
                 <MenuItem
                   icon={Dumbbell}
@@ -146,7 +154,7 @@ export default function SettingsScreen() {
             {/* General Section */}
             <YStack gap="$2">
               <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">Apparence</Text>
-              
+
               <SettingsGroup>
                 <MenuItem
                   icon={isDark ? Moon : Sun}
@@ -164,24 +172,39 @@ export default function SettingsScreen() {
               <NotificationSettings />
             </YStack>
 
-            {/* Support Section (Ajouté pour compléter la page) */}
+            {/* Support BookOpen*/}
             <YStack gap="$2">
-              <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">
-                Support
-              </Text>
+              <Text ml="$2" fontSize={13} fontWeight="700" color="$color" opacity={0.5} textTransform="uppercase">Support</Text>
+
               <SettingsGroup>
-                <MenuItem 
-                  icon={HelpCircle} 
-                  iconColor="$green10"
-                  iconBg="$green4"
-                  title="Aide & FAQ" 
-                />
-                <Separator borderColor="$borderColor" />
-                <MenuItem 
-                  icon={Shield} 
+                <MenuItem
+                  icon={BookOpen}
                   iconColor="$blue10"
                   iconBg="$blue4"
-                  title="Confidentialité" 
+                  title="Revoir l'introduction"
+                  subtitle="Découvrez à nouveau l'application"
+                  onPress={handleReviewOnboarding}
+                />
+                <Separator borderColor="$borderColor" />
+                <MenuItem
+                  icon={HelpCircle}
+                  iconColor="$green10"
+                  iconBg="$green4"
+                  title="Aide & FAQ"
+                />
+                <Separator borderColor="$borderColor" />
+                <MenuItem
+                  icon={Shield}
+                  iconColor="$purple10"
+                  iconBg="$purplen4"
+                  title="Aide & FAQ"
+                />
+                <Separator borderColor="$borderColor" />
+                <MenuItem
+                  icon={Shield}
+                  iconColor="$blue10"
+                  iconBg="$blue4"
+                  title="Confidentialité"
                 />
               </SettingsGroup>
             </YStack>
@@ -230,7 +253,7 @@ export default function SettingsScreen() {
                   }}
                 >
                   <XStack gap="$3" alignItems="center">
-                    
+
                     <SvgPushUp size={32} color={trainingType === 'pushup' ? 'white' : '$color'} />
                     <Text fontSize={16} fontWeight="600" color={trainingType === 'pushup' ? 'white' : '$color'}>
                       Pompes
