@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { YStack, XStack, H1, H2, Text, Button } from 'tamagui';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
-import { Target, TrendingUp, Trophy, Flame, ArrowRight, Check } from '@tamagui/lucide-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const { width } = Dimensions.get('window');
-
+import { ArrowRight, Check, Flame, Target, TrendingUp, Trophy } from '@tamagui/lucide-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button, H1, Text, XStack, YStack } from 'tamagui';
+ 
 const ONBOARDING_STEPS = [
   {
     title: 'Un Jour, Une Pompe de Plus',

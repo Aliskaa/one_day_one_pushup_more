@@ -32,44 +32,28 @@ export default function Page() {
 
   const onPress = useCallback(async () => {
     try {
-      const linkedUrl = Linking.createURL("/oauth-native-callback", { scheme: "onedayonepushupmore" }); 
+      const linkedUrl = Linking.createURL("/(auth)/login", { scheme: "onedayonepushupmore" }); 
 
-      // Start the authentication process by calling `startSSOFlow()`
       const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        strategy: 'oauth_google',
-        // For web, defaults to current path
-        // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
-        // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
-        redirectUrl: linkedUrl,
-      })
+                strategy: 'oauth_google',
+                redirectUrl: linkedUrl,
+            });
 
-      // If sign in was successful, set the active session
-      if (createdSessionId) {
-        setActive!({
-          session: createdSessionId,
-          // Check for session tasks and navigate to custom UI to help users resolve them
-          // See https://clerk.com/docs/guides/development/custom-flows/overview#session-tasks
-          navigate: async ({ session }) => {
-            if (session?.currentTask) {
-              log.info(session?.currentTask)
-              router.push('/sign-in')
-              return
+            if (createdSessionId) {
+                log.debug("🟢 Google Login: Existing User, Session ID:", createdSessionId);
+                await setActive!({ session: createdSessionId });
+                router.replace('/(main)/(tabs)/home');
+            } else if (signUp?.createdSessionId) {
+                log.debug("🟢 Google Signup: New User, Session ID:", signUp.createdSessionId);
+                await setActive!({ session: signUp.createdSessionId });
+                router.replace('/(main)/(tabs)/home');
+            } else {
+                log.error("🔴 Google Auth: Pas de session créée.");
             }
-
-            router.push('/')
-          },
-        })
-      } else {
-        // If there is no `createdSessionId`,
-        // there are missing requirements, such as MFA
-        // See https://clerk.com/docs/guides/development/custom-flows/authentication/oauth-connections#handle-missing-requirements
-      }
-    } catch (err) {
-      // See https://clerk.com/docs/guides/development/custom-flows/error-handling
-      // for more info on error handling
-      log.error(JSON.stringify(err, null, 2))
-    }
-  }, [])
+        } catch (err) {
+            log.error("🔴 Erreur Google SSO :", JSON.stringify(err, null, 2));
+        }
+    }, [startSSOFlow, router]);
 
   return (
     <Button

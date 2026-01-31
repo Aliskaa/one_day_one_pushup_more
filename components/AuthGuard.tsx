@@ -13,13 +13,13 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoaded) return;
 
-    const isOnSignIn = segments[0] === 'sign-in';
+    const isOnSignIn = segments[0] === '(auth)';
     const isOnIndex = !segments[0] || segments.join('/') === '';
-    const isOnTabs = segments[0] === '(tabs)';
+    const isOnTabs = segments[0] === '(main)' && segments[1] === '(tabs)';
 
     // Pas connecté : rediriger vers sign-in
     if (!isSignedIn && !isOnSignIn) {
-      router.replace('/sign-in');
+      router.replace('/(auth)/login');
       return;
     }
 
@@ -37,7 +37,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // Connecté avec training sélectionné sur index : aller aux tabs
     if (isSignedIn && trainingType && isOnIndex) {
-      router.replace('/(tabs)');
+      router.replace('/(main)/(tabs)/home');
       return;
     }
   }, [isSignedIn, isLoaded, trainingType, segments, router]);

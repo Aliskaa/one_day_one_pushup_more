@@ -247,7 +247,7 @@ export default function SettingsScreen() {
                   onPress={() => {
                     selectTraining('pushup');
                     setShowTrainingSheet(false);
-                    router.replace('/(tabs)');
+                    router.replace('/(main)/(tabs)/home');
                   }}
                 >
                   <XStack gap="$3" alignItems="center">
@@ -267,7 +267,7 @@ export default function SettingsScreen() {
                   onPress={() => {
                     selectTraining('crunch');
                     setShowTrainingSheet(false);
-                    router.replace('/(tabs)');
+                    router.replace('/(main)/(tabs)/home');
                   }}
                 >
                   <XStack gap="$3" alignItems="center">

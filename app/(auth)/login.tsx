@@ -1,5 +1,5 @@
 import Logo from "@/components/Logo";
-import SignInWithGoogle from "@/components/SignInWithGoogle";
+import SignInWithGoogle from "@/components/auth/SignInWithGoogle";
 import { Card } from "@/components/ui";
 import { Flame, Target, Trophy } from "@tamagui/lucide-icons";
 import React from "react";
@@ -12,7 +12,7 @@ import {
   XStack
 } from "tamagui";
 
-export default function Page() {
+export default function LoginScreen() {
   return (
     <YStack flex={1} backgroundColor="$backgroundHover">
       <SafeAreaView style={{ flex: 1 }}>
