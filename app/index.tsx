@@ -3,24 +3,56 @@ import { TrainingName, useTraining } from '@/contexts/TrainingContext';
 import SvgCrunch from '@/icons/Crunch';
 import SvgPushUp from '@/icons/Pushup';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   H2,
   Paragraph,
   ScrollView,
-  YStack
+  YStack,
+  Spinner
 } from "tamagui";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function Index() {
   const router = useRouter();
-
   const { selectTraining } = useTraining();
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    checkOnboardingStatus();
+  }, []);
+
+  const checkOnboardingStatus = async () => {
+    try {
+      const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
+      
+      if (!onboardingCompleted) {
+        // Première ouverture - afficher l'onboarding
+        router.replace('/onboarding');
+      } else {
+        // Onboarding déjà vu - rester sur cette page
+        setIsChecking(false);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+      setIsChecking(false);
+    }
+  };
 
   const handleSelectTraining = (trainingType: TrainingName) => {
     selectTraining(trainingType);
     router.push('/(tabs)');
+  }
+
+  // Afficher un spinner pendant la vérification
+  if (isChecking) {
+    return (
+      <YStack flex={1} backgroundColor="$background" alignItems="center" justifyContent="center">
+        <Spinner size="large" color="$primary" />
+      </YStack>
+    );
   }
 
   return (

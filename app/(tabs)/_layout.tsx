@@ -1,4 +1,4 @@
-import { Home, Calendar, Settings, Award } from '@tamagui/lucide-icons';
+import { Home, Calendar, Settings, Award, Palette } from '@tamagui/lucide-icons';
 import { Colors } from '@/constants/theme';
 import { Tabs } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,28 +23,36 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
+            title: 'Accueil',
             tabBarIcon: ({ color }) => <Home size={28} color={color} />,
           }}
         />
         <Tabs.Screen
           name="days"
           options={{
-            title: 'Days',
+            title: 'Calendrier',
             tabBarIcon: ({ color }) => <Calendar size={28} color={color} />,
           }}
         />
         <Tabs.Screen
           name="achievements"
           options={{
-            title: 'Achievements',
+            title: 'Réussites',
             tabBarIcon: ({ color }) => <Award size={28} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="design-system"
+          options={{
+            title: 'Design',
+            tabBarIcon: ({ color }) => <Palette size={28} color={color} />,
+            href: null, // Masqué en production (commentez pour afficher)
           }}
         />
         <Tabs.Screen
           name="settings"
           options={{
-            title: 'Settings',
+            title: 'Paramètres',
             tabBarIcon: ({ color }) => <Settings size={28} color={color} />,
           }}
         />

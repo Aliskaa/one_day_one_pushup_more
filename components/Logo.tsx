@@ -1,29 +1,26 @@
 import { APP_NAME } from '@/constants/constants';
-import { Dumbbell } from '@tamagui/lucide-icons';
 import React from 'react';
-
-import { Avatar, Image, Text, XStack, YStack } from 'tamagui';
+import { Image, Text, YStack } from 'tamagui';
 
 export default function Logo({ hasText = false }: { hasText?: boolean }) {
     return (
-        <YStack gap="$3" style={{ alignItems: 'center' }} mb="$4">
-            <XStack
-                bg="$orange9"
-                p="$3"
-                style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 16,
-                }}
+        <YStack gap="$3" alignItems="center">
+            <YStack
+                backgroundColor="$backgroundHover"
+                padding="$4"
+                borderRadius={24}
+                alignItems="center"
+                justifyContent="center"
             >
                 <Image
                     source={require('../assets/images/logo_one_day_one_pushup_more.png')}
-                    width={200}
-                    height={300}
+                    width={160}
+                    height={240}
+                    resizeMode="contain"
                 />
-            </XStack>
+            </YStack>
             {hasText && (
-                <Text fontSize="$7" fontWeight="700" color="$color" textAlign='center'>
+                <Text fontSize={20} fontWeight="700" color="$color" textAlign="center">
                     {APP_NAME}
                 </Text>
             )}

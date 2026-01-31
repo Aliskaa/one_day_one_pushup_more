@@ -1,17 +1,20 @@
 import Logo from "@/components/Logo";
 import SignInWithGoogle from "@/components/SignInWithGoogle";
+import { Card } from "@/components/ui";
+import { Flame, Target, Trophy } from "@tamagui/lucide-icons";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  H1,
-  Paragraph,
+  H2,
+  Text,
   ScrollView,
-  YStack
+  YStack,
+  XStack
 } from "tamagui";
 
 export default function Page() {
   return (
-    <YStack flex={1} bg="$backgroundHover">
+    <YStack flex={1} backgroundColor="$backgroundHover">
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
@@ -19,36 +22,115 @@ export default function Page() {
           keyboardShouldPersistTaps="handled"
         >
           <YStack
-            p="$4"
-            gap="$6"
+            padding="$4"
+            gap="$5"
             maxWidth={600}
             width="100%"
             alignSelf="center"
           >
-            {/* 1. HEADER & LOGO */}
-            <YStack alignItems="center" gap="$2" mt="$4">
-              <Logo hasText={true} />
+            {/* Logo et Header */}
+            <YStack alignItems="center" gap="$3" marginTop="$4">
+              <Logo hasText={false} />
 
-              <YStack alignItems="center" mt="$4">
-                <H1 fontFamily="$heading" size="$8" color="$primary" textAlign="center">
+              <YStack alignItems="center" gap="$2">
+                <H2 fontSize={32} fontWeight="800" color="$color" textAlign="center">
                   Bienvenue
-                </H1>
-                <Paragraph
-                  color="$color"
-                  opacity={0.6}
+                </H2>
+                <Text
+                  color="$colorMuted"
                   textAlign="center"
-                  fontSize={16}
+                  fontSize={15}
+                  lineHeight={22}
                 >
-                  Connecte-toi pour continuer
-                </Paragraph>
+                  Connecte-toi pour commencer ton défi
+                </Text>
               </YStack>
             </YStack>
 
-            {/* 2. MAIN LOGIN CARD */}
-            <SignInWithGoogle />
+            {/* Carte de connexion */}
+            <Card 
+              backgroundColor="$background" 
+              padding="$5"
+              borderRadius={24}
+              gap="$4"
+            >
+              <YStack gap="$3" alignItems="center">
+                <Text fontSize={16} fontWeight="600" color="$color" textAlign="center">
+                  Prêt à te surpasser ?
+                </Text>
+                <Text fontSize={13} color="$colorMuted" textAlign="center" lineHeight={20}>
+                  Rejoins des milliers d'athlètes qui progressent chaque jour
+                </Text>
+              </YStack>
+
+              <SignInWithGoogle />
+            </Card>
+
+            {/* Features */}
+            <YStack gap="$3" marginTop="$2">
+              <Feature 
+                icon={Target}
+                color="$blue8"
+                title="Objectifs progressifs"
+                description="Un défi qui s'adapte à ton niveau"
+              />
+              <Feature 
+                icon={Flame}
+                color="$red8"
+                title="Séries de motivation"
+                description="Garde ta motivation au maximum"
+              />
+              <Feature 
+                icon={Trophy}
+                color="$amber8"
+                title="Achievements"
+                description="Débloque des badges uniques"
+              />
+            </YStack>
+
+            <Text 
+              fontSize={11} 
+              color="$colorMuted" 
+              textAlign="center" 
+              marginTop="$2"
+            >
+              En continuant, tu acceptes nos conditions d'utilisation
+            </Text>
           </YStack>
         </ScrollView>
       </SafeAreaView>
     </YStack>
+  );
+}
+
+interface FeatureProps {
+  icon: any;
+  color: string;
+  title: string;
+  description: string;
+}
+
+function Feature({ icon: Icon, color, title, description }: FeatureProps) {
+  return (
+    <XStack gap="$3" alignItems="center">
+      <YStack
+        width={44}
+        height={44}
+        backgroundColor="$backgroundHover"
+        borderRadius={12}
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Icon size={22} color={color} />
+      </YStack>
+      <YStack flex={1}>
+        <Text fontSize={15} fontWeight="600" color="$color">
+          {title}
+        </Text>
+        <Text fontSize={13} color="$colorMuted" lineHeight={18}>
+          {description}
+        </Text>
+      </YStack>
+    </XStack>
   );
 }

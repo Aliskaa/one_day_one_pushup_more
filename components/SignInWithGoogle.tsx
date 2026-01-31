@@ -73,17 +73,19 @@ export default function Page() {
 
   return (
     <Button
-      size="$4"
+      size="$5"
+      backgroundColor="$background"
       borderColor="$borderColor"
       borderWidth={1}
-      borderRadius={14}
-      m="$5"
+      borderRadius={16}
+      paddingVertical="$4"
       onPress={onPress}
-      icon={<Chrome size={20} color="#EA4335" />}
-      animation="bouncy"
-      pressStyle={{ bg: '$backgroundHover', scale: 0.98 }}
+      icon={<Chrome size={22} color="#EA4335" />}
+      animation="quick"
+      pressStyle={{ backgroundColor: '$backgroundHover', scale: 0.98 }}
+      hoverStyle={{ backgroundColor: '$backgroundHover' }}
     >
-      <Text fontFamily="$body" fontWeight="600" color="$color">
+      <Text fontSize={16} fontWeight="600" color="$color">
         Continuer avec Google
       </Text>
     </Button>

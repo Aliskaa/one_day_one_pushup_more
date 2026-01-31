@@ -6211,12 +6211,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-native-confetti@npm:^0":
+  version: 0.1.4
+  resolution: "@types/react-native-confetti@npm:0.1.4"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 10/788267cd2fe8fb2bd22eba4026f8189f2761fb3ce99471d3af513382d6a375360e3575532d70f8da83968526da7f4551997794c6c1f9981318dbf470e39c9a01
+  languageName: node
+  linkType: hard
+
 "@types/react-native@npm:^0.73.0":
   version: 0.73.0
   resolution: "@types/react-native@npm:0.73.0"
   dependencies:
     react-native: "npm:*"
   checksum: 10/a764ca5d876dae3c109da449f736c44271b3b236d0d6e836c078247af1419f6d851600c56bb0c26f3e0d1b4be6eaac56b65c1f74ad0f0d05baf8b65dd1d5c597
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:*":
+  version: 19.2.10
+  resolution: "@types/react@npm:19.2.10"
+  dependencies:
+    csstype: "npm:^3.2.2"
+  checksum: 10/0e34a0e42db02f4b3f4bed446128c555446c2854b833d71d597e6c8b08800dd90519a03a226ad250cccc4a0c9e51bd3f9c54cdcb79ee1219f4d5b318fb3a3813
   languageName: node
   linkType: hard
 
@@ -7728,7 +7746,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csstype@npm:^3.0.2":
+"csstype@npm:^3.0.2, csstype@npm:^3.2.2":
   version: 3.2.3
   resolution: "csstype@npm:3.2.3"
   checksum: 10/ad41baf7e2ffac65ab544d79107bf7cd1a4bb9bab9ac3302f59ab4ba655d5e30942a8ae46e10ba160c6f4ecea464cc95b975ca2fefbdeeacd6ac63f12f99fe1f
@@ -11183,6 +11201,7 @@ __metadata:
     "@tamagui/toast": "npm:^1.144.1"
     "@types/react": "npm:~19.1.10"
     "@types/react-native": "npm:^0.73.0"
+    "@types/react-native-confetti": "npm:^0"
     babel-preset-expo: "npm:~54.0.0"
     burnt: "npm:^0.12.2"
     expo: "npm:^54.0.23"

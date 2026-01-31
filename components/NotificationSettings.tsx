@@ -125,9 +125,10 @@ export const NotificationSettings: React.FC = () => {
         </XStack>
 
         {/* Paramètres détaillés */}
-        {settings.enabled && (
-          <YStack animation="medium" enterStyle={{ opacity: 0, y: -10 }} exitStyle={{ opacity: 0, y: -10 }}>
-            <Separator borderColor="$borderColor" />
+        <AnimatePresence>
+          {settings.enabled && (
+            <YStack>
+              <Separator borderColor="$borderColor" />
             
             {/* Heure du rappel quotidien */}
             <YStack>
@@ -154,15 +155,14 @@ export const NotificationSettings: React.FC = () => {
               </XStack>
 
               {/* Zone Time Picker Expandable */}
-              {showTimePicker && (
-                <YStack 
-                  bg="$backgroundHover" 
-                  p="$4" 
-                  alignItems="center" 
-                  gap="$3"
-                  animation="quick"
-                  enterStyle={{ opacity: 0, scale: 0.95 }}
-                >
+              <AnimatePresence>
+                {showTimePicker && (
+                  <YStack 
+                    bg="$backgroundHover" 
+                    p="$4" 
+                    alignItems="center" 
+                    gap="$3"
+                  >
                   <Text fontSize={14} fontWeight="600" color="$color" opacity={0.7}>
                     Définir l'heure
                   </Text>
@@ -180,8 +180,9 @@ export const NotificationSettings: React.FC = () => {
                   >
                     Valider
                   </Button>
-                </YStack>
-              )}
+                  </YStack>
+                )}
+              </AnimatePresence>
             </YStack>
 
             <Separator borderColor="$borderColor" />
@@ -206,8 +207,9 @@ export const NotificationSettings: React.FC = () => {
                 <Switch.Thumb animation="bouncy" bg="white" />
               </Switch>
             </XStack>
-          </YStack>
-        )}
+            </YStack>
+          )}
+        </AnimatePresence>
       </YStack>
     </YStack>
   );
