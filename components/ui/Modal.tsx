@@ -41,8 +41,6 @@ export const ModalContent = styled(YStack, {
   shadowRadius: 24,
   elevation: 10,
   
-  animation: 'bouncy',
-  
   variants: {
     size: {
       sm: {

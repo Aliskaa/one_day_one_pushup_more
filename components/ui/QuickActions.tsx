@@ -22,12 +22,12 @@ export const QuickActionButton = styled(PrimaryButton, {
     paddingHorizontal: '$4',
     borderRadius: '$4',
     
-    animation: 'bouncy',
+    // Removed animation property to fix web compatibility
     pressStyle: {
-        scale: 0.92,
+        opacity: 0.8,
     },
     hoverStyle: {
-        scale: 1.02,
+        opacity: 0.9,
     },
 
     variants: {
@@ -105,8 +105,7 @@ export const QuickActions = forwardRef<any, QuickActionsProps>((props, ref) => {
                     minWidth={120}
                     onPress={handleComplete}
                     disabled={disabled}
-                    animation="bouncy"
-                    pressStyle={{ scale: 0.92 }}
+                    pressStyle={{ opacity: 0.8 }}
                 >
                     <Text fontSize={16} fontWeight="700" color="white">✓ Fait !</Text>
                 </SuccessButton>

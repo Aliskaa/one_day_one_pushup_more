@@ -17,9 +17,6 @@ export const BaseBadge = styled(View, {
   paddingVertical: '$1',
   gap: '$1',
   
-  // Animation
-  animation: 'quick',
-  
   variants: {
     size: {
       sm: {

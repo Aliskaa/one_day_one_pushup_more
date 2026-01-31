@@ -15,9 +15,6 @@ export const BaseCard = styled(TamaguiCard, {
   borderWidth: 1,
   borderColor: '$borderColor',
   
-  // Animation
-  animation: 'smooth',
-  
   variants: {
     // Variantes d'élévation
     elevated: {
@@ -63,7 +60,6 @@ export const BaseCard = styled(TamaguiCard, {
         },
         pressStyle: {
           backgroundColor: '$surfaceActive',
-          scale: 0.99,
         },
       },
     },

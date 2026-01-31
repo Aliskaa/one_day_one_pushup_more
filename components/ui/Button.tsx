@@ -24,7 +24,6 @@ export const BaseButton = styled(TamaguiButton, {
   },
   pressStyle: {
     opacity: 0.8,
-    scale: 0.98,
   },
   focusStyle: {
     outlineWidth: 2,
@@ -36,9 +35,6 @@ export const BaseButton = styled(TamaguiButton, {
     opacity: 0.5,
     cursor: 'not-allowed',
   },
-  
-  // Animation
-  animation: 'quick',
   
   variants: {
     size: {
@@ -91,7 +87,6 @@ export const PrimaryButton = styled(BaseButton, {
   },
   pressStyle: {
     backgroundColor: '$primaryPress',
-    scale: 0.98,
   },
   focusStyle: {
     outlineColor: '$primary',
@@ -113,7 +108,6 @@ export const SecondaryButton = styled(BaseButton, {
   },
   pressStyle: {
     backgroundColor: '$secondaryPress',
-    scale: 0.98,
   },
 });
 
@@ -134,7 +128,6 @@ export const OutlineButton = styled(BaseButton, {
   },
   pressStyle: {
     backgroundColor: '$primaryMuted',
-    scale: 0.98,
   },
 });
 
@@ -153,7 +146,6 @@ export const GhostButton = styled(BaseButton, {
   },
   pressStyle: {
     backgroundColor: '$backgroundPress',
-    scale: 0.98,
   },
 });
 
@@ -172,7 +164,6 @@ export const SuccessButton = styled(BaseButton, {
   },
   pressStyle: {
     backgroundColor: '$successPress',
-    scale: 0.98,
   },
 });
 
@@ -191,7 +182,6 @@ export const DangerButton = styled(BaseButton, {
   },
   pressStyle: {
     backgroundColor: '$dangerPress',
-    scale: 0.98,
   },
 });
 
@@ -257,7 +247,6 @@ export const IconButton = styled(BaseButton, {
   },
   pressStyle: {
     opacity: 0.7,
-    scale: 0.95,
   },
 });
 

@@ -61,14 +61,6 @@ export const StreakIcon = styled(YStack, {
   justifyContent: 'center',
   borderRadius: '$round',
   backgroundColor: '$streak',
-  
-  variants: {
-    animated: {
-      true: {
-        animation: 'bouncy',
-      },
-    },
-  } as const,
 });
 
 export interface StreakDisplayProps {
@@ -78,14 +70,14 @@ export interface StreakDisplayProps {
 }
 
 export const StreakDisplay = forwardRef<any, StreakDisplayProps>((props, ref) => {
-  const { streak, bestStreak, animated = true } = props;
+  const { streak, bestStreak } = props;
   
   const hasStreak = streak > 0;
   
   return (
     <StreakContainer ref={ref}>
       <StreakContent>
-        <StreakIcon animated={animated && hasStreak}>
+        <StreakIcon>
           <Flame size={36} color="white" />
         </StreakIcon>
         

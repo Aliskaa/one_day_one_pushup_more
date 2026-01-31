@@ -1,12 +1,12 @@
-import { AnimatedCounter, Card, StatCard, PrimaryButton, GhostButton } from '@/components/ui';
+import { AnimatedCounter, Card, GhostButton, PrimaryButton, StatCard } from '@/components/ui';
 import { useTraining } from '@/contexts/TrainingContext';
 import { isDayCompleted, isDayMissed } from '@/helpers/dateUtils';
 import { useProgressData } from '@/hooks/useProgressData';
 import { DayDataType } from '@/types/day';
-import { Calendar, ChevronLeft, ChevronRight, Edit3, Check } from '@tamagui/lucide-icons';
+import { Calendar, Check, ChevronLeft, ChevronRight, Edit3 } from '@tamagui/lucide-icons';
 import React, { useMemo, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, H2, H3, ScrollView, Spinner, Text, XStack, YStack, Sheet, Input } from 'tamagui';
+import { Button, H2, H3, Input, ScrollView, Sheet, Spinner, Text, XStack, YStack } from 'tamagui';
 
 const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
@@ -14,7 +14,7 @@ const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 export default function DaysCalendarScreen() {
   const { days, updateDay, isLoading, error } = useProgressData();
   const { trainingType } = useTraining();
-  
+
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear] = useState(2026);
   const [selectedDay, setSelectedDay] = useState<{ dayData: DayDataType | undefined; index: number; dateStr: string } | null>(null);
@@ -37,13 +37,14 @@ export default function DaysCalendarScreen() {
 
   // Générer les jours du calendrier
   const calendarDays = useMemo(() => {
-    const firstDay = new Date(selectedYear, selectedMonth, 1);
-    const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
-    const startingDayOfWeek = (firstDay.getDay() + 6) % 7; // Lundi = 0
-    const daysInMonth = lastDay.getDate();
+    const firstDay = new Date(Date.UTC(selectedYear, selectedMonth, 1));
+
+    const lastDay = new Date(Date.UTC(selectedYear, selectedMonth + 1, 0));
+    const startingDayOfWeek = (firstDay.getUTCDay() + 6) % 7; // Lundi = 0
+    const daysInMonth = lastDay.getUTCDate();
 
     const calendar = [];
-    
+
     // Jours vides avant le 1er
     for (let i = 0; i < startingDayOfWeek; i++) {
       calendar.push(null);
@@ -51,13 +52,14 @@ export default function DaysCalendarScreen() {
 
     // Jours du mois
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = new Date(selectedYear, selectedMonth, day).toISOString().split('T')[0];
+      const dateStr = new Date(Date.UTC(selectedYear, selectedMonth, day)).toISOString().split('T')[0];
       const dayData = days.find(d => d.dateStr === dateStr);
       calendar.push({ day, dayData, dateStr });
     }
 
     return calendar;
   }, [selectedMonth, selectedYear, days]);
+
 
   const handlePreviousMonth = () => {
     if (selectedMonth > 0) setSelectedMonth(selectedMonth - 1);
@@ -72,11 +74,11 @@ export default function DaysCalendarScreen() {
     today.setHours(0, 0, 0, 0);
     const clickedDate = new Date(dateStr);
     clickedDate.setHours(0, 0, 0, 0);
-    
+
     // Permettre la modification uniquement pour aujourd'hui et hier
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-    
+
     if (clickedDate.getTime() === today.getTime() || clickedDate.getTime() === yesterday.getTime()) {
       const index = days.findIndex(d => d.dateStr === dateStr);
       setSelectedDay({ dayData, index, dateStr });
@@ -180,15 +182,6 @@ export default function DaysCalendarScreen() {
               </XStack>
             </YStack>
 
-                        
-                        // Vérifier si c'est aujourd'hui ou hier (éditable)
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const clickedDate = new Date(dateStr);
-                        clickedDate.setHours(0, 0, 0, 0);
-                        const yesterday = new Date(today);
-                        yesterday.setDate(today.getDate() - 1);
-                        const isEditable = clickedDate.getTime() === today.getTime() || clickedDate.getTime() === yesterday.getTime();
             {/* CALENDRIER HEATMAP */}
             <Card elevated padding="$4">
               <YStack gap="$3">
@@ -205,76 +198,85 @@ export default function DaysCalendarScreen() {
 
                 {/* Grille calendrier */}
                 <YStack gap="$2">
-                  {Array.from({ length: Math.ceil(calendarDays.length / 7) }).map((_, weekIndex) => (
-                    <XStack key={weekIndex} justifyContent="space-around" gap="$2">
-                      {calendarDays.slice(weekIndex * 7, weekIndex * 7 + 7).map((item, dayIndex) => {
-                        if (!item) {
-                          return <YStack key={dayIndex} width={40} height={40} />;
-                        }
+                  {Array.from({ length: Math.ceil(calendarDays.length / 7) }).map((_, weekIndex) => {
+                    const week = calendarDays.slice(weekIndex * 7, weekIndex * 7 + 7);
 
-                        const { day, dayData, dateStr } = item;
-                        const isToday = dateStr === new Date().toISOString().split('T')[0];
-                        const isCompleted = dayData && isDayCompleted(dayData.done, dayData.target);
-                        const isMissed = dayData && isDayMissed(dayData.done, dayData.target);
-                        const isPending = dayData && dayData.done !== null && !isCompleted;
-                        const isFuture = new Date(dateStr) > new Date();
-                        
-                        // Vérifier si c'est aujourd'hui ou hier (éditable)
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const clickedDate = new Date(dateStr);
-                        clickedDate.setHours(0, 0, 0, 0);
-                        const yesterday = new Date(today);
-                        yesterday.setDate(today.getDate() - 1);
-                        const isEditable = clickedDate.getTime() === today.getTime() || clickedDate.getTime() === yesterday.getTime();
+                    // Si la semaine est incomplète (dernière ligne), on ajoute des "null" pour arriver à 7
+                    while (week.length < 7) {
+                      week.push(null);
+                    }
 
-                        let bgColor = '$backgroundHover';
-                        let textColor = '$colorMuted';
+                    return (
+                      <XStack key={weekIndex} justifyContent="space-around" gap="$2">
+                        {week.map((item, dayIndex) => {
+                          if (!item) {
+                            return <YStack key={dayIndex} width={40} height={40} />;
+                          }
 
-                        if (isCompleted) {
-                          bgColor = '$green10Dark';
-                          textColor = 'white';
-                        } else if (isMissed) {
-                          bgColor = '$red10Dark';
-                          textColor = 'white';
-                        } else if (isPending) {
-                          bgColor = '$orange10Dark';
-                          textColor = 'white';
-                        } else if (isToday) {
-                          bgColor = '$primary';
-                          textColor = 'white';
-                        } else if (isFuture) {
-                          textColor = '$colorMuted';
-                        }
+                          const { day, dayData, dateStr } = item;
+                          const isToday = dateStr === new Date().toISOString().split('T')[0];
+                          const isCompleted = dayData && isDayCompleted(dayData.done, dayData.target);
+                          const isMissed = dayData && isDayMissed(dayData.done, dayData.target);
+                          const isPending = dayData && dayData.done !== null && !isCompleted;
+                          const isFuture = new Date(dateStr) > new Date();
 
-                        return (
-                          <YStack
-                            key={dayIndex}
-                            width={40}
-                            height={40}
-                            backgroundColor={bgColor}
-                            borderRadius={8}
-                            alignItems="center"
-                            justifyContent="center"
-                            borderWidth={isToday ? 2 : 0}
-                            borderColor="$color"
-                            onPress={isEditable ? () => handleDayClick(dayData, dateStr) : undefined}
-                            pressStyle={isEditable ? { opacity: 0.7, scale: 0.95 } : undefined}
-                            cursor={isEditable ? 'pointer' : 'default'}
-                          >
-                            <Text fontSize={14} fontWeight={isToday ? '800' : '600'} color={textColor}>
-                              {day}
-                            </Text>
-                            {isEditable && (
-                              <YStack position="absolute" top={2} right={2}>
-                                <Edit3 size={8} color={textColor} opacity={0.6} />
-                              </YStack>
-                            )}
-                          </YStack>
-                        );
-                      })}
-                    </XStack>
-                  ))}
+                          // Vérifier si c'est aujourd'hui ou hier (éditable)
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const clickedDate = new Date(dateStr);
+                          clickedDate.setHours(0, 0, 0, 0);
+                          const yesterday = new Date(today);
+                          yesterday.setDate(today.getDate() - 1);
+                          const isEditable = clickedDate.getTime() === today.getTime() || clickedDate.getTime() === yesterday.getTime();
+
+                          let bgColor = '$backgroundHover';
+                          let textColor = '$colorMuted';
+
+                          if (isCompleted) {
+                            bgColor = '$green10Dark';
+                            textColor = 'white';
+                          } else if (isPending) {
+                            bgColor = '$orange10Dark';
+                            textColor = 'white';
+                          } else if (isMissed) {
+                            bgColor = '$red10Dark';
+                            textColor = 'white';
+                          } else if (isToday) {
+                            bgColor = '$primary';
+                            textColor = 'white';
+                          } else if (isFuture) {
+                            textColor = '$colorMuted';
+                          }
+
+                          return (
+                            <YStack
+                              key={dayIndex}
+                              width={40}
+                              height={40}
+                              backgroundColor={bgColor}
+                              borderRadius={8}
+                              alignItems="center"
+                              justifyContent="center"
+                              borderWidth={isToday ? 2 : 0}
+                              borderColor="$color"
+                              onPress={isEditable ? () => handleDayClick(dayData, dateStr) : undefined}
+                              pressStyle={isEditable ? { opacity: 0.7, scale: 0.95 } : undefined}
+                              cursor={isEditable ? 'pointer' : 'default'}
+                            >
+                              <Text fontSize={14} fontWeight={isToday ? '800' : '600'} color={textColor}>
+                                {day}
+                              </Text>
+                              {isEditable && (
+                                <YStack position="absolute" top={2} right={2}>
+                                  <Edit3 size={8} color={textColor} opacity={0.6} />
+                                </YStack>
+                              )}
+                            </YStack>
+                          );
+                        })}
+                      </XStack>
+                    );
+                  })}
                 </YStack>
 
                 {/* Légende */}
@@ -295,79 +297,79 @@ export default function DaysCalendarScreen() {
                     <YStack width={16} height={16} backgroundColor="$primary" borderRadius={4} />
                     <Text fontSize={11} color="$colorMuted">Aujourd'hui</Text>
 
-      {/* SHEET D'ÉDITION */}
-      <Sheet
-        modal
-        open={selectedDay !== null}
-        onOpenChange={(open: boolean) => !open && handleCloseSheet()}
-        snapPoints={[45]}
-        dismissOnSnapToBottom
-      >
-        <Sheet.Overlay animation="lazy" enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
-        <Sheet.Frame backgroundColor="$background" padding="$4" borderTopLeftRadius={20} borderTopRightRadius={20}>
-          <YStack gap="$4" paddingBottom="$4">
-            {/* Handle */}
-            <YStack alignItems="center">
-              <YStack width={40} height={4} backgroundColor="$borderColor" borderRadius={10} />
-            </YStack>
+                    {/* SHEET D'ÉDITION */}
+                    <Sheet
+                      modal
+                      open={selectedDay !== null}
+                      onOpenChange={(open: boolean) => !open && handleCloseSheet()}
+                      snapPoints={[45]}
+                      dismissOnSnapToBottom
+                    >
+                      <Sheet.Overlay animation="lazy" enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
+                      <Sheet.Frame backgroundColor="$background" padding="$4" borderTopLeftRadius={20} borderTopRightRadius={20}>
+                        <YStack gap="$4" paddingBottom="$4">
+                          {/* Handle */}
+                          <YStack alignItems="center">
+                            <YStack width={40} height={4} backgroundColor="$borderColor" borderRadius={10} />
+                          </YStack>
 
-            {/* Header */}
-            <YStack alignItems="center" gap="$2">
-              <H3 fontSize={20} fontWeight="700" color="$color">
-                Modifier
-              </H3>
-              <Text fontSize={14} color="$colorMuted">
-                {selectedDay && new Date(selectedDay.dateStr).toLocaleDateString('fr-FR', { 
-                  weekday: 'long', 
-                  day: 'numeric', 
-                  month: 'long' 
-                })}
-              </Text>
-            </YStack>
+                          {/* Header */}
+                          <YStack alignItems="center" gap="$2">
+                            <H3 fontSize={20} fontWeight="700" color="$color">
+                              Modifier
+                            </H3>
+                            <Text fontSize={14} color="$colorMuted">
+                              {selectedDay && new Date(selectedDay.dateStr).toLocaleDateString('fr-FR', {
+                                weekday: 'long',
+                                day: 'numeric',
+                                month: 'long'
+                              })}
+                            </Text>
+                          </YStack>
 
-            {/* Infos */}
-            {selectedDay?.dayData && (
-              <Card backgroundColor="$backgroundHover" padding="$3">
-                <XStack justifyContent="space-between">
-                  <Text fontSize={13} color="$colorMuted">Objectif</Text>
-                  <Text fontSize={13} fontWeight="700" color="$color">
-                    {selectedDay.dayData.target} {trainingType === 'pushup' ? 'pompes' : 'crunchs'}
-                  </Text>
-                </XStack>
-              </Card>
-            )}
+                          {/* Infos */}
+                          {selectedDay?.dayData && (
+                            <Card backgroundColor="$backgroundHover" padding="$3">
+                              <XStack justifyContent="space-between">
+                                <Text fontSize={13} color="$colorMuted">Objectif</Text>
+                                <Text fontSize={13} fontWeight="700" color="$color">
+                                  {selectedDay.dayData.target} {trainingType === 'pushup' ? 'pompes' : 'crunchs'}
+                                </Text>
+                              </XStack>
+                            </Card>
+                          )}
 
-            {/* Input */}
-            <YStack gap="$2">
-              <Text fontSize={13} fontWeight="600" color="$color">
-                Nombre réalisé
-              </Text>
-              <Input
-                size="$5"
-                value={editValue}
-                onChangeText={setEditValue}
-                keyboardType="numeric"
-                placeholder="0"
-                fontSize={18}
-                textAlign="center"
-                backgroundColor="$backgroundHover"
-                borderColor="$borderColor"
-                focusStyle={{ borderColor: '$primary' }}
-              />
-            </YStack>
+                          {/* Input */}
+                          <YStack gap="$2">
+                            <Text fontSize={13} fontWeight="600" color="$color">
+                              Nombre réalisé
+                            </Text>
+                            <Input
+                              size="$5"
+                              value={editValue}
+                              onChangeText={setEditValue}
+                              keyboardType="numeric"
+                              placeholder="0"
+                              fontSize={18}
+                              textAlign="center"
+                              backgroundColor="$backgroundHover"
+                              borderColor="$borderColor"
+                              focusStyle={{ borderColor: '$primary' }}
+                            />
+                          </YStack>
 
-            {/* Boutons */}
-            <XStack gap="$3">
-              <GhostButton flex={1} onPress={handleCloseSheet}>
-                Annuler
-              </GhostButton>
-              <PrimaryButton flex={1} onPress={handleSaveEdit} icon={Check}>
-                Valider
-              </PrimaryButton>
-            </XStack>
-          </YStack>
-        </Sheet.Frame>
-      </Sheet>
+                          {/* Boutons */}
+                          <XStack gap="$3">
+                            <GhostButton flex={1} onPress={handleCloseSheet}>
+                              Annuler
+                            </GhostButton>
+                            <PrimaryButton flex={1} onPress={handleSaveEdit} icon={Check}>
+                              Valider
+                            </PrimaryButton>
+                          </XStack>
+                        </YStack>
+                      </Sheet.Frame>
+                    </Sheet>
                   </XStack>
                 </XStack>
               </YStack>
