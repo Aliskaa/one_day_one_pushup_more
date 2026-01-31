@@ -14,7 +14,7 @@ export function TrendChart({ days, todayIndex }: TrendChartProps) {
   const theme = useTheme();
   const { width } = useWindowDimensions();
   
-  const chartWidth = Math.min(width - 100, 350);
+  const chartWidth = Math.min(width - 120, 350);
 
   const trendData = useMemo(() => {
     // Analyser les 4 dernières semaines
@@ -107,7 +107,6 @@ export function TrendChart({ days, todayIndex }: TrendChartProps) {
         </XStack>
 
         {/* Graphique en barres */}
-        <YStack alignItems="center" paddingVertical="$2">
           <BarChart
             data={trendData.barData}
             height={160}
@@ -124,7 +123,6 @@ export function TrendChart({ days, todayIndex }: TrendChartProps) {
             showGradient
             gradientColor={theme.background.val}
           />
-        </YStack>
 
         {/* Stats de tendance */}
         <XStack justifyContent="space-around" pt="$2" borderTopWidth={1} borderTopColor="$borderColor">
