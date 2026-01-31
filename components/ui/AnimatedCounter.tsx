@@ -42,7 +42,8 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   }, [value]);
 
   return (
-    <Text fontSize={fontSize} fontWeight={fontWeight} color={color}>
+    <Text fontSize={fontSize} fontWeight={fontWeight} color={color}
+                    fontFamily="$body">
       {prefix}{displayValue.toLocaleString()}{suffix}
     </Text>
   );

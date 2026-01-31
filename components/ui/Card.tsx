@@ -7,14 +7,14 @@ import { forwardRef } from 'react';
 
 export const BaseCard = styled(TamaguiCard, {
   name: 'BaseCard',
-  
+
   // Defaults
   backgroundColor: '$surface',
   borderRadius: '$4',
   padding: '$4',
   borderWidth: 1,
   borderColor: '$borderColor',
-  
+
   variants: {
     // Variantes d'élévation
     elevated: {
@@ -31,7 +31,7 @@ export const BaseCard = styled(TamaguiCard, {
         elevation: 0,
       },
     },
-    
+
     // Variantes de padding
     padded: {
       none: {
@@ -47,7 +47,7 @@ export const BaseCard = styled(TamaguiCard, {
         padding: '$6',
       },
     },
-    
+
     // Variantes d'interactivité
     pressable: {
       true: {
@@ -63,7 +63,7 @@ export const BaseCard = styled(TamaguiCard, {
         },
       },
     },
-    
+
     // Variantes de couleur
     variant: {
       default: {
@@ -90,7 +90,7 @@ export const BaseCard = styled(TamaguiCard, {
       },
     },
   } as const,
-  
+
   defaultVariants: {
     elevated: false,
     padded: 'md',
@@ -107,7 +107,7 @@ export const StatCard = styled(BaseCard, {
   padding: '$5',
   gap: '$2',
   alignItems: 'flex-start',
-  
+
   variants: {
     highlight: {
       true: {
@@ -150,7 +150,7 @@ export const CompactCard = styled(BaseCard, {
   flexDirection: 'row',
   alignItems: 'center',
   gap: '$3',
-  
+
   variants: {
     active: {
       true: {
@@ -172,13 +172,13 @@ export const HeroCard = styled(BaseCard, {
   padding: '$6',
   alignItems: 'center',
   gap: '$4',
-  
+
   shadowColor: '$shadowColor',
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 1,
   shadowRadius: 16,
   elevation: 6,
-  
+
   variants: {
     gradient: {
       true: {
@@ -197,7 +197,7 @@ export const AchievementCard = styled(BaseCard, {
   elevated: true,
   padding: '$4',
   gap: '$3',
-  
+
   variants: {
     unlocked: {
       true: {
@@ -240,7 +240,7 @@ export const WorkoutCard = styled(BaseCard, {
   elevated: true,
   padding: '$5',
   gap: '$4',
-  
+
   variants: {
     training: {
       pushup: {
@@ -361,10 +361,10 @@ export function AchievementCardComponent({
 
         {/* Content */}
         <YStack flex={1} gap="$1">
-          <Text fontSize={15} fontWeight="700" color={textColor}>
+          <Text fontSize={15} fontWeight="700" color={textColor} fontFamily="$body">
             {title}
           </Text>
-          <Text fontSize={13} color={descColor} lineHeight={18}>
+          <Text fontSize={13} color={descColor} lineHeight={18} fontFamily="$body">
             {description}
           </Text>
 
@@ -372,10 +372,10 @@ export function AchievementCardComponent({
           {!unlocked && progress > 0 && (
             <YStack gap="$1" marginTop="$2">
               <XStack justifyContent="space-between" alignItems="center">
-                <Text fontSize={11} color="$colorMuted" fontWeight="600">
+                <Text fontSize={11} color="$colorMuted" fontWeight="600" fontFamily="$heading">
                   Progression
                 </Text>
-                <Text fontSize={11} color="$color" fontWeight="700">
+                <Text fontSize={11} color="$color" fontWeight="700" fontFamily="$heading">
                   {progress.toFixed(0)}%
                 </Text>
               </XStack>
@@ -389,7 +389,7 @@ export function AchievementCardComponent({
           {unlocked && (
             <XStack gap="$1" alignItems="center" marginTop="$1">
               <Trophy size={12} color="white" />
-              <Text fontSize={11} fontWeight="600" color="white">
+              <Text fontSize={11} fontWeight="600" color="white" fontFamily="$heading">
                 Débloqué
               </Text>
             </XStack>

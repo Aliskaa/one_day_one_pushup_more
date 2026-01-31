@@ -1,42 +1,19 @@
-import React, { useState, useMemo } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { YStack, XStack, Text, H2, ScrollView, Button } from 'tamagui';
+import { AchievementCardComponent, AnimatedCounter, Card, StatCard } from '@/components/ui';
+import { useTraining } from '@/contexts/TrainingContext';
+import { useAchievements } from '@/hooks/useAchievements';
+import { useProgressData } from '@/hooks/useProgressData';
+import log from '@/services/logger';
+import { AchievementCategory } from '@/types/achievement';
 import {
-  Award,
-  BadgeCheck,
-  Calendar,
-  CalendarCheck,
-  CalendarDays,
-  CalendarRange,
-  CheckCircle,
-  Crown,
-  Dumbbell,
   Filter,
   Flame,
-  Footprints,
-  Gem,
-  Globe,
   Medal,
-  Milestone,
-  Mountain,
-  PartyPopper,
-  Rocket,
-  RotateCcw,
-  Shield,
-  Sparkles,
-  Star,
-  Swords,
   Target,
-  TrendingUp,
-  Trophy,
-  Zap,
+  Trophy
 } from '@tamagui/lucide-icons';
-import { StatCard, Card, AchievementCardComponent, AnimatedCounter } from '@/components/ui';
-import { useProgressData } from '@/hooks/useProgressData';
-import { useAchievements } from '@/hooks/useAchievements';
-import { useTraining } from '@/contexts/TrainingContext';
-import { AchievementCategory } from '@/types/achievement';
-import log from '@/services/logger';
+import React, { useMemo, useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button, H2, ScrollView, Text, XStack, YStack } from 'tamagui';
 
 const CATEGORY_CONFIG = {
   all: { label: 'Tous', icon: Trophy, color: '$purple8' },
@@ -101,24 +78,24 @@ export default function AchievementsScreen() {
             {/* HEADER */}
             <YStack gap="$2" alignItems="center" paddingTop="$2">
               <Trophy size={48} color="$achievement" />
-              <H2 fontSize={28} fontWeight="800" color="$color">
+              <H2 fontSize={28} fontWeight="800" color="$color" fontFamily="$heading">
                 Accomplissements
               </H2>
-              <Text fontSize={14} color="$colorMuted" textAlign="center">
+              <Text fontSize={14} color="$colorMuted" textAlign="center" fontFamily="$body">
                 Débloquez tous les badges en progressant
               </Text>
             </YStack>
 
             {/* STATS GLOBALES */}
             <YStack gap="$3">
-              <Text fontSize={14} fontWeight="700" color="$colorMuted" textTransform="uppercase" marginLeft="$2">
+              <Text fontSize={14} fontWeight="700" color="$colorMuted" textTransform="uppercase" marginLeft="$2" fontFamily="$heading">
                 Progression globale
               </Text>
               <XStack gap="$3">
                 <StatCard flex={1} variant="achievement">
                   <XStack alignItems="center" gap="$2">
                     <Trophy size={20} color="$achievement" />
-                    <Text fontSize={11} color="$colorMuted" fontWeight="600">Débloqués</Text>
+                    <Text fontSize={11} color="$colorMuted" fontWeight="600" fontFamily="$heading">Débloqués</Text>
                   </XStack>
                   <AnimatedCounter 
                     value={unlockedCount} 
@@ -126,7 +103,7 @@ export default function AchievementsScreen() {
                     fontWeight="800" 
                     color="$achievement" 
                   />
-                  <Text fontSize={11} color="$colorMuted">
+                  <Text fontSize={11} color="$colorMuted" fontFamily="$body">
                     / {totalCount} badges
                   </Text>
                 </StatCard>
@@ -134,7 +111,7 @@ export default function AchievementsScreen() {
                 <StatCard flex={1}>
                   <XStack alignItems="center" gap="$2">
                     <Target size={20} color="$color" />
-                    <Text fontSize={11} color="$colorMuted" fontWeight="600">Taux</Text>
+                    <Text fontSize={11} color="$colorMuted" fontWeight="600" fontFamily="$heading">Taux</Text>
                   </XStack>
                   <AnimatedCounter 
                     value={totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0}
@@ -143,7 +120,7 @@ export default function AchievementsScreen() {
                     color="$color"
                     suffix="%"
                   />
-                  <Text fontSize={11} color="$colorMuted">
+                  <Text fontSize={11} color="$colorMuted" fontFamily="$body">
                     complété
                   </Text>
                 </StatCard>
@@ -152,36 +129,36 @@ export default function AchievementsScreen() {
               {/* Stats Secondaires */}
               <XStack gap="$3">
                 <StatCard flex={1} variant="streak">
-                  <Text fontSize={11} color="$colorMuted" fontWeight="600">Streak</Text>
+                  <Text fontSize={11} color="$colorMuted" fontWeight="600" fontFamily="$heading">Streak</Text>
                   <AnimatedCounter 
                     value={stats.currentStreak} 
                     fontSize={28} 
                     fontWeight="800" 
                     color="$streak" 
                   />
-                  <Text fontSize={10} color="$colorMuted">jours</Text>
+                  <Text fontSize={10} color="$colorMuted" fontFamily="$body">jours</Text>
                 </StatCard>
 
                 <StatCard flex={1} variant="primary">
-                  <Text fontSize={11} color="$colorMuted" fontWeight="600">Total</Text>
+                  <Text fontSize={11} color="$colorMuted" fontWeight="600" fontFamily="$heading">Total</Text>
                   <AnimatedCounter 
                     value={stats.totalPushups} 
                     fontSize={24} 
                     fontWeight="800" 
                     color="$primary" 
                   />
-                  <Text fontSize={10} color="$colorMuted">{trainingType === 'pushup' ? 'pompes' : 'crunchs'}</Text>
+                  <Text fontSize={10} color="$colorMuted" fontFamily="$body">{trainingType === 'pushup' ? 'pompes' : 'crunchs'}</Text>
                 </StatCard>
 
                 <StatCard flex={1}>
-                  <Text fontSize={11} color="$colorMuted" fontWeight="600">Record</Text>
+                  <Text fontSize={11} color="$colorMuted" fontWeight="600" fontFamily="$heading">Record</Text>
                   <AnimatedCounter 
                     value={stats.bestStreak} 
                     fontSize={28} 
                     fontWeight="800" 
                     color="$color" 
                   />
-                  <Text fontSize={10} color="$colorMuted">jours</Text>
+                  <Text fontSize={10} color="$colorMuted" fontFamily="$body">jours</Text>
                 </StatCard>
               </XStack>
             </YStack>
@@ -190,7 +167,7 @@ export default function AchievementsScreen() {
             <YStack gap="$3">
               <XStack alignItems="center" gap="$2">
                 <Filter size={16} color="$colorMuted" />
-                <Text fontSize={14} fontWeight="700" color="$colorMuted" textTransform="uppercase">
+                <Text fontSize={14} fontWeight="700" color="$colorMuted" textTransform="uppercase" fontFamily="$heading">
                   Catégories
                 </Text>
               </XStack>
@@ -218,6 +195,7 @@ export default function AchievementsScreen() {
                             fontSize={13} 
                             fontWeight="600" 
                             color={isSelected ? 'white' : '$color'}
+                            fontFamily="$body"
                           >
                             {config.label}
                           </Text>
@@ -233,7 +211,7 @@ export default function AchievementsScreen() {
             {unlocked.length > 0 && (
               <YStack gap="$3">
                 <XStack alignItems="center" justifyContent="space-between">
-                  <Text fontSize={16} fontWeight="700" color="$color">
+                  <Text fontSize={16} fontWeight="700" color="$color" fontFamily="$heading">
                     ✓ Débloqués ({unlocked.length})
                   </Text>
                 </XStack>
@@ -259,7 +237,7 @@ export default function AchievementsScreen() {
             {locked.length > 0 && (
               <YStack gap="$3">
                 <XStack alignItems="center" justifyContent="space-between">
-                  <Text fontSize={16} fontWeight="700" color="$color">
+                  <Text fontSize={16} fontWeight="700" color="$color" fontFamily="$heading">
                     🔒 À débloquer ({locked.length})
                   </Text>
                 </XStack>
@@ -284,7 +262,7 @@ export default function AchievementsScreen() {
             {/* Message si aucun résultat */}
             {filteredAchievements.length === 0 && (
               <Card elevated padding="$6" alignItems="center">
-                <Text fontSize={14} color="$colorMuted" textAlign="center">
+                <Text fontSize={14} color="$colorMuted" textAlign="center" fontFamily="$body">
                   Aucun achievement dans cette catégorie
                 </Text>
               </Card>

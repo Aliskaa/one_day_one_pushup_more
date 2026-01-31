@@ -57,7 +57,7 @@ export default function OnboardingScreen() {
     // Marquer l'onboarding comme complété
     await AsyncStorage.setItem('onboarding_completed', 'true');
     // Rediriger vers la sélection du type d'entraînement
-    router.replace('/');
+    router.replace('/(main)/select-defi');
   };
 
   const handleBack = () => {

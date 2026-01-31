@@ -18,21 +18,21 @@ export {
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
-  const [interLoaded, interError] = useFonts({
-    Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
+  const [loaded] = useFonts({
+    InterRegular: require('@tamagui/font-inter/otf/Inter-Regular.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
-  })
+    InterExtraBold: require('@tamagui/font-inter/otf/Inter-ExtraBold.otf'),
+  });
 
   const colorScheme = useColorScheme()
 
   useEffect(() => {
-    if (interLoaded || interError) {
+    if (loaded) {
       // Hide the splash screen after the fonts have loaded (or an error was returned) and the UI is ready.
       SplashScreen.hideAsync()
     }
-  }, [interLoaded, interError])
-
-  if (!interLoaded && !interError) {
+  }, [loaded])
+  if (!loaded) {
     return null
   }
 

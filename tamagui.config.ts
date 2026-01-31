@@ -48,6 +48,7 @@ const animations = createAnimations({
 // 2. TYPOGRAPHIE - Hiérarchie claire et lisible
 // ============================================================================
 const headingFont = createInterFont({
+  family: 'Inter, -apple-system, system-ui, sans-serif',
   size: {
     1: 11,   // Micro (badges, labels)
     2: 13,   // Caption (metadata)
