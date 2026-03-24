@@ -7,12 +7,14 @@ import { useTraining } from '@/contexts/TrainingContext';
 import SvgCrunch from '@/icons/Crunch';
 import SvgPushUp from '@/icons/Pushup';
 import { useUser } from '@clerk/clerk-expo';
-import { ChevronRight, Dumbbell, Moon, Sun, BookOpen, User } from '@tamagui/lucide-icons';
+import { ChevronRight, Dumbbell, Moon, Sun, BookOpen, User, RefreshCw, Upload } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Avatar, Button, H2, ScrollView, Separator, Sheet, Switch, Text, XStack, YStack } from 'tamagui';
+import { Avatar, Button, H2, ScrollView, Separator, Sheet, Switch, Text, XStack, YStack, Spinner } from 'tamagui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSyncToLeaderboard } from '@/hooks/useSyncToLeaderboard';
+import { useToastController } from '@tamagui/toast';
 
 interface MenuItemProps {
   icon: any;
@@ -93,7 +95,9 @@ export default function SettingsScreen() {
   const { theme, toggleTheme, isSystemTheme } = useAppTheme();
   const { trainingType, selectTraining } = useTraining();
   const router = useRouter();
+  const toast = useToastController();
   const [showTrainingSheet, setShowTrainingSheet] = useState(false);
+  const { syncCurrentTraining, syncAllTrainings, syncing } = useSyncToLeaderboard();
 
   const isDark = theme === 'dark';
 
@@ -102,6 +106,21 @@ export default function SettingsScreen() {
     await AsyncStorage.removeItem('onboarding_completed');
     // Rediriger vers l'onboarding
     router.push('/onboarding');
+  };
+
+  const handleSyncToLeaderboard = async () => {
+    try {
+      await syncAllTrainings();
+      toast.show('✅ Synchronisé', {
+        message: 'Vos données ont été synchronisées vers le classement',
+        duration: 3000,
+      });
+    } catch (error) {
+      toast.show('❌ Erreur', {
+        message: 'Impossible de synchroniser',
+        duration: 3000,
+      });
+    }
   };
 
   return (
@@ -181,6 +200,53 @@ export default function SettingsScreen() {
 
               {/* Notifications Settings Component */}
               <NotificationSettings />
+            </YStack>
+
+            {/* Data Section */}
+            <YStack gap="$3">
+              <Text marginLeft="$2" fontSize={14} fontWeight="700" color="$colorMuted" textTransform="uppercase">
+                Données
+              </Text>
+
+              <SettingsGroup>
+                <XStack
+                  p="$3.5"
+                  alignItems="center"
+                  gap="$3"
+                  bg="transparent"
+                  pressStyle={{ bg: '$backgroundHover', opacity: 0.8 }}
+                  animation="quick"
+                  onPress={syncing ? undefined : handleSyncToLeaderboard}
+                  cursor={syncing ? 'default' : 'pointer'}
+                  opacity={syncing ? 0.6 : 1}
+                >
+                  <YStack 
+                    width={40} 
+                    height={40} 
+                    bg="$backgroundHover" 
+                    borderRadius={12}
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    {syncing ? (
+                      <Spinner size="small" color="$primary" />
+                    ) : (
+                      <Upload size={20} color="$primary" />
+                    )}
+                  </YStack>
+
+                  <YStack flex={1}>
+                    <Text fontSize={15} fontWeight="600" color="$color">
+                      Synchroniser vers le classement
+                    </Text>
+                    <Text fontSize={12} color="$colorMuted" marginTop="$1">
+                      {syncing ? 'Synchronisation en cours...' : 'Publier vos stats existantes'}
+                    </Text>
+                  </YStack>
+
+                  <ChevronRight size={18} color="$colorMuted" />
+                </XStack>
+              </SettingsGroup>
             </YStack>
 
             {/* Support */}

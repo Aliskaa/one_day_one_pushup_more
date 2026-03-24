@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Profils publics - lecture publique, écriture publique (Clerk gère l'auth côté client)
+    match /publicProfiles/{userId} {
+      allow read: if true;
+      allow write: if true; // ⚠️ Validez côté client avec Clerk
+    }
+    
+    // Stats publiques (structure plate: publicStats/{userId}_{trainingType})
+    match /publicStats/{statsId} {
+      allow read: if true;
+      allow write: if true; // ⚠️ Validez côté client avec Clerk
+    }
+    
+    // Données utilisateur privées - écriture publique (Clerk gère l'auth côté client)
+    match /users/{userId} {
+      allow read, write: if true; // ⚠️ Validez côté client avec Clerk
+      
+      // Sous-collections (training, achievements, etc.)
+      match /{document=**} {
+        allow read, write: if true; // ⚠️ Validez côté client avec Clerk
+      }
+    }
+  }
+}

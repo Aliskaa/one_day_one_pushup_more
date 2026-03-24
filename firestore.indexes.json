@@ -1,0 +1,47 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "publicStats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "trainingType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "totalDone",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "publicStats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "trainingType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "currentStreak",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "publicStats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "trainingType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "bestStreak",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

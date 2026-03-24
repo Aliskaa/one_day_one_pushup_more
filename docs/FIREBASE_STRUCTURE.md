@@ -36,7 +36,29 @@ users/
               ├── unlockedBadges: { "first_step": {...} }
               ├── stats: { totalPushups: 8200, currentStreak: 12, ... }
               └── lastUpdated: Timestamp
+
+publicProfiles/ (Collection racine pour le leaderboard)
+  └── {userId}
+      ├── userId: "user123"
+      ├── username: "JohnDoe"
+      ├── avatarUrl: "https://..."
+      ├── createdAt: Timestamp
+      └── lastActive: Timestamp
+
+publicStats/ (Collection racine pour le leaderboard - structure PLATE)
+  └── {userId}_{trainingType}  (ex: "user123_pushup")
+      ├── userId: "user123"
+      ├── trainingType: "pushup"
+      ├── totalDone: 12500
+      ├── currentStreak: 45
+      ├── bestStreak: 67
+      ├── daysCompleted: 180
+      ├── weekTotal: 420
+      ├── monthTotal: 1800
+      └── lastUpdated: Timestamp
 ```
+
+**💡 Note :** Structure PLATE choisie pour faciliter les requêtes du leaderboard (where + orderBy).
 
 ## 🔧 Implémentation
 
@@ -86,6 +108,33 @@ const { trainingType, selectTraining } = useTraining();
 // Changer de type d'entraînement
 selectTraining('pushup'); // ou 'crunch'
 ```
+
+### 4. Leaderboard (leaderboard.ts)
+
+Système de classement public avec stats synchronisées automatiquement :
+
+```typescript
+// Récupérer le leaderboard
+const entries = await getLeaderboard({
+  trainingType: 'pushup',
+  sortBy: 'totalDone',
+  period: 'allTime',
+  limit: 50
+});
+
+// S'abonner aux changements en temps réel
+const unsubscribe = subscribeToLeaderboard(filters, (entries) => {
+  console.log('Leaderboard mis à jour:', entries);
+});
+
+// Obtenir le rang d'un utilisateur
+const rank = await getUserRank(userId, 'pushup', 'totalDone');
+```
+
+**Synchronisation automatique :**
+Les stats publiques sont mises à jour automatiquement dans `useProgressData` après chaque sauvegarde de progression.
+
+
 
 ## 🔄 Flux de l'application
 

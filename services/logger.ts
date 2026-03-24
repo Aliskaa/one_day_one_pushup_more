@@ -21,7 +21,7 @@ const log = logger.createLogger({
   printDate: true,
   fixedExtLvlLength: false,
   enabled: true,
-  severity: __DEV__ ? 'debug' : 'warn',
+  // severity: (typeof __DEV__ !== 'undefined' && __DEV__) ? 'debug' : 'warn',
 });
 
 export default log;

@@ -16,9 +16,10 @@ import {
 import log from '@/services/logger';
 import { DayDataType } from '@/types/day';
 import { ProgressMapType } from '@/types/utils';
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useToastController } from '@tamagui/toast';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { syncPublicStats } from '@/services/leaderboardSync';
 
 export type ProgressDataStats = {
   totalDone: number;
@@ -42,6 +43,7 @@ export interface UseProgressDataReturn {
 
 export const useProgressData = (): UseProgressDataReturn => {
   const { userId } = useAuth();
+  const { user } = useUser();
   const toast = useToastController();
   const { trainingType } = useTraining();
 
@@ -138,12 +140,31 @@ export const useProgressData = (): UseProgressDataReturn => {
         await saveProgressToFirebase(userId, trainingType, allUpdates);
         pendingUpdatesRef.current = {};
         log.info('💾 Sauvegarde effectuée');
+        
+        // ✨ Synchroniser les stats publiques pour le leaderboard
+        if (user) {
+          // Obtenir un nom d'affichage
+          const displayName = user.username 
+            || user.fullName 
+            || (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : null)
+            || user.firstName
+            || user.primaryEmailAddress?.emailAddress?.split('@')[0]
+            || 'Utilisateur';
+            
+          await syncPublicStats(
+            userId,
+            displayName,
+            trainingType,
+            allUpdates,
+            user.imageUrl
+          );
+        }
       } catch (err) {
         log.error('❌ Erreur de sauvegarde:', err);
         setError('Erreur de sauvegarde');
       }
     }, UI_CONSTANTS.DEBOUNCE_SAVE_DELAY);
-  }, [userId, trainingType, progressMap]);
+  }, [userId, trainingType, progressMap, user]);
 
   // Mise à jour d'un jour
   const updateDay = useCallback((index: number, value: string) => {
