@@ -96,7 +96,8 @@ export const ModalDescription = styled(Text, {
 
 export const ModalBody = styled(ScrollView, {
   name: 'ModalBody',
-  flex: 1,
+  flexGrow: 0,
+  flexShrink: 1,
   paddingVertical: '$2',
   showsVerticalScrollIndicator: false,
 });
@@ -178,7 +179,9 @@ export const Modal = forwardRef<any, ModalProps>((props, ref) => {
             </ModalHeader>
           )}
           
-          <ModalBody contentContainerStyle={{ flexGrow: 1 }}>
+          <ModalBody
+            contentContainerStyle={{ flexGrow: 0, paddingBottom: 4 }}
+          >
             {children}
           </ModalBody>
           

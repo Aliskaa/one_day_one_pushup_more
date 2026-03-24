@@ -167,6 +167,8 @@ export default function DashboardScreen() {
                 onIncrement={handleIncrement}
                 onComplete={handleComplete}
                 onUseBank={withdrawFromBank}
+                surplusReserve={stats.surplusReserve}
+                repLabel={trainingType === 'pushup' ? 'pompes' : 'crunchs'}
                 currentValue={effectiveToday}
                 targetValue={stats.todayTarget}
                 bankAvailable={canUseBank}

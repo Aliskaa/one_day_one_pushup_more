@@ -1,6 +1,7 @@
-import { styled, XStack, YStack, Text } from 'tamagui';
-import { forwardRef } from 'react';
-import { PrimaryButton, SuccessButton } from './Button';
+import { styled, XStack, YStack, Text, Separator } from 'tamagui';
+import { forwardRef, useMemo, useState } from 'react';
+import { PrimaryButton, SuccessButton, GhostButton } from './Button';
+import { Modal } from './Modal';
 import * as Haptics from 'expo-haptics';
 
 // ============================================================================
@@ -51,6 +52,10 @@ export interface QuickActionsProps {
     onIncrement: (amount: number) => void;
     onComplete: () => void;
     onUseBank?: () => void;
+    /** Réserve actuelle (pour la modale banque) */
+    surplusReserve?: number;
+    /** Libellé unité : pompes, crunchs, etc. */
+    repLabel?: string;
     currentValue: number;
     targetValue: number;
     bankAvailable?: boolean;
@@ -62,11 +67,22 @@ export const QuickActions = forwardRef<any, QuickActionsProps>((props, ref) => {
         onIncrement,
         onComplete,
         onUseBank,
+        surplusReserve = 0,
+        repLabel = 'répétitions',
         currentValue,
         targetValue,
         bankAvailable = false,
         disabled = false,
     } = props;
+
+    const [bankModalOpen, setBankModalOpen] = useState(false);
+
+    const bankPreview = useMemo(() => {
+        const shortfall = Math.max(0, targetValue - currentValue);
+        const willUse = Math.min(shortfall, surplusReserve);
+        const after = Math.max(0, surplusReserve - willUse);
+        return { shortfall, willUse, after };
+    }, [currentValue, targetValue, surplusReserve]);
 
     const isCompleted = currentValue >= targetValue;
 
@@ -81,6 +97,7 @@ export const QuickActions = forwardRef<any, QuickActionsProps>((props, ref) => {
     };
 
     return (
+        <>
         <QuickActionsContainer ref={ref}>
             <QuickActionButton
                 flex={1}
@@ -135,7 +152,7 @@ export const QuickActions = forwardRef<any, QuickActionsProps>((props, ref) => {
                             variant="increment"
                             onPress={() => {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                onUseBank();
+                                setBankModalOpen(true);
                             }}
                             disabled={disabled}
                             backgroundColor="$orange9"
@@ -146,6 +163,76 @@ export const QuickActions = forwardRef<any, QuickActionsProps>((props, ref) => {
                 </>
             )}
         </QuickActionsContainer>
+
+        {onUseBank && bankAvailable ? (
+            <Modal
+                visible={bankModalOpen}
+                onClose={() => setBankModalOpen(false)}
+                size="sm"
+                showCloseButton={false}
+                footer={
+                    <>
+                        <GhostButton onPress={() => setBankModalOpen(false)}>Annuler</GhostButton>
+                        <PrimaryButton
+                            onPress={() => {
+                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                onUseBank();
+                                setBankModalOpen(false);
+                            }}
+                        >
+                            Valider
+                        </PrimaryButton>
+                    </>
+                }
+            >
+                <YStack gap="$3" paddingVertical="$1">
+                    <YStack gap="$1.5">
+                        <Text fontSize={16} fontWeight="600" color="$color" fontFamily="$body">
+                            Compléter avec la réserve
+                        </Text>
+                        <Text fontSize={13} lineHeight={18} color="$colorMuted">
+                            {repLabel} pour atteindre l’objectif du jour.
+                        </Text>
+                    </YStack>
+                    <YStack
+                        gap="$2"
+                        padding="$3"
+                        borderRadius="$4"
+                        backgroundColor="$backgroundHover"
+                        borderWidth={1}
+                        borderColor="$borderColor"
+                    >
+                        <XStack justifyContent="space-between" alignItems="center" gap="$3">
+                            <Text fontSize={14} color="$colorMuted">
+                                Réserve actuelle
+                            </Text>
+                            <Text fontSize={17} fontWeight="700" color="$color">
+                                {surplusReserve.toLocaleString()}
+                            </Text>
+                        </XStack>
+                        <Separator borderColor="$borderColor" />
+                        <XStack justifyContent="space-between" alignItems="center" gap="$3">
+                            <Text fontSize={14} color="$colorMuted">
+                                Prélevé
+                            </Text>
+                            <Text fontSize={17} fontWeight="700" color="$orange10">
+                                −{bankPreview.willUse.toLocaleString()}
+                            </Text>
+                        </XStack>
+                        <Separator borderColor="$borderColor" />
+                        <XStack justifyContent="space-between" alignItems="center" gap="$3">
+                            <Text fontSize={14} color="$colorMuted">
+                                Reste en banque
+                            </Text>
+                            <Text fontSize={17} fontWeight="700" color="$success">
+                                {bankPreview.after.toLocaleString()}
+                            </Text>
+                        </XStack>
+                    </YStack>
+                </YStack>
+            </Modal>
+        ) : null}
+        </>
     );
 });
 
