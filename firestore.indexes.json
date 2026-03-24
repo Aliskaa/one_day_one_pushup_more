@@ -37,7 +37,21 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "bestStreak",
+          "fieldPath": "bestSingleDay",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "publicStats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "trainingType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "physicalEcart",
           "order": "DESCENDING"
         }
       ]

@@ -19,7 +19,8 @@ Contient les statistiques par utilisateur et type d'entraînement :
 - ID du document : `{userId}_{trainingType}` (ex: "user123_pushup")
 - `totalDone` : Nombre total de répétitions
 - `currentStreak` : Série de jours consécutifs actuelle
-- `bestStreak` : Meilleure série de tous les temps
+- `bestStreak` : Meilleure série de tous les temps (toujours synchronisé)
+- `bestSingleDay` : Record du nombre de répétitions sur une journée (tri « Record »)
 - `daysCompleted` : Nombre de jours complétés
 - `weekTotal` : Total de la semaine en cours
 - `monthTotal` : Total du mois en cours
@@ -58,7 +59,7 @@ Pour optimiser les requêtes du leaderboard, créez ces index composites :
 
 1. **publicStats** : `trainingType` (ASC) + `totalDone` (DESC)
 2. **publicStats** : `trainingType` (ASC) + `currentStreak` (DESC)
-3. **publicStats** : `trainingType` (ASC) + `bestStreak` (DESC)
+3. **publicStats** : `trainingType` (ASC) + `bestSingleDay` (DESC)
 
 Firebase vous proposera de créer ces index automatiquement lors de la première utilisation.
 
@@ -95,7 +96,7 @@ setSortBy('totalDone');
 setSortBy('currentStreak');
 
 // Trier par meilleure série
-setSortBy('bestStreak');
+setSortBy('bestSingleDay');
 ```
 
 ### Activer les mises à jour en temps réel

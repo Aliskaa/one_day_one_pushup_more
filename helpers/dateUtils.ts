@@ -99,8 +99,13 @@ export const getCurrentWeekDays = (days: DayDataType[]): WeekDayData[] => {
  * @param target Nombre de répétitions ciblées
  * @returns true si l'objectif est atteint
  */
-export const isDayCompleted = (done: number | null | undefined, target: number): boolean => {
-  return done !== null && done !== undefined && done >= target;
+export const isDayCompleted = (
+  done: number | null | undefined,
+  target: number,
+  bankUsed?: number
+): boolean => {
+  if (done === null || done === undefined) return false;
+  return done + (bankUsed ?? 0) >= target;
 };
 
 /**
@@ -109,8 +114,13 @@ export const isDayCompleted = (done: number | null | undefined, target: number):
  * @param target Nombre de répétitions ciblées
  * @returns true si l'objectif n'est pas atteint
  */
-export const isDayMissed = (done: number | null | undefined, target: number): boolean => {
-  return done !== null && done !== undefined && done < target;
+export const isDayMissed = (
+  done: number | null | undefined,
+  target: number,
+  bankUsed?: number
+): boolean => {
+  if (done === null || done === undefined) return false;
+  return done + (bankUsed ?? 0) < target;
 };
 
 /**

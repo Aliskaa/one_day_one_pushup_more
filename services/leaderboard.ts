@@ -7,6 +7,7 @@ import { TrainingName } from '@/contexts/TrainingContext';
 import {
   LeaderboardEntry,
   LeaderboardFilters,
+  LeaderboardSortBy,
   PublicUserProfile,
   PublicUserStats,
 } from '@/types/leaderboard';
@@ -29,6 +30,33 @@ import log from './logger';
 // Collections Firestore
 const PUBLIC_PROFILES_COLLECTION = 'publicProfiles';
 const PUBLIC_STATS_COLLECTION = 'publicStats';
+
+const LEADERBOARD_ORDER_FIELDS = {
+  totalDone: 'totalDone',
+  currentStreak: 'currentStreak',
+  bestSingleDay: 'bestSingleDay',
+  physicalEcart: 'physicalEcart',
+} as const satisfies Record<LeaderboardSortBy, string>;
+
+export function getLeaderboardOrderField(sortBy: LeaderboardSortBy): string {
+  return LEADERBOARD_ORDER_FIELDS[sortBy];
+}
+
+export function getLeaderboardSortUserValue(
+  stats: PublicUserStats,
+  sortBy: LeaderboardSortBy
+): number {
+  switch (sortBy) {
+    case 'totalDone':
+      return stats.totalDone;
+    case 'currentStreak':
+      return stats.currentStreak;
+    case 'bestSingleDay':
+      return stats.bestSingleDay ?? 0;
+    case 'physicalEcart':
+      return stats.physicalEcart ?? 0;
+  }
+}
 
 /**
  * Crée ou met à jour le profil public d'un utilisateur
@@ -71,6 +99,8 @@ export const updatePublicStats = async (
     totalDone: number;
     currentStreak: number;
     bestStreak: number;
+    bestSingleDay: number;
+    physicalEcart: number;
     daysCompleted: number;
     weekTotal?: number;
     monthTotal?: number;
@@ -109,13 +139,7 @@ export const getLeaderboard = async (
   try {
     const { trainingType, sortBy, limit: maxResults = 100 } = filters;
 
-    // Mapping des critères de tri
-    const orderByField =
-      sortBy === 'totalDone'
-        ? 'totalDone'
-        : sortBy === 'currentStreak'
-          ? 'currentStreak'
-          : 'bestStreak';
+    const orderByField = getLeaderboardOrderField(sortBy);
 
     // Requête des stats avec filtre et tri
     const statsQuery = query(
@@ -199,14 +223,14 @@ export const getUserPublicStats = async (
 export const getUserRank = async (
   userId: string,
   trainingType: TrainingName,
-  sortBy: 'totalDone' | 'currentStreak' | 'bestStreak' = 'totalDone'
+  sortBy: LeaderboardSortBy = 'totalDone'
 ): Promise<number | null> => {
   try {
     const userStats = await getUserPublicStats(userId, trainingType);
     if (!userStats) return null;
 
-    const orderByField = sortBy;
-    const userValue = userStats[orderByField];
+    const orderByField = getLeaderboardOrderField(sortBy);
+    const userValue = getLeaderboardSortUserValue(userStats, sortBy);
 
     // Compter combien d'utilisateurs ont un meilleur score
     const statsQuery = query(
@@ -235,12 +259,7 @@ export const subscribeToLeaderboard = (
 ): Unsubscribe => {
   const { trainingType, sortBy, limit: maxResults = 100 } = filters;
 
-  const orderByField =
-    sortBy === 'totalDone'
-      ? 'totalDone'
-      : sortBy === 'currentStreak'
-        ? 'currentStreak'
-        : 'bestStreak';
+  const orderByField = getLeaderboardOrderField(sortBy);
 
   const statsQuery = query(
     collection(db, PUBLIC_STATS_COLLECTION),

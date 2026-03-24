@@ -24,18 +24,29 @@ import {
   TrendingUp,
   Trophy
 } from '@tamagui/lucide-icons';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { H2, Separator, Spinner, Text, XStack, YStack } from 'tamagui';
 
 export default function DashboardScreen() {
-  const { days, todayIndex, updateDay, stats, isLoading, error, refreshData } = useProgressData();
+  const {
+    days,
+    todayIndex,
+    updateDay,
+    withdrawFromBank,
+    stats,
+    isLoading,
+    error,
+    refreshData,
+  } = useProgressData();
   const { trainingType } = useTraining();
   const { sendCelebration } = usePushNotifications();
   
   const [loading, setLoading] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [previousDone, setPreviousDone] = useState(0);
+  const prevEffectiveTodayRef = useRef<number | null>(null);
+
+  const effectiveToday = (stats.todayDone ?? 0) + stats.todayBankUsed;
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -44,49 +55,60 @@ export default function DashboardScreen() {
   };
 
   useEffect(() => {
-    setPreviousDone(stats.todayDone || 0);
-  }, [stats.todayDone]);
+    const eff = (stats.todayDone ?? 0) + stats.todayBankUsed;
+    if (prevEffectiveTodayRef.current === null) {
+      prevEffectiveTodayRef.current = eff;
+      return;
+    }
+    if (
+      stats.todayTarget > 0 &&
+      eff >= stats.todayTarget &&
+      prevEffectiveTodayRef.current < stats.todayTarget
+    ) {
+      setShowCelebration(true);
+      sendCelebration(
+        `🎉 Objectif du jour validé ! ${eff} ${trainingType === 'pushup' ? 'pompes' : 'crunchs'} !`
+      );
+    }
+    prevEffectiveTodayRef.current = eff;
+  }, [
+    stats.todayDone,
+    stats.todayBankUsed,
+    stats.todayTarget,
+    trainingType,
+    sendCelebration,
+  ]);
 
   const handleIncrement = (amount: number) => {
     if (todayIndex === -1) return;
-    
+
     const newValue = (stats.todayDone || 0) + amount;
     updateDay(todayIndex, newValue.toString());
-    
-    // Célébration si objectif atteint pour la première fois
-    if (newValue >= stats.todayTarget && previousDone < stats.todayTarget) {
-      setShowCelebration(true);
-      sendCelebration(`🎉 Objectif du jour validé ! ${newValue} ${trainingType === 'pushup' ? 'pompes' : 'crunchs'} !`);
-    }
-    
-    setPreviousDone(newValue);
   };
 
   const handleComplete = () => {
     if (todayIndex === -1) return;
-    
+
     const targetValue = stats.todayTarget;
     updateDay(todayIndex, targetValue.toString());
-    
-    if (previousDone < stats.todayTarget) {
-      setShowCelebration(true);
-      sendCelebration(`🎉 Objectif du jour validé ! ${targetValue} ${trainingType === 'pushup' ? 'pompes' : 'crunchs'} !`);
-    }
-    
-    setPreviousDone(targetValue);
   };
+
+  const canUseBank =
+    stats.surplusReserve > 0 &&
+    effectiveToday < stats.todayTarget &&
+    todayIndex !== -1;
 
   const isAhead = stats.ecart >= 0;
   const progressPercentage = stats.todayTarget > 0
-    ? Math.min(100, ((stats.todayDone || 0) / stats.todayTarget) * 100)
+    ? Math.min(100, (effectiveToday / stats.todayTarget) * 100)
     : 0;
 
   const weekProgress = useMemo(() => {
     const weekDays = getCurrentWeekDays(days);
     
     return weekDays.map(({ day, isToday, isFuture, dayData }) => {
-      const isDone = isDayCompleted(dayData?.done, dayData?.target || 1);
-      const isMissed = isDayMissed(dayData?.done, dayData?.target || 1);
+      const isDone = isDayCompleted(dayData?.done, dayData?.target || 1, dayData?.bankUsed);
+      const isMissed = isDayMissed(dayData?.done, dayData?.target || 1, dayData?.bankUsed);
       
       return {
         day,
@@ -135,7 +157,7 @@ export default function DashboardScreen() {
 
               {/* HERO - OBJECTIF DU JOUR */}
               <TodayObjective
-                current={stats.todayDone || 0}
+                current={effectiveToday}
                 target={stats.todayTarget}
                 trainingType={trainingType || 'pushup'}
               />
@@ -144,8 +166,10 @@ export default function DashboardScreen() {
               <QuickActions
                 onIncrement={handleIncrement}
                 onComplete={handleComplete}
-                currentValue={stats.todayDone || 0}
+                onUseBank={withdrawFromBank}
+                currentValue={effectiveToday}
                 targetValue={stats.todayTarget}
+                bankAvailable={canUseBank}
                 disabled={todayIndex === -1}
               />
 
@@ -201,7 +225,11 @@ export default function DashboardScreen() {
                       duration={800}
                     />
                     <Text fontSize={12} color="$colorMuted">
-                      {isAhead ? 'en avance' : 'en retard'}
+                      {stats.physicalEcart < 0
+                        ? 'en retard'
+                        : stats.surplusReserve > 0
+                          ? 'surplus utilisable'
+                          : 'en avance'}
                     </Text>
                   </StatCard>
                 </XStack>

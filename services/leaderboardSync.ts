@@ -4,6 +4,7 @@
  */
 
 import { TrainingName } from '@/contexts/TrainingContext';
+import { computePhysicalEcartFromProgressMap } from '@/helpers/progressStats';
 import { ProgressMapType } from '@/types/utils';
 import { updatePublicProfile, updatePublicStats } from './leaderboard';
 import log from './logger';
@@ -15,6 +16,8 @@ export const calculateStatsFromProgress = (progressMap: ProgressMapType): {
   totalDone: number;
   currentStreak: number;
   bestStreak: number;
+  bestSingleDay: number;
+  physicalEcart: number;
   daysCompleted: number;
   weekTotal: number;
   monthTotal: number;
@@ -23,11 +26,15 @@ export const calculateStatsFromProgress = (progressMap: ProgressMapType): {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
 
+  const values = Object.values(progressMap);
   // Total
-  const totalDone = Object.values(progressMap).reduce(
-    (sum, val) => sum + (val || 0),
-    0
-  );
+  const totalDone = values.reduce((sum, val) => sum + (val || 0), 0);
+
+  let bestSingleDay = 0;
+  for (const val of values) {
+    const n = typeof val === 'number' && !Number.isNaN(val) ? val : 0;
+    if (n > bestSingleDay) bestSingleDay = n;
+  }
 
   // Jours complétés
   const daysCompleted = Object.values(progressMap).filter((val) => val && val > 0).length;
@@ -93,10 +100,14 @@ export const calculateStatsFromProgress = (progressMap: ProgressMapType): {
     monthTotal += progressMap[dateStr] || 0;
   }
 
+  const physicalEcart = computePhysicalEcartFromProgressMap(progressMap);
+
   return {
     totalDone,
     currentStreak,
     bestStreak,
+    bestSingleDay,
+    physicalEcart,
     daysCompleted,
     weekTotal,
     monthTotal,

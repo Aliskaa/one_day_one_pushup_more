@@ -10,8 +10,8 @@ export function useCalendarData(days: DayDataType[], selectedMonth: number, sele
       return date.getMonth() === selectedMonth && date.getFullYear() === selectedYear;
     });
 
-    const completed = monthDays.filter(d => isDayCompleted(d.done, d.target)).length;
-    const missed = monthDays.filter(d => isDayMissed(d.done, d.target)).length;
+    const completed = monthDays.filter(d => isDayCompleted(d.done, d.target, d.bankUsed)).length;
+    const missed = monthDays.filter(d => isDayMissed(d.done, d.target, d.bankUsed)).length;
     const total = monthDays.reduce((sum, d) => sum + (d.done || 0), 0);
     const target = monthDays.reduce((sum, d) => sum + (d.target || 0), 0);
 

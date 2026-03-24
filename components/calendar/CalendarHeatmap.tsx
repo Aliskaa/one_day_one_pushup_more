@@ -24,8 +24,8 @@ export function CalendarHeatmap({ calendarDays, onDayClick }: CalendarHeatmapPro
 
   const getDayColors = (dayData: DayDataType | undefined, dateStr: string) => {
     const isToday = dateStr === new Date().toISOString().split('T')[0];
-    const isCompleted = dayData && isDayCompleted(dayData.done, dayData.target);
-    const isMissed = dayData && isDayMissed(dayData.done, dayData.target);
+    const isCompleted = dayData && isDayCompleted(dayData.done, dayData.target, dayData.bankUsed);
+    const isMissed = dayData && isDayMissed(dayData.done, dayData.target, dayData.bankUsed);
     const isPending = dayData && dayData.done !== null && !isCompleted;
     const isFuture = new Date(dateStr) > new Date();
 

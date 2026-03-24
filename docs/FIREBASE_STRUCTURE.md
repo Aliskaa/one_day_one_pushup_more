@@ -52,6 +52,7 @@ publicStats/ (Collection racine pour le leaderboard - structure PLATE)
       ├── totalDone: 12500
       ├── currentStreak: 45
       ├── bestStreak: 67
+      ├── bestSingleDay: 120
       ├── daysCompleted: 180
       ├── weekTotal: 420
       ├── monthTotal: 1800

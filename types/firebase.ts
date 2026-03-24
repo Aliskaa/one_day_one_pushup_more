@@ -14,6 +14,10 @@ export interface UserProgressDoc {
   progressMap: ProgressMapType;
   lastUpdated: Date;
   totalDone: number;
+  /** Réserve affichée (banque) : diminue quand tu préleves pour compléter un jour */
+  surplusReserve?: number;
+  /** Par date : combien prélevé ce jour sur la banque */
+  bankByDate?: Record<string, number>;
 }
 
 /**

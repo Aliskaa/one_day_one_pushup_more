@@ -50,13 +50,23 @@ export const QuickActionButton = styled(PrimaryButton, {
 export interface QuickActionsProps {
     onIncrement: (amount: number) => void;
     onComplete: () => void;
+    onUseBank?: () => void;
     currentValue: number;
     targetValue: number;
+    bankAvailable?: boolean;
     disabled?: boolean;
 }
 
 export const QuickActions = forwardRef<any, QuickActionsProps>((props, ref) => {
-    const { onIncrement, onComplete, currentValue, targetValue, disabled = false } = props;
+    const {
+        onIncrement,
+        onComplete,
+        onUseBank,
+        currentValue,
+        targetValue,
+        bankAvailable = false,
+        disabled = false,
+    } = props;
 
     const isCompleted = currentValue >= targetValue;
 
@@ -110,14 +120,30 @@ export const QuickActions = forwardRef<any, QuickActionsProps>((props, ref) => {
                     <Text fontSize={16} fontWeight="700" color="white">✓ Fait !</Text>
                 </SuccessButton>
             ) : (
-                <QuickActionButton
-                    flex={1}
-                    variant="complete"
-                    onPress={handleComplete}
-                    disabled={disabled}
-                >
-                    <Text fontSize={16} fontWeight="700" color="white">Objectif</Text>
-                </QuickActionButton>
+                <>
+                    <QuickActionButton
+                        flex={1}
+                        variant="complete"
+                        onPress={handleComplete}
+                        disabled={disabled}
+                    >
+                        <Text fontSize={16} fontWeight="700" color="white">Objectif</Text>
+                    </QuickActionButton>
+                    {onUseBank && bankAvailable ? (
+                        <QuickActionButton
+                            flex={1}
+                            variant="increment"
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                onUseBank();
+                            }}
+                            disabled={disabled}
+                            backgroundColor="$orange9"
+                        >
+                            <Text fontSize={14} fontWeight="700" color="white">Banque</Text>
+                        </QuickActionButton>
+                    ) : null}
+                </>
             )}
         </QuickActionsContainer>
     );

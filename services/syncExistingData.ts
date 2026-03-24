@@ -23,7 +23,7 @@ export const syncUserToLeaderboard = async (
     log.info(`🔄 Synchronisation de ${username} (${trainingType})...`);
 
     // Charger les données existantes
-    const progressMap = await loadProgressFromFirebase(userId, trainingType);
+    const { progressMap } = await loadProgressFromFirebase(userId, trainingType);
 
     if (Object.keys(progressMap).length === 0) {
       log.info(`⚠️ Aucune donnée pour ${username} (${trainingType})`);

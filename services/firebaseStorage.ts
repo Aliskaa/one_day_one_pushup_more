@@ -45,10 +45,16 @@ export const generateYearData = (): DayDataType[] => {
   return generatedDays;
 };
 
+export type LoadedProgressDoc = {
+  progressMap: ProgressMapType;
+  bankByDate: Record<string, number>;
+  surplusReserve: number | undefined;
+};
+
 /**
  * Charge les données de progression depuis Firestore
  */
-export const loadProgressFromFirebase = async (userId: string, trainingType: TrainingName): Promise<ProgressMapType> => {
+export const loadProgressFromFirebase = async (userId: string, trainingType: TrainingName): Promise<LoadedProgressDoc> => {
   try {
     const docRef = getProgressDocRef(userId, trainingType);
     const docSnap = await getDoc(docRef);
@@ -59,11 +65,15 @@ export const loadProgressFromFirebase = async (userId: string, trainingType: Tra
         totalEntries: Object.keys(data.progressMap || {}).length,
         lastUpdated: data.lastUpdated
       });
-      return data.progressMap || {};
+      return {
+        progressMap: data.progressMap || {},
+        bankByDate: data.bankByDate || {},
+        surplusReserve: data.surplusReserve,
+      };
     }
     
     log.info('📝 Aucune donnée existante, création du document...');
-    return {};
+    return { progressMap: {}, bankByDate: {}, surplusReserve: undefined };
   } catch (error) {
     log.error('❌ Erreur lors du chargement Firebase:', error);
     throw error;
@@ -73,10 +83,16 @@ export const loadProgressFromFirebase = async (userId: string, trainingType: Tra
 /**
  * Sauvegarde les données de progression dans Firestore
  */
+export type SaveProgressMeta = {
+  surplusReserve?: number;
+  bankByDate?: Record<string, number>;
+};
+
 export const saveProgressToFirebase = async (
   userId: string,
   trainingType: TrainingName,
-  progressMap: ProgressMapType
+  progressMap: ProgressMapType,
+  meta?: SaveProgressMeta
 ): Promise<void> => {
   try {
     const docRef = getProgressDocRef(userId, trainingType);
@@ -89,6 +105,8 @@ export const saveProgressToFirebase = async (
       progressMap,
       lastUpdated: new Date(),
       totalDone,
+      ...(meta?.surplusReserve !== undefined ? { surplusReserve: meta.surplusReserve } : {}),
+      ...(meta?.bankByDate !== undefined ? { bankByDate: meta.bankByDate } : {}),
     };
     
     await setDoc(docRef, data, { merge: true });
@@ -131,14 +149,18 @@ export const updateDayProgress = async (
 export const subscribeToProgress = (
   userId: string,
   trainingType: TrainingName,
-  onUpdate: (progressMap: ProgressMapType) => void
+  onUpdate: (payload: LoadedProgressDoc) => void
 ): Unsubscribe => {
   const docRef = getProgressDocRef(userId, trainingType);
   
   return onSnapshot(docRef, (docSnap) => {
     if (docSnap.exists()) {
       const data = docSnap.data() as UserProgressDoc;
-      onUpdate(data.progressMap || {});
+      onUpdate({
+        progressMap: data.progressMap || {},
+        bankByDate: data.bankByDate || {},
+        surplusReserve: data.surplusReserve,
+      });
     }
   }, (error) => {
     log.error('❌ Erreur de synchronisation:', error);
@@ -150,11 +172,13 @@ export const subscribeToProgress = (
  */
 export const mergeDataWithProgress = (
   generatedDays: DayDataType[],
-  savedProgress: ProgressMapType
+  savedProgress: ProgressMapType,
+  bankByDate: Record<string, number> = {}
 ): DayDataType[] => {
   return generatedDays.map(day => ({
     ...day,
-    done: savedProgress[day.dateStr] ?? null
+    done: savedProgress[day.dateStr] ?? null,
+    bankUsed: bankByDate[day.dateStr] ?? 0,
   }));
 };
 
@@ -169,6 +193,8 @@ export const clearUserData = async (userId: string, trainingType: TrainingName):
       progressMap: {},
       lastUpdated: new Date(),
       totalDone: 0,
+      surplusReserve: 0,
+      bankByDate: {},
     });
     log.info('🗑️ Données réinitialisées');
   } catch (error) {

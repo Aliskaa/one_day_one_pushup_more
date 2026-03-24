@@ -6,6 +6,25 @@ Vous voyez cette erreur : **"The query requires an index"**
 
 C'est normal ! Firebase a besoin d'index composites pour les requêtes avec `where` + `orderBy`.
 
+## Répertoire CLI (`firebase.json`)
+
+La commande `firebase deploy` doit être lancée à la **racine du repo** (`c:\dev\pushup`), là où se trouvent `firebase.json`, `firestore.rules` et `firestore.indexes.json`.
+
+Si la CLI répond *Not in a Firebase app directory*, c’est qu’il manquait `firebase.json` (il est versionné dans ce projet).
+
+Ensuite, associe ton projet une fois :
+
+```bash
+firebase login
+firebase use --add
+```
+
+Choisis le même **project ID** que `EXPO_PUBLIC_FIREBASE_PROJECT_ID`. Puis :
+
+```bash
+firebase deploy --only firestore:indexes
+```
+
 ## 🚀 Solution rapide (Console Firebase)
 
 ### Option 1 : Cliquer sur le lien dans l'erreur
@@ -20,7 +39,7 @@ C'est normal ! Firebase a besoin d'index composites pour les requêtes avec `whe
 2. Sélectionnez votre projet
 3. Allez dans **Firestore Database** → **Index**
 4. Cliquez sur **Create Index**
-5. Créez ces 3 index :
+5. Créez ces index :
 
 #### Index 1 : Tri par Total
 - Collection : `publicStats`
@@ -36,11 +55,18 @@ C'est normal ! Firebase a besoin d'index composites pour les requêtes avec `whe
   - `currentStreak` : Descending
 - Query scopes : Collection
 
-#### Index 3 : Tri par Record
+#### Index 3 : Tri par Record (meilleure journée)
 - Collection : `publicStats`
 - Champs :
   - `trainingType` : Ascending
-  - `bestStreak` : Descending
+  - `bestSingleDay` : Descending
+- Query scopes : Collection
+
+#### Index 4 : Tri par Écart (cumul vs objectifs)
+- Collection : `publicStats`
+- Champs :
+  - `trainingType` : Ascending
+  - `physicalEcart` : Descending
 - Query scopes : Collection
 
 ⏱️ **La création prend 1-2 minutes**

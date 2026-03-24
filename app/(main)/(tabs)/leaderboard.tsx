@@ -1,4 +1,4 @@
-import { Award, Crown, Medal, RefreshCw, TrendingUp, Users, Zap, Upload } from "@tamagui/lucide-icons";
+import { Award, Crown, Medal, RefreshCw, Target, TrendingDown, TrendingUp, Users, Zap, Upload } from "@tamagui/lucide-icons";
 import { useUser } from "@clerk/clerk-expo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar, Button, Card, H2, H3, Separator, ScrollView, Spinner, Text, XStack, YStack } from "tamagui";
@@ -10,9 +10,34 @@ import { useSyncToLeaderboard } from "@/hooks/useSyncToLeaderboard";
 import { useToastController } from "@tamagui/toast";
 import { useState } from "react";
 
+const primaryStat = (
+    stats: LeaderboardEntry['stats'],
+    sortBy: LeaderboardSortBy
+): {
+    value: number;
+    label: string;
+    suffix: string;
+    showSign?: boolean;
+} => {
+    if (sortBy === 'totalDone') return { value: stats.totalDone, label: 'Total', suffix: '' };
+    if (sortBy === 'currentStreak') return { value: stats.currentStreak, label: 'Série', suffix: ' j' };
+    if (sortBy === 'bestSingleDay') return { value: stats.bestSingleDay ?? 0, label: 'Meilleur jour', suffix: '' };
+    return { value: stats.physicalEcart ?? 0, label: 'Écart', suffix: '', showSign: true };
+};
+
 // Composant pour une entrée du leaderboard
-const LeaderboardRow = ({ entry, isCurrentUser }: { entry: LeaderboardEntry; isCurrentUser: boolean }) => {
+const LeaderboardRow = ({
+    entry,
+    isCurrentUser,
+    sortBy,
+}: {
+    entry: LeaderboardEntry;
+    isCurrentUser: boolean;
+    sortBy: LeaderboardSortBy;
+}) => {
     const { profile, stats, rank } = entry;
+    const main = primaryStat(stats, sortBy);
+    const ecart = stats.physicalEcart ?? 0;
     
     // Icônes et couleurs selon le rang
     const getRankDisplay = () => {
@@ -61,7 +86,7 @@ const LeaderboardRow = ({ entry, isCurrentUser }: { entry: LeaderboardEntry; isC
                             </Text>
                         )}
                     </XStack>
-                    <XStack gap="$3" marginTop="$1">
+                    <XStack gap="$3" marginTop="$1" flexWrap="wrap">
                         <XStack alignItems="center" gap="$1">
                             <TrendingUp size={14} color="$colorMuted" />
                             <Text fontSize={13} color="$colorMuted">
@@ -74,16 +99,36 @@ const LeaderboardRow = ({ entry, isCurrentUser }: { entry: LeaderboardEntry; isC
                                 {stats.currentStreak}j
                             </Text>
                         </XStack>
+                        <XStack alignItems="center" gap="$1">
+                            {ecart >= 0 ? (
+                                <TrendingUp size={14} color="$success" />
+                            ) : (
+                                <TrendingDown size={14} color="$danger" />
+                            )}
+                            <Text
+                                fontSize={13}
+                                fontWeight="600"
+                                color={ecart >= 0 ? '$success' : '$danger'}
+                            >
+                                {ecart >= 0 ? '+' : ''}
+                                {ecart.toLocaleString()}
+                            </Text>
+                            <Text fontSize={11} color="$colorMuted">
+                                écart
+                            </Text>
+                        </XStack>
                     </XStack>
                 </YStack>
 
                 {/* Stats principales */}
                 <YStack alignItems="flex-end">
                     <Text fontSize={18} fontWeight="800" color="$amber500">
-                        {stats.totalDone.toLocaleString()}
+                        {main.showSign
+                            ? `${main.value >= 0 ? '+' : ''}${main.value.toLocaleString()}`
+                            : `${main.value.toLocaleString()}${main.suffix}`}
                     </Text>
                     <Text fontSize={12} color="$colorMuted">
-                        Total
+                        {main.label}
                     </Text>
                 </YStack>
             </XStack>
@@ -116,7 +161,8 @@ export default function Leaderboard() {
     const sortOptions: { value: LeaderboardSortBy; label: string; icon: any }[] = [
         { value: 'totalDone', label: 'Total', icon: TrendingUp },
         { value: 'currentStreak', label: 'Série', icon: Zap },
-        { value: 'bestStreak', label: 'Record', icon: Award },
+        { value: 'bestSingleDay', label: 'Record', icon: Award },
+        { value: 'physicalEcart', label: 'Écart', icon: Target },
     ];
 
     return (
@@ -221,52 +267,65 @@ export default function Leaderboard() {
                             <YStack gap="$1">
                                 <Text fontSize={13} color="$colorMuted" marginBottom="$2" marginLeft="$2">
                                     {entries.length} participant{entries.length > 1 ? 's' : ''}
-
-                        {/* SYNC HINT - Si l'utilisateur n'est pas dans le leaderboard */}
-                        {!loading && !isUserInLeaderboard && showSyncHint && (
-                            <Card backgroundColor="$amber50" padding="$4" borderWidth={1} borderColor="$amber200">
-                                <YStack gap="$3">
-                                    <XStack alignItems="center" gap="$2">
-                                        <Upload size={20} color="$amber700" />
-                                        <Text fontSize={14} fontWeight="600" color="$amber700">
-                                            Vous n'apparaissez pas encore
-                                        </Text>
-                                    </XStack>
-                                    <Text fontSize={13} color="$amber600">
-                                        Synchronisez vos données existantes pour apparaître dans le classement
-                                    </Text>
-                                    <XStack gap="$2">
-                                        <Button
-                                            flex={1}
-                                            size="$3"
-                                            backgroundColor="$amber500"
-                                            color="white"
-                                            icon={syncing ? <Spinner size="small" color="white" /> : <Upload size={16} />}
-                                            onPress={handleSync}
-                                            disabled={syncing}
-                                            pressStyle={{ opacity: 0.8 }}
-                                        >
-                                            {syncing ? 'Synchronisation...' : 'Synchroniser'}
-                                        </Button>
-                                        <Button
-                                            size="$3"
-                                            backgroundColor="$amber100"
-                                            color="$amber700"
-                                            onPress={() => setShowSyncHint(false)}
-                                            pressStyle={{ opacity: 0.8 }}
-                                        >
-                                            Plus tard
-                                        </Button>
-                                    </XStack>
-                                </YStack>
-                            </Card>
-                        )}
                                 </Text>
+
+                                {!loading && !isUserInLeaderboard && showSyncHint && (
+                                    <Card
+                                        backgroundColor="$amber50"
+                                        padding="$4"
+                                        borderWidth={1}
+                                        borderColor="$amber200"
+                                        marginBottom="$2"
+                                    >
+                                        <YStack gap="$3">
+                                            <XStack alignItems="center" gap="$2">
+                                                <Upload size={20} color="$amber700" />
+                                                <Text fontSize={14} fontWeight="600" color="$amber700">
+                                                    Vous n'apparaissez pas encore
+                                                </Text>
+                                            </XStack>
+                                            <Text fontSize={13} color="$amber600">
+                                                Synchronisez vos données existantes pour apparaître dans le classement
+                                            </Text>
+                                            <XStack gap="$2">
+                                                <Button
+                                                    flex={1}
+                                                    size="$3"
+                                                    backgroundColor="$amber500"
+                                                    color="white"
+                                                    icon={
+                                                        syncing ? (
+                                                            <Spinner size="small" color="white" />
+                                                        ) : (
+                                                            <Upload size={16} />
+                                                        )
+                                                    }
+                                                    onPress={handleSync}
+                                                    disabled={syncing}
+                                                    pressStyle={{ opacity: 0.8 }}
+                                                >
+                                                    {syncing ? 'Synchronisation...' : 'Synchroniser'}
+                                                </Button>
+                                                <Button
+                                                    size="$3"
+                                                    backgroundColor="$amber100"
+                                                    color="$amber700"
+                                                    onPress={() => setShowSyncHint(false)}
+                                                    pressStyle={{ opacity: 0.8 }}
+                                                >
+                                                    Plus tard
+                                                </Button>
+                                            </XStack>
+                                        </YStack>
+                                    </Card>
+                                )}
+
                                 {entries.map((entry) => (
                                     <LeaderboardRow
                                         key={entry.profile.userId}
                                         entry={entry}
                                         isCurrentUser={entry.profile.userId === user?.id}
+                                        sortBy={sortBy}
                                     />
                                 ))}
                             </YStack>

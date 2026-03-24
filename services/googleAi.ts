@@ -19,11 +19,15 @@ export const generateWorkoutAdvice = async (stats: ProgressDataStats, previousAd
     const genAi = new GoogleGenerativeAI(API_KEY);
 
     try {
-        const retard = Math.abs(stats.ecart);
-        const isRetard = stats.ecart < 0;
+        const effectiveToday = (stats.todayDone ?? 0) + stats.todayBankUsed;
+        const retard = Math.abs(stats.physicalEcart);
+        const isRetard = stats.physicalEcart < 0;
         
         // Analyser le contexte de performance
-        const isStrong = stats.todayDone && stats.todayTarget && stats.todayDone > stats.todayTarget * 1.5;
+        const isStrong =
+          effectiveToday &&
+          stats.todayTarget &&
+          effectiveToday > stats.todayTarget * 1.5;
         const isPerfectStreak = stats.streak > 0 && stats.streak % 7 === 0;
         const isMilestone = stats.totalDone % 1000 === 0 || (stats.totalDone > 1000 && stats.totalDone % 500 === 0);
         const streakLevel = stats.streak >= 30 ? 'exceptionnel' : stats.streak >= 14 ? 'excellent' : stats.streak >= 7 ? 'bon' : 'débutant';
@@ -32,11 +36,11 @@ export const generateWorkoutAdvice = async (stats: ProgressDataStats, previousAd
 Tu es un coach sportif personnel, empathique et motivant. Tu connais bien ton athlète et tu adaptes tes messages à sa progression.
 
 📊 STATISTIQUES ACTUELLES :
-- Performance du jour : ${stats.todayDone || 0} répétitions (Objectif : ${stats.todayTarget}) ✅ OBJECTIF ATTEINT${isStrong ? ' ET DÉPASSÉ !' : ''}
+- Performance du jour : ${effectiveToday} répétitions (Objectif : ${stats.todayTarget}${stats.todayBankUsed ? `, dont ${stats.todayBankUsed} via la banque` : ''}) ✅ OBJECTIF ATTEINT${isStrong ? ' ET DÉPASSÉ !' : ''}
 - Série actuelle : ${stats.streak} jours consécutifs (Niveau : ${streakLevel})
 - Total cumulé : ${stats.totalDone} répétitions
 - Situation globale : ${isRetard ? `${retard} répétitions de retard sur l'objectif annuel` : `${retard} répétitions d'avance sur l'objectif annuel`}
-- Progression : ${stats.ecart >= 0 ? '📈 En avance' : '📉 À rattraper'}
+- Progression : ${stats.physicalEcart >= 0 ? '📈 En avance' : '📉 À rattraper'}
 
 🎯 CONTEXTE SPÉCIAL :
 ${isPerfectStreak ? `🔥 SÉRIE PARFAITE : ${stats.streak} jours d'affilée !` : ''}

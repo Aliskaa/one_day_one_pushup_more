@@ -24,7 +24,11 @@ export interface PublicUserStats {
   totalDone: number; // Total de répétitions effectuées
   currentStreak: number; // Série de jours consécutifs actuelle
   bestStreak: number; // Meilleure série de tous les temps
+  /** Max de répétitions sur une seule journée (classement « Record ») — absent sur anciens docs avant sync */
+  bestSingleDay?: number;
   daysCompleted: number; // Nombre de jours complétés
+  /** Cumul réel − objectifs attendus jusqu’à aujourd’hui (comme sur l’accueil, sans banque) */
+  physicalEcart?: number;
   lastUpdated: Date;
   // Stats optionnelles
   weekTotal?: number; // Total de la semaine
@@ -44,7 +48,11 @@ export interface LeaderboardEntry {
  * Options de filtrage du leaderboard
  */
 export type LeaderboardPeriod = 'allTime' | 'month' | 'week';
-export type LeaderboardSortBy = 'totalDone' | 'currentStreak' | 'bestStreak';
+export type LeaderboardSortBy =
+  | 'totalDone'
+  | 'currentStreak'
+  | 'bestSingleDay'
+  | 'physicalEcart';
 
 export interface LeaderboardFilters {
   period: LeaderboardPeriod;

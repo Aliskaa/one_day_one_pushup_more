@@ -3,6 +3,7 @@ import { TextInput } from 'react-native';
 import { XStack, YStack, Text, Card, useTheme } from 'tamagui';
 import { Check, Clock, Circle, Lock } from '@tamagui/lucide-icons';
 import { DayDataType } from '@/types/day';
+import { isDayCompleted } from '@/helpers/dateUtils';
 
 interface DayRowProps {
   item: DayDataType;
@@ -37,7 +38,7 @@ export const DayRow: React.FC<DayRowProps> = React.memo(({ item, index, onUpdate
   const isPast = itemDate < today;
   const isMissed = isPast && item.done === null;
   
-  const isValidated = item.done !== null && item.done >= item.target;
+  const isValidated = isDayCompleted(item.done, item.target, item.bankUsed);
   const isStarted = item.done !== null && item.done > 0;
   
   // Détermination des couleurs dynamiques basées sur le thème
