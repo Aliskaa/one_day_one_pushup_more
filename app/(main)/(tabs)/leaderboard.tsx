@@ -1,11 +1,10 @@
 import { Award, Crown, Medal, RefreshCw, Target, TrendingDown, TrendingUp, Users, Zap, Upload } from "@tamagui/lucide-icons";
 import { useUser } from "@clerk/clerk-expo";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Avatar, Button, Card, H2, H3, Separator, ScrollView, Spinner, Text, XStack, YStack } from "tamagui";
+import { Avatar, Button, Card, H2, H3, ScrollView, Spinner, Text, XStack, YStack } from "tamagui";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { useTraining } from "@/contexts/TrainingContext";
 import { LeaderboardEntry, LeaderboardSortBy } from "@/types/leaderboard";
-import { ActivityIndicator } from "react-native";
 import { useSyncToLeaderboard } from "@/hooks/useSyncToLeaderboard";
 import { useToastController } from "@tamagui/toast";
 import { useState } from "react";
@@ -87,40 +86,56 @@ const LeaderboardRow = ({
                         )}
                     </XStack>
                     <XStack gap="$3" marginTop="$1" flexWrap="wrap">
-                        <XStack alignItems="center" gap="$1">
-                            <TrendingUp size={14} color="$colorMuted" />
-                            <Text fontSize={13} color="$colorMuted">
-                                {stats.totalDone.toLocaleString()}
-                            </Text>
-                        </XStack>
-                        <XStack alignItems="center" gap="$1">
-                            <Zap size={14} color="$colorMuted" />
-                            <Text fontSize={13} color="$colorMuted">
-                                {stats.currentStreak}j
-                            </Text>
-                        </XStack>
-                        <XStack alignItems="center" gap="$1">
-                            {ecart >= 0 ? (
-                                <TrendingUp size={14} color="$success" />
-                            ) : (
-                                <TrendingDown size={14} color="$danger" />
-                            )}
-                            <Text
-                                fontSize={13}
-                                fontWeight="600"
-                                color={ecart >= 0 ? '$success' : '$danger'}
-                            >
-                                {ecart >= 0 ? '+' : ''}
-                                {ecart.toLocaleString()}
-                            </Text>
-                            <Text fontSize={11} color="$colorMuted">
-                                écart
-                            </Text>
-                        </XStack>
+                        {sortBy !== 'totalDone' && (
+                            <XStack alignItems="center" gap="$1">
+                                <TrendingUp size={14} color="$colorMuted" />
+                                <Text fontSize={13} color="$colorMuted">
+                                    {stats.totalDone.toLocaleString()}
+                                </Text>
+                            </XStack>
+                        )}
+                        {sortBy !== 'currentStreak' && (
+                            <XStack alignItems="center" gap="$1">
+                                <Zap size={14} color="$colorMuted" />
+                                <Text fontSize={13} color="$colorMuted">
+                                    {stats.currentStreak}j
+                                </Text>
+                            </XStack>
+                        )}
+                        {sortBy !== 'physicalEcart' && (
+                            <XStack alignItems="center" gap="$1">
+                                {ecart >= 0 ? (
+                                    <TrendingUp size={14} color="$success" />
+                                ) : (
+                                    <TrendingDown size={14} color="$danger" />
+                                )}
+                                <Text
+                                    fontSize={13}
+                                    fontWeight="600"
+                                    color={ecart >= 0 ? '$success' : '$danger'}
+                                >
+                                    {ecart >= 0 ? '+' : ''}
+                                    {ecart.toLocaleString()}
+                                </Text>
+                                <Text fontSize={11} color="$colorMuted">
+                                    écart
+                                </Text>
+                            </XStack>
+                        )}
+                        {sortBy !== 'bestSingleDay' && (
+                            <XStack alignItems="center" gap="$1">
+                                <Award size={14} color="$colorMuted" />
+                                <Text fontSize={13} color="$colorMuted">
+                                    {(stats.bestSingleDay ?? 0).toLocaleString()}
+                                </Text>
+                                <Text fontSize={11} color="$colorMuted">
+                                    record
+                                </Text>
+                            </XStack>
+                        )}
                     </XStack>
                 </YStack>
 
-                {/* Stats principales */}
                 <YStack alignItems="flex-end">
                     <Text fontSize={18} fontWeight="800" color="$amber500">
                         {main.showSign
@@ -203,15 +218,36 @@ export default function Leaderboard() {
                                         {option.label}
                                     </Button>
                                 ))}
+                            </XStack>
+                            <XStack
+                                justifyContent="flex-end"
+                                marginTop="$3"
+                                paddingTop="$3"
+                                borderTopWidth={1}
+                                borderTopColor="$borderColor"
+                            >
                                 <Button
                                     size="$3"
+                                    borderRadius={999}
+                                    paddingHorizontal="$4"
+                                    height={40}
                                     backgroundColor="$backgroundHover"
                                     borderWidth={1}
-                                    borderColor="$borderColor"
-                                    icon={<RefreshCw size={16} />}
+                                    borderColor="$blue7"
+                                    color="$blue11"
+                                    fontWeight="700"
+                                    icon={
+                                        loading ? (
+                                            <Spinner size="small" color="$blue11" />
+                                        ) : (
+                                            <RefreshCw size={17} strokeWidth={2.5} />
+                                        )
+                                    }
                                     onPress={refresh}
                                     disabled={loading}
-                                    pressStyle={{ scale: 0.95 }}
+                                    opacity={loading ? 0.85 : 1}
+                                    pressStyle={{ scale: 0.97, opacity: 0.92 }}
+                                    hoverStyle={{ backgroundColor: '$backgroundPress' }}
                                 >
                                     Rafraîchir
                                 </Button>
